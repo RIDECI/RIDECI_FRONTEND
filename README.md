@@ -49,9 +49,13 @@ Se implementa una estrategia de versionamiento basada en **GitFlow**, garantizan
 ### Convención de Branches
 
 feature/[nombre-componente]
+
 feature/[nombre-funcionalidad]-frontend_[jira]
+
 bugfix/[descripcion-error]
+
 release/[version]
+
 
 
 ---
@@ -109,6 +113,7 @@ Formato: (tipo): (descripción breve)
  * Componente: LoginPage
  * Descripción: Renderiza el formulario de autenticación de RidECI.
  * Autor: Equipo RidECI
+   
  */
 
 ---
