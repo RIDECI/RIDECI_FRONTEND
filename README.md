@@ -84,7 +84,6 @@ Formato: (tipo): (descripción breve)
 | **UI Frameworks**                   | shadcn/ui y Supabase                                |
 | **Routing**                         | React Router DOM                                    |
 | **Geolocalización**                 | Google Maps API                                     |
-| **HTTP Client**                     | Axios                                               |
 | **Autenticación**                   | JWT                                                 |
 | **Integración Continua**            | GitHub Actions                                      |
 | **Despliegue**                      | Vercel                                              |
