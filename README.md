@@ -116,5 +116,3 @@ Formato: (tipo): (descripción breve)
  */
 
 ---
-
-
