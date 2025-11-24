@@ -1,118 +1,98 @@
-# RIDECI_FRONTEND
+# 🚗✨ RIDECI_FRONTEND
 
-## Desarrolladores
+## 🧑‍💻👩‍💻 Desarrolladores
+Todo el equipo de **CVDS / DOSW 1**
 
-
-Todo el equipo de CVDS/DOSW 1
-
-
-Equipos: 
-TROYA
-POSEIDON
-NEMESIS
-ATENEA
-KRATOS
-HADES
+**Equipos participantes:**  
+- 🏛️ TROYA
+- 🌊 POSEIDON
+- ⚔️ NEMESIS
+- 🧠 ATENEA
+- 💪 KRATOS
+- 🔱 HADES
 
 ---
 
-## Descripción
+## 🌐 Descripción
 
+**RidECI** es la plataforma web oficial de movilidad compartida de la  
+**Escuela Colombiana de Ingeniería Julio Garavito**.
 
-RidECI es una plataforma web de movilidad compartida diseñada para estudiantes, profesores y personal administrativo de la Escuela Colombiana de Ingeniería.
-El frontend permite:
+El frontend permite a estudiantes, profesores y administrativos:
 
-- Autenticarse con credenciales institucionales.
-
-- Consultar, crear y reservar viajes.
-
-- Ver rutas en tiempo real mediante geolocalización.
-
-- Calificar la experiencia en la plataforma y ver las reputaciones de otros usuarios.
-
-- Usar funcionalidades de seguridad y comunicación como chats y alertas.
-
-- Acceder a paneles administrativos y estadísticas.
-
-##  Estrategia de Versionamiento y Branching
-
-Se implementa una estrategia de versionamiento basada en **GitFlow**, garantizando un flujo de desarrollo **colaborativo, trazable y controlado**.
-
-| Rama          | Propósito                                                            |
-| ------------- | -------------------------------------------------------------------- |
-| **main**      | Versión estable lista para despliegue en producción.                 |
-| **develop**   | Rama base donde se integran todas las funcionalidades en desarrollo. |
-| **feature/*** | Desarrollo de nuevas pantallas, componentes o funcionalidades UI.    |
-| **bugfix/***  | Corrección de errores.                                               |
-| **release/*** | Preparación de versiones antes del despliegue.                       |
-
-### Convención de Branches
-
-feature/[nombre-componente]
-
-feature/[nombre-funcionalidad]-frontend_[jira]
-
-bugfix/[descripcion-error]
-
-release/[version]
-
-
+- 🔐 **Autenticarse** con credenciales institucionales.  
+- 🚘 **Consultar, crear y reservar viajes**.  
+- 🗺️ **Visualizar rutas en tiempo real** mediante geolocalización.  
+- ⭐ **Calificar viajes** y conocer reputaciones de otros usuarios.  
+- 🚨 **Reportar alertas, usar chats y herramientas de seguridad**.  
+- 📊 **Acceder a paneles administrativos y estadísticas avanzadas**.
 
 ---
 
-### Convenciones y Tipos de Commit
+## 🔀 Estrategia de Versionamiento y Branching (GitFlow)
 
-Formato: (tipo): (descripción breve)
+Se utiliza una estrategia basada en **GitFlow** para garantizar un desarrollo colaborativo, ordenado y trazable.
 
+| Rama            | Propósito |
+|-----------------|-----------|
+| **main**        | 🟢 Versión estable para producción. |
+| **develop**     | 🧪 Integración de funcionalidades en desarrollo. |
+| **feature/***   | ✨ Nuevas pantallas, componentes o funcionalidades del frontend. |
+| **bugfix/***    | 🐞 Corrección de errores. |
+| **release/***   | 🚀 Preparación de versiones para despliegue. |
 
-| Tipo       | Descripción                                            |
-| ---------- | ------------------------------------------------------ |
-| `feat`     | Nueva funcionalidad o pantalla en el frontend.         |
-| `fix`      | Corrección de errores visuales o funcionales en UI.    |
-| `style`    | Cambios de estilos, CSS, shadcn/ui, Tailwind.          |
-| `refactor` | Mejoras internas sin cambiar el comportamiento visual. |
-| `docs`     | Actualización de documentación.                        |
-| `chore`    | Configurations, scripts, o mantenimiento del proyecto. |
+### 🧩 Convención de nombres
 
----
-
-## Tecnologías Utilizadas
-
-| Categoría                           | Tecnologías                                         |
-| ----------------------------------- | --------------------------------------------------- |
-| **Framework Frontend**              | React 18 + Vite                                     |
-| **UI Frameworks**                   | shadcn/ui y Supabase                                |
-| **Routing**                         | React Router DOM                                    |
-| **Geolocalización**                 | Google Maps API                                     |
-| **Autenticación**                   | JWT                                                 |
-| **Integración Continua**            | GitHub Actions                                      |
-| **Despliegue**                      | Vercel                                              |
+- `feature/[nombre-equipo-modulo]`   
+- `bugfix/[descripcion-error]`  
+- `release/[version]
 
 ---
 
-## Módulos del Backend Utilizados
+## 📝 Convenciones y Tipos de Commit
 
-| Funcionalidad Frontend | Módulo Backend                          |
-| ---------------------- | --------------------------------------- |
-| Login / Verificación   | KRATOS_AUTHENTICATION_BACKEND           |
-| Gestión de viajes      | NEMESIS_TRAVEL_MANAGEMENT_BACKEND       |
-| Reservas               | POSEIDON_SEARCH_AND_BOOKING             |
-| Alertas                | ATENEA_NOTIFICATIONS_BACKEND            |
-| Reputación             | TROYA_REPUTATION_BACKEND                |
-| Geolocalización        | NEMESIS_ROUTES_AND_TRACKING_BACKEND     |
-| Pagos                  | POSEIDON_PAYMENTS                       |
-| Estadisticas           | TROYA_STATISTICS_SUSTAINABILITY_BACKEND |
-| Seguridad              | HADES_COMMUNICATION_SECURITY_BACKEND    |
+Formato:  
+`tipo: descripción breve`
+
+| Tipo        | Uso |
+|-------------|-----|
+| ✨ `feat`     | Nueva funcionalidad o pantalla. |
+| 🐞 `fix`      | Corrección de errores funcionales o visuales. |
+| 🎨 `style`    | Cambios de estilos, CSS, shadcn/ui, Tailwind. |
+| 🔧 `refactor` | Mejora interna sin cambiar comportamiento. |
+| 📚 `docs`     | Documentación. |
+| 🧹 `chore`    | Scripts, configuración o mantenimiento. |
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+
+| Categoría                | Tecnologías |
+|--------------------------|-------------|
+| ⚛️ **Framework Frontend** | React 18 + Vite |
+| 🎨 **UI Frameworks**     | shadcn/ui, Supabase |
+| 🧭 **Routing**           | React Router DOM |
+| 📍 **Geolocalización**   | Google Maps API |
+| 🔐 **Autenticación**     | JWT |
+| 🤖 **CI/CD**             | GitHub Actions |
+| ☁️ **Despliegue**        | Vercel |
 
 ---
 
-## Estructura Documentación
+## 🔌 Módulos del Backend Utilizados
 
-/**
- * Componente: LoginPage
- * Descripción: Renderiza el formulario de autenticación de RidECI.
- * Autor: Equipo RidECI
-   
- */
+| Funcionalidad | Módulo Backend |
+|---------------|----------------|
+| 🔐 Login / Verificación          | KRATOS_AUTHENTICATION_BACKEND |
+| 🚘 Gestión de viajes             | NEMESIS_TRAVEL_MANAGEMENT_BACKEND |
+| 📅 Reservas                      | POSEIDON_SEARCH_AND_BOOKING |
+| 🚨 Alertas                       | ATENEA_NOTIFICATIONS_BACKEND |
+| ⭐ Reputación                    | TROYA_REPUTATION_BACKEND |
+| 📍 Geolocalización               | NEMESIS_ROUTES_AND_TRACKING_BACKEND |
+| 💳 Pagos                         | POSEIDON_PAYMENTS |
+| 📊 Estadísticas                  | TROYA_STATISTICS_SUSTAINABILITY_BACKEND |
+| 🔱 Seguridad y comunicación      | HADES_COMMUNICATION_SECURITY_BACKEND |
 
 ---
+
+# 📱 Flujo de Pantallas
