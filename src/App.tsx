@@ -1,10 +1,10 @@
 import './index.css'
-
+import { AppSidebar } from './AppSidebar';
 function App(){
 
     return (
         <div>
-            Hola
+            <AppSidebar />
         </div>
     )
 
