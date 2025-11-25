@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 
@@ -23,7 +24,7 @@ const items = [
   },
   {
     title: "Calendario",
-    url: "/calendario",
+    url: "/calendar",
     icon: Calendar,
   },
   {
@@ -33,17 +34,17 @@ const items = [
   },
   {
     title: "Alertas",
-    url: "/alertas",
+    url: "/alerts",
     icon: CircleAlert,
   },
   {
     title: "Crear Viaje",
-    url: "/crear-viaje",
+    url: "/travels",
     icon: Map,
   },
   {
     title: "Notificaciones",
-    url: "/notificaciones",
+    url: "/notifications",
     icon: BellPlus,
   },
 ]
@@ -51,12 +52,13 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="[&>div]:bg-[#2196F3]/20 backdrop-blur-2xl border-r border-white/20 h-screen [&>div]:shadow-lg">
-      <SidebarHeader className="bg-transparent h-16 flex items-center justify-center px-4">
-        <div className="flex items-center justify-center group-data-[collapsible=icon]:justify-center">
+      <SidebarHeader className="bg-transparent h-16 flex items-center px-4">
+        <div className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center">
+          <SidebarTrigger className="text-white hover:bg-white/20" />
           <img 
             src="/RidECISidebar.png" 
             alt="Rideci Logo" 
-            className="h-10 w-auto object-contain group-data-[collapsible=icon]:h-8"
+            className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden"
           />
         </div>
       </SidebarHeader>
