@@ -1,8 +1,11 @@
-import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus } from "lucide-react"
+import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus, User } from "lucide-react"
+import { Link } from "react-router-dom"
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -15,56 +18,60 @@ import {
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/home",
     icon: House,
   },
   {
     title: "Calendario",
-    url: "#",
+    url: "/calendario",
     icon: Calendar,
   },
   {
     title: "Estadisticas",
-    url: "#",
+    url: "/statistics",
     icon: ChartColumn,
   },
   {
     title: "Alertas",
-    url: "#",
+    url: "/alertas",
     icon: CircleAlert,
   },
   {
     title: "Crear Viaje",
-    url: "#",
+    url: "/crear-viaje",
     icon: Map,
   },
   {
     title: "Notificaciones",
-    url: "#",
+    url: "/notificaciones",
     icon: BellPlus,
-  },
-  {
-    title: "Cerrar Sesión",
-    url: "#",
-    icon: ArrowLeftFromLine,
   },
 ]
 
 export function AppSidebar() {
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar collapsible="icon" className="[&>div]:bg-[#2196F3]/20 backdrop-blur-2xl border-r border-white/20 h-screen [&>div]:shadow-lg">
+      <SidebarHeader className="bg-transparent h-16 flex items-center justify-center px-4">
+        <div className="flex items-center justify-center group-data-[collapsible=icon]:justify-center">
+          <img 
+            src="/RidECISidebar.png" 
+            alt="Rideci Logo" 
+            className="h-10 w-auto object-contain group-data-[collapsible=icon]:h-8"
+          />
+        </div>
+      </SidebarHeader>
+      <SidebarContent className="bg-transparent">
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white font-semibold">Menú</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild className="text-white hover:bg-white/20 hover:text-white transition-all">
+                    <Link to={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -72,6 +79,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="bg-transparent border-t border-white/20">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild className="text-white hover:bg-red-600/30 hover:text-white transition-all">
+              <a href="#">
+                <ArrowLeftFromLine />
+                <span>Cerrar Sesión</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
