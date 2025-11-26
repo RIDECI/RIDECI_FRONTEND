@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
+import Login from './modules/authentication/pages/login'
 
 
 function App(){
@@ -10,8 +11,8 @@ function App(){
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Navigate to="/home" replace />} />
-                    <Route path="home" element={<Home />} />
+                    <Route index element={<Navigate to="/login" replace />} />
+                    <Route path="login" element={<Login />} />
                     <Route path="statistics" element={<Statistics />} />
                 </Route>
             </Routes>
