@@ -4,6 +4,7 @@ import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
 import Login from './modules/authentication/pages/login'
+import Register from './modules/authentication/pages/register'
 
 
 function App(){

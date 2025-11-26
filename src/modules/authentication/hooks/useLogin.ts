@@ -33,7 +33,12 @@ export const useLogin = () => {
         }
       );
 
+      console.log("Request body:", JSON.stringify(data));
+      console.log("Status:", response.status);
+
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.log("Error al iniciar sesión:", errorData || "Unknown error");
         console.log("Error al iniciar sesión:");
         return;
       }
