@@ -16,6 +16,10 @@ function App(){
                     <Route path="login" element={<Login />} />
                     <Route path="statistics" element={<Statistics />} />
                 </Route>
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<Navigate to="/register" replace />} />
+                    <Route path="register" element={<Register />} />
+                </Route>
             </Routes>
         </BrowserRouter>
     )

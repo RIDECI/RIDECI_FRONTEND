@@ -13,9 +13,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { IdentificationType, Role } from "../types/user.d";
+import { useNavigate } from "react-router-dom";
 
 export function RegisterForm() {
   const { handleRegister } = useRegister();
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,6 +28,10 @@ export function RegisterForm() {
   const [identificationNumber, setIdentificationNumber] = useState("");
   const [address, setAddress] = useState("");
   const [institutionalId, setInstitutionalId] = useState<number>(0);
+
+  const toLogin = () =>{
+    navigate("/login")
+  }
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,7 +57,7 @@ export function RegisterForm() {
           Fill in your details to create a new account
         </CardDescription>
         <CardAction>
-          <Button variant="link">Login</Button>
+          <Button variant="link" onClick={toLogin}>Login</Button>
         </CardAction>
       </CardHeader>
 
