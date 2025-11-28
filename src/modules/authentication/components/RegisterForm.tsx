@@ -63,73 +63,80 @@ export function RegisterForm() {
 
       <CardContent>
         <form onSubmit={onSubmit}>
-          <div className="flex flex-col gap-4">
-            <Input
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <div className="main-bar">
+            <div className="left-bar">
+              <Input
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Input
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+              />
+              <Input
+                type="number"
+                placeholder="Institutional ID"
+                value={institutionalId}
+                onChange={(e) => setInstitutionalId(Number(e.target.value))}
+                required
+              />
+            </div >
+            <div className="right-bar">
+              <Input
+                placeholder="Address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+              
+              <label htmlFor="identificationType">Identification Type</label>
+              <select
+                id="identificationType"
+                value={identificationType}
+                onChange={(e) => setIdentificationType(e.target.value as IdentificationType)}
+              >
+                <option value="CC">CC</option>
+                <option value="CE">CE</option>
+                <option value="TI">TI</option>
+                <option value="PASSPORT">PASSPORT</option>
+              </select>
+
+              <Input
+                placeholder="Identification Number"
+                value={identificationNumber}
+                onChange={(e) => setIdentificationNumber(e.target.value)}
+                required
+              />
+              
+              <label htmlFor="role">Role</label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
+              >
+                <option value="STUDENT">STUDENT</option>
+                <option value="PROFESSOR">PROFESSOR</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+          </div>
+          <div className="second-bar"> 
             <Input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Input
-              placeholder="Phone Number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              required
-            />
-
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-            >
-              <option value="STUDENT">STUDENT</option>
-              <option value="PROFESSOR">PROFESSOR</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
-
-            <label htmlFor="identificationType">Identification Type</label>
-            <select
-              id="identificationType"
-              value={identificationType}
-              onChange={(e) => setIdentificationType(e.target.value as IdentificationType)}
-            >
-              <option value="CC">CC</option>
-              <option value="TI">TI</option>
-              <option value="PASSPORT">PASSPORT</option>
-            </select>
-
-            <Input
-              placeholder="Identification Number"
-              value={identificationNumber}
-              onChange={(e) => setIdentificationNumber(e.target.value)}
-              required
-            />
-            <Input
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
-            <Input
-              type="number"
-              placeholder="Institutional ID"
-              value={institutionalId}
-              onChange={(e) => setInstitutionalId(Number(e.target.value))}
               required
             />
 

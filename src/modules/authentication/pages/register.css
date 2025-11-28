@@ -1,0 +1,40 @@
+/* CENTRADO PERFECTO */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* FORZAR ANCHO DEL CARD (sobrescribe max-w-sm de Tailwind) */
+  .login-container > div {
+    width: 600px !important;
+    max-width: 600px !important;
+  }
+  
+  /* FORMULARIO EN 2 COLUMNAS */
+  .main-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .left-bar,
+  .right-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  /* PARA RESPONSIVE */
+  @media (max-width: 650px) {
+    .main-bar {
+      grid-template-columns: 1fr;
+    }
+    
+    .login-container > div {
+      max-width: 90% !important;
+    }
+  }
+  

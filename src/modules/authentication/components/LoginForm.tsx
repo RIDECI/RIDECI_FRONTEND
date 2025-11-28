@@ -50,8 +50,6 @@ export function LoginForm() {
     <CardContent>
       <form onSubmit={onSubmit}>
         <div className="flex flex-col gap-6">
-
-          {/* EMAIL */}
           <div className="grid gap-2">
             <label htmlFor="email" className="text-white">Email</label>
             <Input
@@ -71,7 +69,6 @@ export function LoginForm() {
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="grid gap-2">
             <label htmlFor="password" className="text-white">Password</label>
             <Input
@@ -91,7 +88,6 @@ export function LoginForm() {
             />
           </div>
 
-          {/* BOTÓN */}
           <Button
             type="submit"
             className="
@@ -115,7 +111,7 @@ export function LoginForm() {
         </Button>
       </CardAction>
       <CardAction>
-        <Button variant="link" className="text-white" onClick={toRegister}>
+        <Button variant="link" className="text-white">
           ¿Olvidaste la contraseña?
         </Button>
       </CardAction>
