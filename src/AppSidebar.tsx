@@ -23,8 +23,8 @@ const items = [
     icon: House,
   },
   {
-    title: "Calendario",
-    url: "/calendar",
+    title: "Mis Viajes",
+    url: "/trips",
     icon: Calendar,
   },
   {
@@ -58,7 +58,7 @@ export function AppSidebar() {
           <img 
             src="/RidECISidebar.png" 
             alt="Rideci Logo" 
-            className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden"
+            className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden brightness-110 drop-shadow-lg"
           />
         </div>
       </SidebarHeader>
