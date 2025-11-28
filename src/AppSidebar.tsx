@@ -39,7 +39,7 @@ const items = [
   },
   {
     title: "Crear Viaje",
-    url: "/travels",
+    url: "/sectionTravel",
     icon: Map,
   },
   {

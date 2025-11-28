@@ -1,13 +1,39 @@
-import { GoogleMap, useJsApiLoader} from '@react-google-maps/api'
-function MapComponent(){
-    const {isLoaded} = useJsApiLoader({
-        id: 'google-map-script',
-        googleMapsApiKey: "AIzaSyBmSX5305EUPHA58uu9DcUOHDXzx3cSSjk"
-    });
-    return isLoaded ? (
-        <GoogleMap />
-    ) : null;
+import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import CardMapComponent from './CardMapComponent';
 
+const containerStyle = {
+  width: '100%',
+  height: '650px'
+};
+
+const center = {
+  lat: 4.7827109,
+  lng: -74.0426038
+};
+
+function MyMapComponent() {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: "AIzaSyBmSX5305EUPHA58uu9DcUOHDXzx3cSSjk"
+  })
+  if (!isLoaded) return <div>Cargando mapa...</div>
+
+  return (
+    <div className="relative w-full h-[650px]">
+      <GoogleMap
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={17}
+        options={{
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false
+        }}
+      >
+      </GoogleMap>
+      <CardMapComponent />
+    </div>
+  )
 }
 
-export default MapComponent;
+export default MyMapComponent
