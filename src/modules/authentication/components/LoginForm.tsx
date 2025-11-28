@@ -6,7 +6,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -30,63 +29,97 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-        <CardAction>
-          <Button variant="link" onClick={toRegister}>Sign Up</Button>
-        </CardAction>
-      </CardHeader>
+      <Card
+    className="
+      w-full max-w-lg
+      bg-white/10
+      backdrop-blur-xl
+      border border-white/20
+      shadow-2xl
+      rounded-2xl
+      text-white
+      p-6
+    "
+  >
+    <CardHeader>
+      <CardTitle className="text-center text-3xl font-bold">
+        Iniciar Sesión
+      </CardTitle>
+    </CardHeader>
 
-      <CardContent>
-        <form onSubmit={onSubmit}>
-          <div className="flex flex-col gap-6">
-            <div className="grid gap-2">
-              <label htmlFor="email">Email</label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+    <CardContent>
+      <form onSubmit={onSubmit}>
+        <div className="flex flex-col gap-6">
 
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <label htmlFor="password">Password</label>
-                <a
-                  href="#"
-                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                >
-                  Forgot your password?
-                </a>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
+          {/* EMAIL */}
+          <div className="grid gap-2">
+            <label htmlFor="email" className="text-white">Email</label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              className="
+                bg-black/20 
+                border border-white/20
+                text-white
+                placeholder-white
+                focus:border-white/40
+              "
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-        </form>
-      </CardContent>
 
-      <CardFooter className="flex-col gap-2">
-        <Button variant="outline" className="w-full">
-          Login with Google
+          {/* PASSWORD */}
+          <div className="grid gap-2">
+            <label htmlFor="password" className="text-white">Password</label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="********"
+              className="
+                bg-black/20 
+                border border-white/20
+                text-white
+                placeholder-white
+                focus:border-white/40
+              "
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* BOTÓN */}
+          <Button
+            type="submit"
+            className="
+              w-full
+              bg-white
+              text-black
+              font-semibold
+              hover:bg-white/90
+            "
+          >
+            Entrar
+          </Button>
+        </div>
+      </form>
+    </CardContent>
+
+    <CardFooter className="card-footer">
+      <CardAction>
+        <Button variant="link" className="text-white" onClick={toRegister}>
+          Registrarse
         </Button>
-      </CardFooter>
-    </Card>
+      </CardAction>
+      <CardAction>
+        <Button variant="link" className="text-white" onClick={toRegister}>
+          ¿Olvidaste la contraseña?
+        </Button>
+      </CardAction>
+    </CardFooter>
+  </Card>
   );
 }
