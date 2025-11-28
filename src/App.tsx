@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
+import { Conversations } from './modules/security/pages/Conversations'
 
 
 function App(){
@@ -13,9 +14,12 @@ function App(){
                     <Route index element={<Navigate to="/home" replace />} />
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
+                    <Route path="conversations" element={<Conversations />} />
+                    
                 </Route>
             </Routes>
         </BrowserRouter>
+        
     )
 }
 
