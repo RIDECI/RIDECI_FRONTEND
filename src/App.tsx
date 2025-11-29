@@ -3,6 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
+import SelectProfile from './modules/reputation&profiles/pages/SelectProfile/SelectProfile'
+import Profile from './modules/reputation&profiles/pages/Profile/Profile'
+
+
 
 
 function App(){
@@ -13,6 +17,8 @@ function App(){
                     <Route index element={<Navigate to="/home" replace />} />
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
+                    <Route path="select-profile" element={<SelectProfile />} />
+                    <Route path="profile" element={<Profile />} />
                 </Route>
             </Routes>
         </BrowserRouter>
