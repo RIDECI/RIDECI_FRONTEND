@@ -14,7 +14,7 @@ const center = {
 function MyMapComponent() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyBmSX5305EUPHA58uu9DcUOHDXzx3cSSjk"
+    googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU"
   })
   if (!isLoaded) return <div>Cargando mapa...</div>
 
@@ -24,11 +24,6 @@ function MyMapComponent() {
         mapContainerStyle={containerStyle}
         center={center}
         zoom={17}
-        options={{
-          streetViewControl: false,
-          mapTypeControl: false,
-          fullscreenControl: false
-        }}
       >
       </GoogleMap>
       <CardMapComponent />

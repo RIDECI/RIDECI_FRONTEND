@@ -31,7 +31,7 @@ function GeolocalizationComponent() {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyBmSX5305EUPHA58uu9DcUOHDXzx3cSSjk"
+    googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU"
   });
 
   useEffect(() => {
