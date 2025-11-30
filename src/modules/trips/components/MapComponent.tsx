@@ -11,7 +11,29 @@ const center = {
   lng: -74.0426038
 };
 
-function MyMapComponent() {
+interface MapComponentProps {
+  origin: string;
+  destination: string;
+  departureDateAndTime: string;
+  estimatedCost: string;
+  onOriginChange: (value: string) => void;
+  onDestinationChange: (value: string) => void;
+  onDateChange: (value: string) => void;
+  onCostChange: (value: string) => void;
+}
+
+function MyMapComponent({
+  origin,
+  destination,
+  departureDateAndTime,
+  estimatedCost,
+  onOriginChange,
+  onDestinationChange,
+  onDateChange,
+  onCostChange
+}: MapComponentProps) {
+
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU"
@@ -26,7 +48,16 @@ function MyMapComponent() {
         zoom={17}
       >
       </GoogleMap>
-      <CardMapComponent />
+      <CardMapComponent 
+        origin={origin}
+        destination={destination}
+        departureDateAndTime={departureDateAndTime}
+        estimatedCost={estimatedCost}
+        onOriginChange={onOriginChange}
+        onDestinationChange={onDestinationChange}
+        onDateChange={onDateChange}
+        onCostChange={onCostChange}
+      />
     </div>
   )
 }

@@ -1,30 +1,65 @@
 import { MapPin, LocateFixed, Clock, CircleDollarSign} from "lucide-react"
 
-const CardMapComponent = () => {
+interface CardMapComponentProps {
+  origin: string;
+  destination: string;
+  departureDateAndTime: string;
+  estimatedCost: string;
+  onOriginChange: (value: string) => void;
+  onDestinationChange: (value: string) => void;
+  onDateChange: (value: string) => void;
+  onCostChange: (value: string) => void;
+}
+
+const CardMapComponent = ({
+  origin,
+  destination,
+  departureDateAndTime,
+  estimatedCost,
+  onOriginChange,
+  onDestinationChange,
+  onDateChange,
+  onCostChange
+}: CardMapComponentProps) => {
+  
+  const handleCostChange = (value: string) => {
+    const numericValue = value.replaceAll(/\D/g, '');
+    const formatted = numericValue.replaceAll(/\B(?=(\d{3})+(?!\d))/g, '.');
+    onCostChange(formatted);
+  };
+
   const fields = [
     {
       id: 'origin',
       placeholder: 'Punto de Origen',
       type: 'text',
-      icon: MapPin
+      icon: MapPin,
+      value: origin,
+      onChange: onOriginChange
     },
     {
       id: 'destination',
       placeholder: 'Punto de destino',
       type: 'text',
-      icon: LocateFixed
+      icon: LocateFixed,
+      value: destination,
+      onChange: onDestinationChange
     },
     {
       id: 'date',
       placeholder: 'Fecha y Hora de Salida',
       type: 'datetime-local',
-      icon: Clock
+      icon: Clock,
+      value: departureDateAndTime,
+      onChange: onDateChange
     },
     {
       id: 'cost',
-      placeholder: 'Costo Estimado',
+      placeholder: 'Costo Estimado (COP)',
       type: 'text',
-      icon: CircleDollarSign
+      icon: CircleDollarSign,
+      value: estimatedCost,
+      onChange: handleCostChange
     }
   ];
 
@@ -45,6 +80,8 @@ const CardMapComponent = () => {
                 type={field.type}
                 name={field.id}
                 placeholder={field.placeholder}
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
                 className="w-full bg-transparent border-none outline-none text-gray-700 placeholder-gray-500 text-sm font-medium [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
             </div>

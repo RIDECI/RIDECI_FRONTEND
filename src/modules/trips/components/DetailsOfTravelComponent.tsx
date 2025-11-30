@@ -1,6 +1,7 @@
 import { ArrowLeft, MapPin, LocateFixed, Clock, Car, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import type { TravelBackendResponse } from "../hooks/createTravelHook";
 
 const mockTripDetails = {
     origin: "Portal Norte",
@@ -19,6 +20,16 @@ const mockTripDetails = {
 };
 function DetailsOfTravelComponent(){
     const navigate = useNavigate();
+    const location = useLocation();
+    const travel = location.state?.travel as TravelBackendResponse | undefined;
+    
+    console.log('Travel data in details:', travel);
+
+    let availableSlotsText = 'Viaje completo';
+    if (travel?.availableSlots && travel.availableSlots > 0) {
+        const plural = travel.availableSlots > 1;
+        availableSlotsText = `${travel.availableSlots} cupo${plural ? 's' : ''} disponible${plural ? 's' : ''}`;
+    }
 
     return (
         <div className="p-6">
@@ -34,7 +45,10 @@ function DetailsOfTravelComponent(){
                 <h1 className="text-3xl font-bold">Detalles de viaje</h1>
                 <div className="ml-auto flex gap-3">
                     <Button
-                        onClick={() => navigate('/travels')}
+                        onClick={() => {
+                            console.log('Navigating to edit with travel:', travel);
+                            navigate('/travels', { state: { travel } });
+                        }}
                         className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-6">
                         Editar Viaje
                     </Button>
@@ -53,7 +67,7 @@ function DetailsOfTravelComponent(){
                         <p className="text-sm font-semibold">Origen</p>
                         <input 
                             type="text" 
-                            value={mockTripDetails.origin}
+                            value={travel?.origin.direction}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-56"
                         />
@@ -66,7 +80,7 @@ function DetailsOfTravelComponent(){
                         <p className="text-sm font-semibold">Destino</p>
                         <input 
                             type="text" 
-                            value={mockTripDetails.destination}
+                            value={travel?.destiny.direction}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-56"
                         />
@@ -79,30 +93,37 @@ function DetailsOfTravelComponent(){
                         <p className="text-sm font-semibold">Fecha y Hora de Salida</p>
                         <input 
                             type="text" 
-                            value={mockTripDetails.departureDate}
+                            value={travel?.departureDateAndTime ? new Date(travel.departureDateAndTime).toLocaleString('es-CO') : mockTripDetails.departureDate}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-64"
                         />
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <h2 className="text-2xl font-bold mb-4 text-center">Pasajeros confirmados</h2>
-                    <div className="space-y-3">
-                        {mockTripDetails.passengers.map((passenger) => (
-                            <div key={passenger.id} className="bg-[#CAE8FF]/35 rounded-full border shadow-sm px-4 py-3 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-                                    <User className="w-6 h-6 text-gray-600" />
+            <div className={`grid ${travel?.passengersId && travel.passengersId.length > 0 ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+                {travel?.passengersId && travel.passengersId.length > 0 && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4 text-center">Pasajeros confirmados</h2>
+                        <div className="space-y-3">
+                            {travel.passengersId.map((passengerId, index) => (
+                                <div key={passengerId} className="bg-[#CAE8FF]/35 rounded-full border shadow-sm px-4 py-3 flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                                        <User className="w-6 h-6 text-gray-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">Pasajero {index + 1}</p>
+                                        <p className="text-gray-500 text-sm">ID: {passengerId}</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold">{passenger.name}</p>
-                                    <p className="text-[#0B8EF5] font-semibold">{passenger.price}</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <div className="mt-4 text-center">
+                            <p className="text-sm text-gray-600">
+                                {availableSlotsText}
+                            </p>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="relative">
                     <h2 className="text-2xl font-bold mb-4 text-center">Información del vehículo</h2>

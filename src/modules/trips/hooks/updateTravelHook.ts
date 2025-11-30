@@ -1,13 +1,8 @@
 import { useState } from 'react';
-import type { Travel, Location, Status, TravelType } from '../types';
+import type { Location, Status, TravelType } from '../types';
 
-export interface TravelRequest {
-    id?: string;
-    organizerId?: string;
-    driverId?: string;
+export interface UpdateTravelRequest {
     availableSlots: number;
-    status: Status;
-    travelType: TravelType;
     estimatedCost: number;
     departureDateAndTime: string;
     passengersId?: string[];
@@ -16,7 +11,7 @@ export interface TravelRequest {
     destiny: Location;
 }
 
-export interface TravelBackendResponse {
+export interface UpdateTravelBackendResponse {
     id: string;
     organizerId?: string;
     driverId?: string;
@@ -31,24 +26,23 @@ export interface TravelBackendResponse {
     destiny: Location;
 }
 
-export interface TravelResponse {
+export interface UpdateTravelResponse {
     success: boolean;
-    data?: TravelBackendResponse;
+    data?: UpdateTravelBackendResponse;
     error?: string;
 }
 
-export function useCreateTravel() {
+export function useUpdateTravel() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [travel, setTravel] = useState<Travel | null>(null);
 
-    const createTravel = async (travelRequest: TravelRequest): Promise<TravelResponse> => {
+    const updateTravel = async (id: string, travelRequest: UpdateTravelRequest): Promise<UpdateTravelResponse> => {
         setLoading(true);
         setError(null);
 
         try {
-            const response = await fetch(`https://nemesistravelmanagementbackend-development.up.railway.app/travels`, {
-                method: 'POST',
+            const response = await fetch(`https://nemesistravelmanagementbackend-development.up.railway.app/travels/${id}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -60,31 +54,14 @@ export function useCreateTravel() {
                 throw new Error(errorData.message || `Error: ${response.status}`);
             }
 
-            const result: TravelBackendResponse = await response.json();
-
-            const travelData: Travel = {
-                id: result.id,
-                organizerId: result.organizerId || '',
-                driverId: result.driverId || '',
-                availableSlots: result.availableSlots,
-                status: result.status,
-                travelType: result.travelType,
-                estimatedCost: result.estimatedCost,
-                departureDateTime: new Date(result.departureDateAndTime).getTime(),
-                passengersId: result.passengersId || [],
-                conditions: result.conditions || '',
-                origin: result.origin,
-                destiny: result.destiny
-            };
-
-            setTravel(travelData);
+            const result: UpdateTravelBackendResponse = await response.json();
 
             return {
                 success: true,
                 data: result,
             };
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Error creating travel';
+            const errorMessage = err instanceof Error ? err.message : 'Error updating travel';
             setError(errorMessage);
 
             return {
@@ -98,14 +75,12 @@ export function useCreateTravel() {
 
     const resetState = () => {
         setError(null);
-        setTravel(null);
     };
 
     return {
-        createTravel,
+        updateTravel,
         loading,
         error,
-        travel,
         resetState,
     };
 }
