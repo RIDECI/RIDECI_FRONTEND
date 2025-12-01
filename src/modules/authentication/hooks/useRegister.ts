@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { IdentificationType, Role , AccountState} from "../types/user";
+import { useNavigate } from "react-router-dom";
 
 
 interface RegisterRequest {
@@ -27,6 +28,7 @@ interface UserResponse {
 export const useRegister = () => {
     const [registerData, setRegisterData] = useState<UserResponse| null> (null);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate()
 
     const handleRegister = async (data: RegisterRequest) => {
         setError(null);
@@ -55,6 +57,7 @@ export const useRegister = () => {
             const userResponse: UserResponse = await response.json();
             setRegisterData(userResponse);
             console.log("Registro melo: ", userResponse)
+            navigate("/pickRole")
         }catch (err: any) {
             setError("Error de conexión con el servidor.");
             console.log("Error en la solicitud de registro:", err.message);
