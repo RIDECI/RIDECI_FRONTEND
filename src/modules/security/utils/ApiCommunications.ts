@@ -6,8 +6,6 @@ const BASE_URL = 'https://hadescommunicationsecuritybackend-development.up.railw
 export const conversationApi = {
   getConversations: async (): Promise<ConversationResponse[]> => {
     try {
-      console.log('🔄 Fetching conversations from:', BASE_URL);
-      
       const response = await fetch(`${BASE_URL}`, {
         method: 'GET',
         credentials: 'include',
@@ -17,28 +15,15 @@ export const conversationApi = {
         }
       });
 
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response ok:', response.ok);
-
       if (!response.ok) {
-        let errorDetails = '';
-        try {
-          const errorText = await response.text();
-          errorDetails = errorText;
-          console.error('❌ Error response body:', errorText);
-        } catch (textError) {
-          errorDetails = 'No se pudo obtener detalles del error';
-        }
-        
-        throw new Error(`HTTP error! status: ${response.status}, details: ${errorDetails}`);
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('✅ Conversations data received:', data);
-      return data;
+      return await response.json();
     } catch (error) {
-      console.error('❌ Error fetching conversations:', error);
-      throw error; 
+      console.error('Error fetching conversations:', error);
+      return [];
     }
   },
 
@@ -89,6 +74,7 @@ export const conversationApi = {
   sendMessage: async (
     conversationId: string,
     senderId: string,
+    receiverId: string,
     content: string
   ): Promise<MessageResponse | null> => {
     try {
@@ -99,7 +85,7 @@ export const conversationApi = {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ senderId, content })
+        body: JSON.stringify({ senderId, receiverId, content })
       });
 
       if (!response.ok) {
