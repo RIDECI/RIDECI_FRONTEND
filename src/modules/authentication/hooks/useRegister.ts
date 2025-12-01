@@ -11,7 +11,7 @@ interface RegisterRequest {
   identificationType: IdentificationType;
   identificationNumber: string;
   address: string;
-  institutionalId: number;
+  institutionalId: string;
 }
 
 interface UserResponse {
@@ -26,9 +26,12 @@ interface UserResponse {
 
 export const useRegister = () => {
     const [registerData, setRegisterData] = useState<UserResponse| null> (null);
+    const [error, setError] = useState<string | null>(null);
 
     const handleRegister = async (data: RegisterRequest) => {
-        if(!data){
+        setError(null);
+        if(!data.name || !data.email || !data.password || !data.phoneNumber || !data.identificationNumber || !data.address || !data.institutionalId || !data.role || !data.identificationType || !data.institutionalId || data.phoneNumber === ""){
+            setError("Datos de registro vacíos.");
             console.log("vacio");
             return;
         }
@@ -43,6 +46,8 @@ export const useRegister = () => {
             );
 
             if (!response.ok){
+                const errorData = await response.json().catch(() => null);
+                setError(errorData?.message || "Error al registrarse.");
                 console.log("Error al registrarse");
                 return;
             }
@@ -51,9 +56,10 @@ export const useRegister = () => {
             setRegisterData(userResponse);
             console.log("Registro melo: ", userResponse)
         }catch (err: any) {
+            setError("Error de conexión con el servidor.");
             console.log("Error en la solicitud de registro:", err.message);
         }
     };
 
-    return {registerData, handleRegister};
+    return {registerData, handleRegister, error};
 }
