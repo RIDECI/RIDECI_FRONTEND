@@ -4,7 +4,10 @@ import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
 import { MyTrips, SearchTrips, TripDetails, ReservationConfirmed } from './modules/trips'
-
+import { 
+  PaymentConfirmation, SavedCardsPayment, AddNewCard, PaymentSuccessDetailed, BrebKeysPayment,
+  PaymentHistory
+} from './modules/payments'
 
 function App(){
     return (
@@ -18,6 +21,13 @@ function App(){
                     <Route path="trip-details" element={<TripDetails />} />
                     <Route path="reservation-confirmed" element={<ReservationConfirmed />} />
                     <Route path="statistics" element={<Statistics />} />
+                    {/* Rutas del módulo Payments (Poseidon) */}
+                    <Route path="payment/:bookingId" element={<PaymentConfirmation />} />
+                    <Route path="payment/cards/:bookingId" element={<SavedCardsPayment />} />
+                    <Route path="payment/cards/add" element={<AddNewCard/>} />
+                    <Route path="payment/breb/:paymentId" element={<BrebKeysPayment/>} />
+                    <Route path="payment/success-detailed/:paymentId" element={<PaymentSuccessDetailed/>} />
+                    <Route path="payment/History" element={<PaymentHistory/>} />
                 </Route>
             </Routes>
         </BrowserRouter>
