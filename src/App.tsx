@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
-import { MyTrips, SearchTrips } from './modules/trips'
+import { MyTrips, SearchTrips, TripDetails, ReservationConfirmed } from './modules/trips'
 
 
 function App(){
@@ -15,6 +15,8 @@ function App(){
                     <Route path="home" element={<Home />} />
                     <Route path="trips" element={<MyTrips />} />
                     <Route path="search-trips" element={<SearchTrips />} />
+                    <Route path="trip-details" element={<TripDetails />} />
+                    <Route path="reservation-confirmed" element={<ReservationConfirmed />} />
                     <Route path="statistics" element={<Statistics />} />
                 </Route>
             </Routes>

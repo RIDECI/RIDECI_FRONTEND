@@ -26,3 +26,19 @@ export interface AvailableTrip {
   price: number;
   availableSeats: number;
 }
+
+export interface TripDetails extends AvailableTrip {
+  driverImage: string;
+  origin: string;
+  destination: string;
+  date: string;
+  departureTime: string;
+  arrivalTime: string;
+  vehicle: {
+    brand: string;
+    plate: string;
+    color: string;
+  };
+  totalPrice: number;
+  paymentMethods: string[];
+}

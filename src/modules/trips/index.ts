@@ -1,7 +1,10 @@
 export { MyTrips } from './pages/MyTrips';
+export { MyAccompaniments } from './pages/MyAccompaniments';
 export { SearchTrips } from './pages/SearchTrips';
+export { TripDetails } from './pages/TripDetails';
+export { ReservationConfirmed } from './pages/ReservationConfirmed';
 export { TripCard } from './components/TripCard';
 export { AvailableTripCard } from './components/AvailableTripCard';
 export { default as ButtonPrimary } from './components/ButtonPrimary';
 export { default as ButtonSecondary } from './components/ButtonSecondary';
-export type { Trip, TripStatus, TabType, AvailableTrip } from './types/Trip';
+export type { Trip, TripStatus, TabType, AvailableTrip, TripDetails as TripDetailsType } from './types/Trip';

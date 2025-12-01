@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Trip, TabType } from '../types/Trip';
 import { TripCard } from '../components/TripCard';
+import { MyAccompaniments } from './MyAccompaniments';
 
 export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
+  const [userProfile, setUserProfile] = useState<'passenger' | 'accompanist'>('passenger');
 
-  // Mock data - Replace with real API data
+  useEffect(() => {
+    const profile = localStorage.getItem('userProfile') as 'passenger' | 'accompanist' || 'passenger';
+    setUserProfile(profile);
+  }, []);
+
+  if (userProfile === 'accompanist') {
+    return <MyAccompaniments />;
+  }
+
   const scheduledTrips: Trip[] = [
     {
       id: '1',
