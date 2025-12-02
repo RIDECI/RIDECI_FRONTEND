@@ -19,6 +19,7 @@ function App(){
                     <Route path="home" element={<Home />} />
                     <Route path="trips" element={<MyTrips />} />
                     <Route path="search-trips" element={<SearchTrips />} />
+                    <Route path="trip-details" element={<TripDetails />} />
                     <Route path="statistics" element={<Statistics />} />
                     {/* Rutas del modulo Payments (Poseidon) */}
                     <Route path="payment/:bookingId" element={<PaymentConfirmation />} />

@@ -84,4 +84,5 @@ export interface CompletedTrip {
     currency: string;
   };
   mapImageUrl?: string;
+
 }

@@ -11,3 +11,4 @@ export { BookingConfirmed } from './pages/BookingConfirmed';
 export * from './types/Trip';
 export { TripCompleted } from './pages/TripCompleted';
 export * from './types/Trip';
+

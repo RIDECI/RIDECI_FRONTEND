@@ -12,7 +12,6 @@ export function SearchTrips() {
   const [nearbySearch, setNearbySearch] = useState(true);
   const [showResults, setShowResults] = useState(true);
 
-  // Mock data - Replace with real API data
   const availableTrips: AvailableTrip[] = [
     {
       id: '1',
@@ -81,8 +80,7 @@ export function SearchTrips() {
   };
 
   const handleViewDetails = (trip: AvailableTrip) => {
-    console.log('View details for trip:', trip);
-    // TODO: Navigate to trip details page
+    navigate('/trip-details', { state: { trip } });
   };
 
   return (

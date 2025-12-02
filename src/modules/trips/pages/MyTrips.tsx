@@ -8,7 +8,6 @@ export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
 
-  // Mock data - Replace with real API data
   const scheduledTrips: Trip[] = [
     {
       id: '1',

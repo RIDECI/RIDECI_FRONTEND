@@ -18,12 +18,13 @@ export function TripDetails() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('nequi');
 
   const handleReserve = () => {
-    // simular reserva
+    // TODO: Crear reserva y navegar a confirmación o pago
     console.log('Reservando viaje con método:', selectedPaymentMethod);
     
+    // Simular creación de booking
     const bookingId = `BOOK-${Date.now()}`;
     
-    // pantalla de pago
+    // Navegar a la pantalla de pago correspondiente
     navigate(`/payment/${bookingId}`);
   };
 
