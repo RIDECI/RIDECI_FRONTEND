@@ -4,7 +4,8 @@ import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
 import SelectProfile from './modules/reputation&profiles/pages/SelectProfile/SelectProfile'
-import Profile from './modules/reputation&profiles/pages/Profile/Profile'
+import UpdateProfile from './modules/reputation&profiles/pages/UpdateProfile/UpdateProfile'
+import Profile from './modules/reputation&profiles/pages/ConsultProfile/Profile'
 
 
 
@@ -18,6 +19,7 @@ function App(){
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
                     <Route path="select-profile" element={<SelectProfile />} />
+                    <Route path="update-profile" element={<UpdateProfile />} />
                     <Route path="profile" element={<Profile />} />
                 </Route>
             </Routes>

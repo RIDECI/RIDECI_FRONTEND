@@ -1,4 +1,4 @@
-import FormSelectProfile from "@/modules/reputation&profiles/components/FormSelectProfile/FormSelectProfile";
+import FormSelectProfile from "@/modules/reputation&profiles/components/NetflixSelectProfile/FormSelectProfile";
 
 export default function SelectProfile() {
   return (
