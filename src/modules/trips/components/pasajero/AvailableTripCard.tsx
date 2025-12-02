@@ -1,7 +1,7 @@
 import { User } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import ButtonPrimary from './ButtonPrimary';
-import type { AvailableTrip } from '../types/Trip';
+import type { AvailableTrip } from '../../types/Trip';
 import destinyIcon from '@/assets/destiny.png';
 import clockIcon from '@/assets/clock.png';
 

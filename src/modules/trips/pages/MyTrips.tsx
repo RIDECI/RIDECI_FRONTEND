@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Trip, TabType } from '../types/Trip';
-import { TripCard } from '../components/TripCard';
+import { TripCard } from '../components/pasajero/TripCard';
 
 export function MyTrips() {
   const navigate = useNavigate();

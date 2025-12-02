@@ -3,7 +3,7 @@ import { Search, Zap, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { AvailableTrip } from '../types/Trip';
-import { AvailableTripCard } from '../components/AvailableTripCard';
+import { AvailableTripCard } from '../components/pasajero/AvailableTripCard';
 
 export function SearchTrips() {
   const navigate = useNavigate();

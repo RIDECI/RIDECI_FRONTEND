@@ -1,5 +1,5 @@
 import { MapPin, Clock } from 'lucide-react';
-import type { Trip } from '../types/Trip';
+import type { Trip } from '../../types/Trip';
 
 interface TripCardProps {
   trip: Trip;
