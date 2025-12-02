@@ -18,3 +18,4 @@ export { AvailableAccompanimentCard } from './components/accompaniments/Availabl
 export { AccompanimentRouteDetails } from './pages/AccompanimentRouteDetails';
 export { AccompanimentConfirmed } from './pages/AccompanimentConfirmed';
 export { CancelConfirmationModal } from './components/accompaniments/CancelConfirmationModal';
+export { AccompanimentCompleted } from './pages/AccompanimentCompleted';
