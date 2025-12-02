@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
-import { BookingConfirmed, MyTrips, SearchTrips, TripCompleted, MyAccompaniments, SearchAccompaniments, AccompanimentRouteDetails } from './modules/trips'
+import { BookingConfirmed, MyTrips, SearchTrips, TripCompleted, MyAccompaniments, SearchAccompaniments, AccompanimentRouteDetails,AccompanimentConfirmed } from './modules/trips'
 import { 
   PaymentConfirmation, SavedCardsPayment, AddNewCard, PaymentSuccessDetailed, BrebKeysPayment,
   PaymentHistory
@@ -37,6 +37,7 @@ function App(){
                     <Route path="my-accompaniments" element={<MyAccompaniments />} />
                     <Route path="search-accompaniments" element={<SearchAccompaniments />} />
                     <Route path="accompaniment-details/:routeId" element={<AccompanimentRouteDetails />} />
+                    <Route path="accompaniment-confirmed/:accompanimentId" element={<AccompanimentConfirmed />} />
 
                 </Route>
             </Routes>
