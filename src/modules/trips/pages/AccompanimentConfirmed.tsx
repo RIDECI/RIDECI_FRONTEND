@@ -23,7 +23,7 @@ export function AccompanimentConfirmed() {
 
   const handleConfirmCancel = () => {
     setShowCancelModal(false);
-    navigate('/my-accompaniments');
+    navigate('/accompaniments');
   };
 
   const handleCloseModal = () => {

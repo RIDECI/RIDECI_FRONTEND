@@ -22,23 +22,23 @@ function App(){
                     <Route path="trip-details" element={<TripDetails />} />
                     <Route path="statistics" element={<Statistics />} />
                     {/* Rutas del modulo Payments (Poseidon) */}
-                    <Route path="payment/:bookingId" element={<PaymentConfirmation />} />
-                    <Route path="payment/cards/:bookingId" element={<SavedCardsPayment />} />
+                    <Route path="payment/:bookingId/confirm" element={<PaymentConfirmation />} />
+                    <Route path="payment/cards" element={<SavedCardsPayment />} />
                     <Route path="payment/cards/add" element={<AddNewCard/>} />
                     <Route path="payment/breb/:paymentId" element={<BrebKeysPayment/>} />
-                    <Route path="payment/success-detailed/:paymentId" element={<PaymentSuccessDetailed/>} />
-                    <Route path="payment/History" element={<PaymentHistory/>} />
+                    <Route path="payment/success/:paymentId" element={<PaymentSuccessDetailed/>} />
+                    <Route path="payment/history" element={<PaymentHistory/>} />
                     {/*Rutas del modulo trips (Poseidon) */}
                     <Route path="booking/confirmed/:bookinId" element={<BookingConfirmed/>} />
                     <Route path="trips/:tripId" element={<TripDetails/>} />
                     <Route path="trips" element={<MyTrips />} />
                     <Route path="search-trips" element={<SearchTrips />} />
-                    <Route path="trip/completed" element={<TripCompleted />} />
-                    <Route path="my-accompaniments" element={<MyAccompaniments />} />
-                    <Route path="search-accompaniments" element={<SearchAccompaniments />} />
-                    <Route path="accompaniment-details/:routeId" element={<AccompanimentRouteDetails />} />
-                    <Route path="accompaniment-confirmed/:accompanimentId" element={<AccompanimentConfirmed />} />
-                    <Route path="accompaniment-completed/:accompanimentId" element={<AccompanimentCompleted />} />
+                    <Route path="trips/:tripId/completed" element={<TripCompleted />} />
+                    <Route path="accompaniments" element={<MyAccompaniments />} />
+                    <Route path="accompaniments/search" element={<SearchAccompaniments />} />
+                    <Route path="accompaniment/:routeId" element={<AccompanimentRouteDetails />} />
+                    <Route path="accompaniments/:id/confirmed" element={<AccompanimentConfirmed />} />
+                    <Route path="accompaniments/:id/completed" element={<AccompanimentCompleted />} />
 
 
                 </Route>

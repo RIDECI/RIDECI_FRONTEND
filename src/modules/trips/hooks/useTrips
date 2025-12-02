@@ -1,0 +1,55 @@
+import { Trip } from "../types/Trip";
+
+export function useTrips() {
+
+  const scheduledTrips: Trip[] = [
+    {
+      id: '1',
+      route: 'Universidad Escuela colombiana de Ing → Portal 80',
+      date: 'Hoy',
+      time: '18:30',
+      driverName: 'Carlos Ruiz',
+      driverImage: 'https://i.pravatar.cc/40?img=1',
+      status: 'Confirmado',
+      statusColor: 'green',
+    },
+    {
+      id: '2',
+      route: 'Universidad Escuela colombiana de Ing → Portal 80',
+      date: 'Mañana',
+      time: '18:30',
+      driverName: 'Carlos Ruiz',
+      driverImage: 'https://i.pravatar.cc/40?img=1',
+      status: 'Confirmado',
+      statusColor: 'yellow',
+    },
+  ];
+
+  const historyTrips: Trip[] = [
+    {
+      id: '3',
+      route: 'Centro Comercial → Casa',
+      date: '25 Nov',
+      time: '19:45',
+      driverName: 'María García',
+      driverImage: 'https://i.pravatar.cc/40?img=2',
+      status: 'Confirmado',
+      statusColor: 'green',
+    },
+    {
+      id: '4',
+      route: 'Parque Arvi → Universidad',
+      date: '24 Nov',
+      time: '07:20',
+      driverName: 'Juan López',
+      driverImage: 'https://i.pravatar.cc/40?img=3',
+      status: 'Confirmado',
+      statusColor: 'green',
+    },
+  ];
+
+  return {
+    scheduledTrips,
+    historyTrips,
+  };
+}

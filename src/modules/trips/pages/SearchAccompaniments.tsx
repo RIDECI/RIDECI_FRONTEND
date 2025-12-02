@@ -18,7 +18,7 @@ export function SearchAccompaniments() {
   } = useSearchAccompaniments();
 
   const handleViewDetails = (id: string) => {
-    navigate(`/accompaniment-details/${id}`);
+    navigate(`/accompaniment/${id}`);
   };
 
   return (

@@ -14,7 +14,7 @@ export function MyAccompaniments() {
     : historyAccompaniments;
 
   const handleSearchClick = () => {
-    navigate('/search-accompaniments');
+    navigate('/accompaniments/search');
   };
 
   return (

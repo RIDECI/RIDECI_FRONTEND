@@ -13,7 +13,7 @@ export function AccompanimentRouteDetails() {
   const { routeDetails } = useRouteDetails(routeId || '');
 
   const handleRequestAccompaniment = () => {
-    navigate(`/accompaniment-confirmed/${routeId}`);
+    navigate(`/accompaniments/${routeId}/confirmed`);
   };
 
   return (
