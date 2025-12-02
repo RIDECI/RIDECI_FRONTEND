@@ -11,4 +11,8 @@ export { BookingConfirmed } from './pages/BookingConfirmed';
 export * from './types/Trip';
 export { TripCompleted } from './pages/TripCompleted';
 export * from './types/Trip';
-
+export { MyAccompaniments } from './pages/MyAccompaniments';
+export { AccompanimentCard } from './components/accompaniments/AccompanimentCard';
+export { SearchAccompaniments } from './pages/SearchAccompaniments';
+export { AvailableAccompanimentCard } from './components/accompaniments/AvailableAccompanimentCard';
+export { AccompanimentRouteDetails } from './pages/AccompanimentRouteDetails';
