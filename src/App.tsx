@@ -5,24 +5,45 @@ import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
 import Login from './modules/authentication/pages/login'
 import Register from './modules/authentication/pages/register'
+import ForgotPasswordForm  from './modules/authentication/pages/ForgotPasswordPage' 
+import EmailSentPage from './modules/authentication/pages/EmailSentPage'
+import ResetPasswordPage from './modules/authentication/pages/ResetPasswordPage'
 
-
-function App(){
+function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* Ruta principal redirige a login */}
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                
+                {/* Rutas de autenticación SIN Layout */}
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="forgot-password" element={<ForgotPasswordForm />} /> 
+                <Route path="email-sent" element={<EmailSentPage />} />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
+                
+                {/* Rutas protegidas CON Layout */}
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Navigate to="/login" replace />} />
-                    <Route path="login" element={<Login />} />
+                    <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
                 </Route>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Navigate to="/register" replace />} />
-                    <Route path="register" element={<Register />} />
-                </Route>
+                
+                {/* Ruta 404 */}
+                <Route path="*" element={
+                    <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center">
+                            <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
+                            <p className="text-gray-600 mb-4">Página no encontrada</p>
+                            <a href="/login" className="text-blue-600 hover:underline">
+                                Volver al inicio
+                            </a>
+                        </div>
+                    </div>
+                } />
             </Routes>
         </BrowserRouter>
     )
 }
 
-export default App;
+export default App
