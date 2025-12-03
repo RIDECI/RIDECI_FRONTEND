@@ -20,13 +20,13 @@ export const AddNewCard: React.FC = () => {
   } = useAddCard();
 
   const handleCancel = () => {
-    navigate(`/payment/cards/${bookingId}`);
+    navigate(`/payment/cards`);
   };
 
   const handleSave = async () => {
     const success = await handleSaveCard();
     if (success) {
-      navigate(`/payment/cards/${bookingId}`);
+      navigate(`/payment/cards`);
     }
   };
 

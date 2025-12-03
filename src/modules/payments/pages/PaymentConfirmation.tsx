@@ -17,7 +17,7 @@ export const PaymentConfirmation: React.FC = () => {
     if (!selectedMethod) return;
     
     if (selectedMethod === 'card') {
-      navigate(`/payment/cards/${bookingId}`);
+      navigate(`/payment/cards`);
       return;
     }
     
@@ -33,7 +33,7 @@ export const PaymentConfirmation: React.FC = () => {
     });
     
     const mockPaymentId = `PAY-${Date.now()}`;
-    navigate(`/payment/success-detailed/${mockPaymentId}`);
+    navigate(`/payment/success/${mockPaymentId}`);
   };
 
   return (

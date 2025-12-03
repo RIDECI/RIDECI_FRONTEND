@@ -25,7 +25,7 @@ export const SavedCardsPayment: React.FC = () => {
     });
     
     const mockPaymentId = `PAY-CARD-${Date.now()}`;
-    navigate(`/payment/success-detailed/${mockPaymentId}`);
+    navigate(`/payment/success/${mockPaymentId}`);
   };
 
   return (

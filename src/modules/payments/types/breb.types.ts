@@ -7,3 +7,8 @@ export interface BrebKey {
   label: string;
   icon: string;
 }
+
+export interface NewBrebKeyData {
+  type: BrebKeyType;
+  value: string;
+}
