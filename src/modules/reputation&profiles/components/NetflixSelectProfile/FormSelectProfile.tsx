@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
+
 import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group";
 import { SelectImagesPropsSchema } from "../../../../lib/schema";
 import { cn } from "../../../../lib/utils";
@@ -22,6 +24,8 @@ export default function FormSelectProfile() {
   const [selected, setSelected] = useState<Profile | null>(null);
   const [error, setError] = useState("");
 
+  const navigate = useNavigate(); 
+
   const handleSubmit = () => {
     const result = SelectImagesPropsSchema.safeParse({
       profileName: selected?.name,
@@ -33,7 +37,8 @@ export default function FormSelectProfile() {
       return;
     }
 
-    alert("Perfil seleccionado: " + selected!.name);
+    // 👇 redirigir a create-profile
+    navigate("/create-profile");
   };
 
   return (
@@ -53,7 +58,6 @@ export default function FormSelectProfile() {
               className="hidden"
             />
 
-            {/* AVATAR ESTILO NETFLIX CUADRADO */}
             <div className="flex flex-col items-center">
               <div
                 className={cn(

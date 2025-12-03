@@ -9,7 +9,7 @@ const comments = [
     avatar: ok
   },
   {
-    user: "Andrea  Perez",
+    user: "Andrea Perez",
     date: "Hace 2 días",
     text: "Todo perfecto, auto limpio y viaje tranquilo. Lo recomiendo totalmente.",
     avatar: momo
@@ -17,6 +17,12 @@ const comments = [
 ];
 
 export default function CommentList() {
+
+  const handleSeeAll = () => {
+    // Aquí puedes navegar o abrir un modal
+    console.log("Ver todos los comentarios");
+  };
+
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3">Comentarios</h3>
@@ -24,7 +30,9 @@ export default function CommentList() {
       <div className="space-y-4 bg-white border rounded-xl p-4 shadow-sm">
         {comments.map((c, idx) => (
           <div key={idx} className="flex gap-4 items-start">
-            <img src={c.avatar} className="w-10 h-10 rounded-full object-cover"
+            <img
+              src={c.avatar}
+              className="w-10 h-10 rounded-full object-cover"
               alt={c.user}
             />
             <div>
@@ -34,6 +42,15 @@ export default function CommentList() {
             </div>
           </div>
         ))}
+
+        {/* Botón Ver Todos */}
+        <button
+          onClick={handleSeeAll}
+          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+        >
+          Ver todos los comentarios
+        </button>
+
       </div>
     </div>
   );

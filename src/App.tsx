@@ -6,6 +6,8 @@ import { Statistics } from './modules/statistics and sustainability'
 import SelectProfile from './modules/reputation&profiles/pages/SelectProfile/SelectProfile'
 import UpdateProfile from './modules/reputation&profiles/pages/UpdateProfile/UpdateProfile'
 import Profile from './modules/reputation&profiles/pages/ConsultProfile/Profile'
+import TripHistory from './modules/reputation&profiles/pages/TripHistory/TripHistory'
+import CreateProfile from './modules/reputation&profiles/pages/CreateProfile/CreateProfile'
 
 
 
@@ -21,6 +23,8 @@ function App(){
                     <Route path="select-profile" element={<SelectProfile />} />
                     <Route path="update-profile" element={<UpdateProfile />} />
                     <Route path="profile" element={<Profile />} />
+                    <Route path="trip-history" element={<TripHistory />} />
+                    <Route path="create-profile" element={<CreateProfile />} />
                 </Route>
             </Routes>
         </BrowserRouter>
