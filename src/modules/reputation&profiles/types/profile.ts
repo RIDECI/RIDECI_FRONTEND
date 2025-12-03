@@ -1,9 +1,20 @@
+import {type ProfileType, type IdentificationType } from "./enums"
+import type { Reputation } from "./reputation"
+
 export interface Profile {
-    id?: number;
+    id: number;
     name: string;
     email: string;
-    phoneNumber?: string;
-    password: string[];
-    bio?: string;
-    profilePictureUrl?: string;
+    vehicles: string[];
+    phoneNumber: string;
+    ratings: string[];
+    badges: string[];
+    profileType: ProfileType;
+    reputation: Reputation;
+    identificationType: IdentificationType;
+    identificationNumber: string;
+    address: String;
+    profilePictureUrl: String;
+    birthDate: Date;
+
 }
