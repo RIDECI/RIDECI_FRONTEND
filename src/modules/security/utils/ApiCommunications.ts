@@ -1,7 +1,7 @@
 import type { MessageResponse } from '../types/MessageResponse';
 import type { ConversationResponse } from '../types/ConversationResponse';
 
-const BASE_URL = 'https://hadescommunicationsecuritybackend-development.up.railway.app/conversations';
+const BASE_URL = 'https://web-production-d849d5.up.railway.app/conversations';
 
 export const conversationApi = {
   getConversations: async (): Promise<ConversationResponse[]> => {

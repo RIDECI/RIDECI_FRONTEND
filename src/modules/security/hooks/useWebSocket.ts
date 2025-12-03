@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState } from "react";
+import socketIOClient, { type Socket } from "socket.io-client";
 import type { MessageResponse } from "../types/MessageResponse";
 
 interface UseWebSocketProps {
   userId: string;
   onMessageReceived: (message: MessageResponse) => void;
   onConnected?: () => void;
-  onError?: (error: Event) => void;
-  reconnectInterval?: number;
+  onError?: (error: any) => void;
+}
+
+interface SendMessageRequest {
+  conversationId: string;
+  senderId: string;
+  receiverId?: string;
+  content: string;
 }
 
 export function useWebSocket({
@@ -14,66 +21,48 @@ export function useWebSocket({
   onMessageReceived,
   onConnected,
   onError,
-  reconnectInterval = 3000,
 }: UseWebSocketProps) {
-  const socketRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const connectWebSocket = () => {
+  useEffect(() => {
     if (!userId) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const host = window.location.hostname;
-    const port = 8080;
-    const wsUrl = `${protocol}://${host}:${port}/ws/chat?userId=${userId}`;
-
-    const socket = new WebSocket(wsUrl);
+    const socket = socketIOClient("http://localhost:8081", {
+      query: { userId },
+      transports: ["websocket"],
+    });
     socketRef.current = socket;
 
-    socket.onopen = () => {
+    socket.on("connect", () => {
       setIsConnected(true);
       onConnected?.();
-    };
+    });
 
-    socket.onmessage = (event) => {
-      try {
-        const data: MessageResponse = JSON.parse(event.data);
-        onMessageReceived(data);
-      } catch (err) {
-        console.error("Error parseando mensaje WS:", err);
-      }
-    };
+    socket.on("message", (msg: MessageResponse) => {
+      onMessageReceived(msg);
+    });
 
-    socket.onerror = (event) => {
-      onError?.(event);
-    };
+    socket.on("connect_error", (err: any) => {
+      onError?.(err);
+    });
 
-    socket.onclose = () => {
+    socket.on("disconnect", () => {
       setIsConnected(false);
-      socketRef.current = null;
-      setTimeout(connectWebSocket, reconnectInterval);
-    };
-  };
+    });
 
-  useEffect(() => {
-    connectWebSocket();
-    return () => socketRef.current?.close();
+    return () => {
+      socket.disconnect();
+    };
   }, [userId]);
 
-  const sendMessage = (conversationId: string, content: string, receiverId?: string): boolean => {
-    const socket = socketRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN) return false;
-
-    const message: MessageResponse = {
-      conversationId,
-      senderId: userId,
-      receiverId: receiverId || "",
-      content,
-      timestamp: new Date(),
-    };
-
-    socket.send(JSON.stringify(message));
-    return true;
+  const sendMessage = (conversationId: string, content: string, receiverId?: string) => {
+    if (socketRef.current?.connected) {
+      const message: SendMessageRequest = { conversationId, senderId: userId, receiverId, content };
+      socketRef.current.emit("send-message", message);
+      return true;
+    }
+    return false;
   };
 
   return { isConnected, sendMessage };
