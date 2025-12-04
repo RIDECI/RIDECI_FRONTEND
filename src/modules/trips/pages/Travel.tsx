@@ -135,7 +135,7 @@ export function Travel(){
                 onDateChange={setDepartureDateAndTime}
                 onCostChange={setEstimatedCost}
             />
-            <div className="px-6 py-4 flex justify-between">
+            <div className="px-6 pt-20 pb-8 flex justify-between gap-4">
                 <ButtonCancel title="Cancelar" />
                 <ButtonCreate 
                     title={buttonTitle} 

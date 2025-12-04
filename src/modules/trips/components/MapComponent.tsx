@@ -3,7 +3,7 @@ import CardMapComponent from './CardMapComponent';
 
 const containerStyle = {
   width: '100%',
-  height: '650px'
+  height: '700px'
 };
 
 const center = {
@@ -46,6 +46,40 @@ function MyMapComponent({
         mapContainerStyle={containerStyle}
         center={center}
         zoom={17}
+        options={{
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+          disableDefaultUI: false,
+          zoomControl: true,
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "poi.business",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "transit",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "administrative.land_parcel",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "administrative.neighborhood",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            }
+          ]
+        }}
       >
       </GoogleMap>
       <CardMapComponent 

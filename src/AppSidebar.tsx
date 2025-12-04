@@ -71,19 +71,19 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="bg-transparent py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/80 font-semibold text-xs uppercase tracking-wider px-2">
+          <SidebarGroupLabel className="text-white/80 font-semibold text-xs uppercase tracking-wider px-2 mb-5">
             Menú
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
+            <SidebarMenu className="gap-5">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    className="text-white hover:bg-white/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md"
+                    className="text-white hover:bg-white/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md px-3 py-2"
                   >
                     <Link to={item.url}>
-                      <item.icon className="w-5 h-5" />
+                      <item.icon className="w-5 h-5 mr-3" />
                       <span className="font-medium">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -98,10 +98,10 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              className="text-white hover:bg-red-500/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md border border-transparent hover:border-red-500/30"
+              className="text-white hover:bg-red-500/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md border border-transparent hover:border-red-500/30 px-3 py-2"
             >
               <a href="#">
-                <ArrowLeftFromLine className="w-5 h-5" />
+                <ArrowLeftFromLine className="w-5 h-5 mr-3" />
                 <span className="font-medium">Cerrar Sesión</span>
               </a>
             </SidebarMenuButton>

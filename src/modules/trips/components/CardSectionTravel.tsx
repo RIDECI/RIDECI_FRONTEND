@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Car, Search, MapPin, LocateFixed, Clock } from "lucide-react";
+import { Car, Search, MapPin, LocateFixed, Clock, MapPinned } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ function CardSectionTravel(){
         <div className="p-6">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <Car className="w-8 h-8" />
+                    <MapPinned className="w-8 h-8" />
                     <h1 className="text-3xl font-bold">Ver mis viajes</h1>
                 </div>
                 <Button 
@@ -49,10 +49,17 @@ function CardSectionTravel(){
             )}
 
             {!loading && !error && travels.length === 0 && (
-                <div className="text-center py-8">
-                    <Car className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500 text-lg">No tienes viajes creados</p>
-                    <p className="text-gray-400 text-sm">Crea tu primer viaje haciendo clic en "Añadir viaje"</p>
+                <div className="flex flex-col items-center justify-center py-20 px-6">
+                    <Car className="w-24 h-24 text-gray-300 mb-6 animate-[slideRight_2s_ease-in-out_infinite]" 
+                         style={{ 
+                           animation: 'slideRight 2s ease-in-out infinite',
+                         }} />
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-700 mb-3 text-center">
+                        No tienes viajes creados
+                    </h2>
+                    <p className="text-lg md:text-xl text-gray-500 text-center max-w-md">
+                        Crea tu primer viaje haciendo clic en "Añadir viaje"
+                    </p>
                 </div>
             )}
 
@@ -84,7 +91,7 @@ function CardSectionTravel(){
                             <Card key={trip.id} className="gap-4 bg-[#CAE8FF]/35">
                                 <CardHeader>
                                     <CardTitle className="flex items-start justify-between">
-                                        <span className="text-base">A {trip.destiny.direction.split(',')[0]}</span>
+                                        <span className="text-base">{trip.destiny.direction.split(',')[0]}</span>
                                         <span className={`text-xs px-2 py-1 rounded-full ${status.className}`}>
                                             {status.label}
                                         </span>
@@ -103,7 +110,7 @@ function CardSectionTravel(){
                                         <Clock className="w-4 h-4" />
                                         <span>{formattedTime}</span>
                                     </div>
-                                    <div className="text-blue-600 font-semibold text-base">
+                                    <div className="text-[#0B8EF5] font-semibold text-base">
                                         ${formattedCost} COP
                                     </div>
                                     <div className="text-xs text-gray-500">
