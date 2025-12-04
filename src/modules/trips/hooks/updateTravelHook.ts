@@ -2,10 +2,13 @@ import { useState } from 'react';
 import type { Location, Status, TravelType } from '../types';
 
 export interface UpdateTravelRequest {
+    id: string,
+    organizerId: number,
+    driverId: number,
     availableSlots: number;
     estimatedCost: number;
     departureDateAndTime: string;
-    passengersId?: string[];
+    passengersId?: number[];
     conditions?: string;
     origin: Location;
     destiny: Location;
@@ -13,14 +16,14 @@ export interface UpdateTravelRequest {
 
 export interface UpdateTravelBackendResponse {
     id: string;
-    organizerId?: string;
-    driverId?: string;
+    organizerId?: number;
+    driverId?: number;
     availableSlots: number;
     status: Status;
     travelType: TravelType;
     estimatedCost: number;
     departureDateAndTime: string;
-    passengersId?: string[];
+    passengersId?: number[];
     conditions?: string;
     origin: Location;
     destiny: Location;

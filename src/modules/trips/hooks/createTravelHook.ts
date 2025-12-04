@@ -3,14 +3,14 @@ import type { Travel, Location, Status, TravelType } from '../types';
 
 export interface TravelRequest {
     id?: string;
-    organizerId?: string;
-    driverId?: string;
+    organizerId?: number;
+    driverId?: number;
     availableSlots: number;
     status: Status;
     travelType: TravelType;
     estimatedCost: number;
     departureDateAndTime: string;
-    passengersId?: string[];
+    passengersId?: number[];
     conditions?: string;
     origin: Location;
     destiny: Location;
@@ -18,14 +18,14 @@ export interface TravelRequest {
 
 export interface TravelBackendResponse {
     id: string;
-    organizerId?: string;
-    driverId?: string;
+    organizerId?: number;
+    driverId?: number;
     availableSlots: number;
     status: Status;
     travelType: TravelType;
     estimatedCost: number;
     departureDateAndTime: string;
-    passengersId?: string[];
+    passengersId?: number[];
     conditions?: string;
     origin: Location;
     destiny: Location;
@@ -64,8 +64,8 @@ export function useCreateTravel() {
 
             const travelData: Travel = {
                 id: result.id,
-                organizerId: result.organizerId || '',
-                driverId: result.driverId || '',
+                organizerId: result.organizerId || 0,
+                driverId: result.driverId || 0,
                 availableSlots: result.availableSlots,
                 status: result.status,
                 travelType: result.travelType,
