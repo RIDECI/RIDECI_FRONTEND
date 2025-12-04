@@ -1,7 +1,7 @@
 export async function deleteTravelHook(travelId: string): Promise<void> {
     try {
         const response = await fetch(
-            `https://nemesistravelmanagementbackend-development.up.railway.app/travels/${travelId}`,
+            `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
             {
                 method: 'DELETE',
                 headers: {

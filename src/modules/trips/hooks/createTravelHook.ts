@@ -47,7 +47,7 @@ export function useCreateTravel() {
         setError(null);
 
         try {
-            const response = await fetch(`https://nemesistravelmanagementbackend-development.up.railway.app/travels`, {
+            const response = await fetch(`https://nemesistravelmanagementbackend-production.up.railway.app/travels`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
