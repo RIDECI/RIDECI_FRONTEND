@@ -3,10 +3,6 @@ import avatar1 from "../assets/avatar-1.png";
 import avatar2 from "../assets/avatar-2.png";
 import avatar3 from "../assets/avatar-3.png";
 
-import Setting from "../components/Setting";
-import Statistics from "../components/Statistics";
-import ElementAvatarsWrapper from "../components/ElementAvatarsWrapper";
-
 import { useAdminMetrics } from "../hooks/useAdminMetrics";
 
 type Report = {
@@ -33,7 +29,8 @@ type UserCard = {
 type ErrorKind = "file" | "report" | "user" | "approve" | "reject";
 
 export default function AdminHome() {
-  const { metrics } = useAdminMetrics();
+  const { metrics = { usersActive: 0, tripsCompleted: 0, openReports: 0, co2: 0 } } =
+    useAdminMetrics() as any;
 
   const [reports] = useState<Report[]>(() => [
     { id: "REP001", title: "Comportamiento Agresivo", reporter: "Juan García", severity: "high", details: "El conductor insultó y manejó agresivo." },
@@ -69,20 +66,19 @@ export default function AdminHome() {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Reports carousel
+  // Reports carousel logic
   const [repPage, setRepPage] = useState(0);
   const repPages = Math.max(1, Math.ceil(reports.length / itemsPerPage));
   useEffect(() => setRepPage((p) => Math.min(p, Math.max(0, repPages - 1))), [itemsPerPage, repPages]);
-  const repStart = repPage * itemsPerPage;
-  const visibleReports = reports.slice(repStart, repStart + itemsPerPage);
+  
   const repPrev = useCallback(() => setRepPage((p) => Math.max(0, p - 1)), []);
   const repNext = useCallback(() => setRepPage((p) => Math.min(repPages - 1, p + 1)), [repPages]);
 
+  // Users carousel logic
   const [userPage, setUserPage] = useState(0);
   const userPages = Math.max(1, Math.ceil(users.length / itemsPerPage));
   useEffect(() => setUserPage((p) => Math.min(p, Math.max(0, userPages - 1))), [itemsPerPage, userPages]);
-  const userStart = userPage * itemsPerPage;
-  const visibleUsers = users.slice(userStart, userStart + itemsPerPage);
+  
   const userPrev = useCallback(() => setUserPage((p) => Math.max(0, p - 1)), []);
   const userNext = useCallback(() => setUserPage((p) => Math.min(userPages - 1, p + 1)), [userPages]);
 
@@ -97,7 +93,8 @@ export default function AdminHome() {
   // confirmation flow
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<null | "suspend_account" | "suspend_profile" | "archive" | "approve" | "reject">(null);
-  const [selectedRole, setSelectedRole] = useState<"Acompañante" | "Conductor" | "Administrador">("Conductor");
+  
+  const [selectedRole, setSelectedRole] = useState<"Acompañante" | "Conductor" | "Pasajero">("Conductor");
   const [actionLoading, setActionLoading] = useState(false);
 
   // error handling
@@ -115,7 +112,7 @@ export default function AdminHome() {
     setSelectedReport(r);
     setIsModalOpen(true);
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
     setPendingAction(null);
@@ -133,32 +130,25 @@ export default function AdminHome() {
     setSelectedUser(null);
   };
 
-  // starts confirmation for sensitive actions
   const startConfirm = (action: typeof pendingAction) => {
     setPendingAction(action);
     setConfirmOpen(true);
   };
 
-  // show error helper
   const showError = (kind: ErrorKind, title?: string, message?: string) => {
     setErrorState({ open: true, kind, title, message });
   };
 
-  // performAction: for demo: first attempt fails with specific error, retry succeeds
   const performAction = async () => {
     if (!pendingAction) return;
     setActionLoading(true);
 
-    // increase attempts counter
     const key = pendingAction;
     attemptsRef.current[key] = (attemptsRef.current[key] || 0) + 1;
     const attempt = attemptsRef.current[key];
 
-    // simulated network delay
     await new Promise((res) => setTimeout(res, 700));
 
-    // map actions -> errors for illustrative UX
-    // first attempt -> show error, second attempt -> succeed
     if (pendingAction === "archive") {
       if (attempt === 1) {
         showError("file", "No se ha generado el archivo", "No se ha generado el archivo. Intenta nuevamente.");
@@ -172,6 +162,7 @@ export default function AdminHome() {
       } else {
         console.log(`Cuenta suspendida: ${selectedReport?.id}`);
         closeModal();
+        if(isUserModalOpen) closeUserModal();
       }
     } else if (pendingAction === "suspend_profile") {
       if (attempt === 1) {
@@ -179,6 +170,7 @@ export default function AdminHome() {
       } else {
         console.log(`Perfil suspendido (${selectedRole}): ${selectedReport?.id}`);
         closeModal();
+        if(isUserModalOpen) closeUserModal();
       }
     } else if (pendingAction === "approve") {
       if (attempt === 1) {
@@ -201,18 +193,15 @@ export default function AdminHome() {
     setPendingAction(null);
   };
 
-  // allow retry from error
   const retryFromError = () => {
     setErrorState({ open: false });
     setConfirmOpen(true);
   };
 
-  // close error
   const closeError = () => {
     setErrorState({ open: false });
   };
 
-  // close modal with ESC
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -295,62 +284,67 @@ export default function AdminHome() {
           </article>
         </section>
 
-        {/* Reportes (carousel) */}
+        {/* Reportes (carousel) - ARREGLADO FLEXBOX */}
         <section className="mb-8 relative">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Nuevos reportes</h2>
             <div className="text-sm text-slate-500">{reports.length} encontrados</div>
           </div>
 
-          <div className="relative overflow-hidden px-16">
+          <div className="flex items-center gap-4">
+            {/* Flecha Izquierda */}
             <button 
               onClick={repPrev} 
               disabled={repPage === 0} 
               aria-label="Anterior reporte" 
               title="Anterior" 
-              className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
             >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
+              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
                 <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
-            <div 
-              className="flex gap-6 transition-transform duration-700 ease-out px-2"
-              style={{ 
-                transform: `translateX(-${repPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
-              }}
-            >
-              {reports.map((r) => (
-                <article 
-                  key={r.id} 
-                  className="flex-shrink-0 bg-white p-6 rounded-xl border border-gray-100 shadow-sm"
-                  style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+            {/* Track Contenedor */}
+            <div className="flex-1 overflow-hidden">
+                <div 
+                className="flex gap-6 transition-transform duration-700 ease-out px-1"
+                style={{ 
+                    transform: `translateX(-${repPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
+                }}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-xs font-semibold text-blue-600">#{r.id}</div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${r.severity === "high" ? "bg-red-100 text-red-600" : r.severity === "medium" ? "bg-yellow-100 text-yellow-600" : "bg-green-100 text-green-600"}`}>
-                      {severityLabel(r.severity)}
-                    </span>
-                  </div>
+                {reports.map((r) => (
+                    <article 
+                    key={r.id} 
+                    className="flex-shrink-0 bg-white p-6 rounded-xl border border-gray-100 shadow-sm"
+                    style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+                    >
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="text-xs font-semibold text-blue-600">#{r.id}</div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${r.severity === "high" ? "bg-red-100 text-red-600" : r.severity === "medium" ? "bg-yellow-100 text-yellow-600" : "bg-green-100 text-green-600"}`}>
+                        {severityLabel(r.severity)}
+                        </span>
+                    </div>
 
-                  <h3 className="font-semibold text-gray-800 mb-1">{r.title}</h3>
-                  <p className="text-sm text-slate-500 mb-4">Reportado por: {r.reporter}</p>
-                  <div className="flex gap-3">
-                    <button onClick={() => openReport(r)} className="px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition">Ver</button>
-                  </div>
-                </article>
-              ))}
+                    <h3 className="font-semibold text-gray-800 mb-1">{r.title}</h3>
+                    <p className="text-sm text-slate-500 mb-4">Reportado por: {r.reporter}</p>
+                    <div className="flex gap-3">
+                        <button onClick={() => openReport(r)} className="px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition">Ver</button>
+                    </div>
+                    </article>
+                ))}
+                </div>
             </div>
 
+            {/* Flecha Derecha */}
             <button 
               onClick={repNext} 
               disabled={repPage >= repPages - 1} 
               aria-label="Siguiente reporte" 
               title="Siguiente" 
-              className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage >= repPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage >= repPages - 1 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
             >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
+              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
                 <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
@@ -359,7 +353,7 @@ export default function AdminHome() {
 
         <div className="my-6 border-t border-dashed border-slate-200" />
 
-        {/* Users */}
+        {/* Users - ARREGLADO FLEXBOX */}
         <section className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-800">Usuarios nuevos por validar</h3>
@@ -367,90 +361,98 @@ export default function AdminHome() {
           </div>
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-            <div className="relative overflow-hidden px-16">
-              <button 
-                onClick={userPrev} 
-                disabled={userPage === 0} 
-                aria-label="Anterior usuario" 
-                title="Anterior usuario" 
-                className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
-              >
-                <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
-                  <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+            <div className="flex items-center gap-4">
+                {/* Flecha Izquierda */}
+                <button 
+                    onClick={userPrev} 
+                    disabled={userPage === 0} 
+                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                    <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
 
-              <div 
-                className="flex gap-6 transition-transform duration-700 ease-out px-2"
-                style={{ 
-                  transform: `translateX(-${userPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
-                }}
-              >
-                {users.map((u) => (
-                  <div 
-                    key={u.id} 
-                    className="flex-shrink-0 bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col items-center text-center"
-                    style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
-                  >
-                    {u.avatar ? (
-                      <div className="w-20 h-20 rounded-full overflow-hidden mb-3 shadow-md">
-                        <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-20 h-20 rounded-full bg-slate-100 mb-3 flex items-center justify-center text-lg font-semibold text-slate-700">
-                        {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                      </div>
-                    )}
-
-                    <div className="text-left w-full">
-                      <div className="font-semibold text-gray-800">{u.name}</div>
-                      <div className="text-xs text-slate-500">Placa: {u.plate ?? "-"}</div>
-                      <div className="mt-3">
-                        <span className="inline-block px-2 py-1 rounded-full text-xs bg-yellow-50 text-yellow-700">{u.status}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 mt-3 w-full">
-                      <button 
-                        onClick={() => openUser(u)}
-                        className="flex-1 py-2 text-sm rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                      >
-                        Ver
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setSelectedUser(u);
-                          startConfirm("approve");
+                {/* Track Contenedor */}
+                <div className="flex-1 overflow-hidden">
+                    <div 
+                        className="flex gap-6 transition-transform duration-700 ease-out px-1"
+                        style={{ 
+                        transform: `translateX(-${userPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
                         }}
-                        className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
-                      >
-                        Aprobar
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setSelectedUser(u);
-                          startConfirm("reject");
-                        }}
-                        className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
-                      >
-                        Rechazar
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    >
+                        {users.map((u) => (
+                        <div 
+                            key={u.id} 
+                            className="flex-shrink-0 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative"
+                            style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+                        >
+                            
+                            {/* Botón Ver - Top Right */}
+                            <button 
+                                onClick={() => openUser(u)} 
+                                className="absolute top-5 right-5 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors"
+                            >
+                                Ver
+                            </button>
 
-              <button 
-                onClick={userNext} 
-                disabled={userPage >= userPages - 1} 
-                aria-label="Siguiente usuario" 
-                title="Siguiente usuario" 
-                className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage >= userPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}
-              >
-                <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
-                  <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
+                            <div className="flex items-start gap-4 mb-4 mt-1">
+                                {/* Avatar */}
+                                <div className="flex-shrink-0">
+                                    {u.avatar ? (
+                                    <img src={u.avatar} alt={u.name} className="w-20 h-20 rounded-full object-cover border-2 border-blue-50" />
+                                    ) : (
+                                    <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500 border-2 border-blue-50">
+                                        {u.name.charAt(0)}
+                                    </div>
+                                    )}
+                                </div>
+
+                                {/* Info */}
+                                <div className="flex-1 min-w-0 pr-16">
+                                    <h4 className="font-bold text-gray-900 truncate text-lg">{u.name}</h4>
+                                    <div className="text-sm text-slate-500 font-medium">{u.role}</div>
+                                    <div className="text-xs text-slate-400 truncate mt-0.5">{u.email}</div>
+                                    <div className="text-xs text-slate-400 truncate">{u.vehicle}</div>
+                                </div>
+                            </div>
+
+                            {/* Botones Grandes Bottom */}
+                            <div className="flex gap-3 mt-4">
+                            <button 
+                                onClick={() => {
+                                setSelectedUser(u);
+                                startConfirm("approve");
+                                }}
+                                className="flex-1 py-2.5 text-sm font-semibold rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                            >
+                                Aprobar
+                            </button>
+                            <button 
+                                onClick={() => {
+                                setSelectedUser(u);
+                                startConfirm("reject");
+                                }}
+                                className="flex-1 py-2.5 text-sm font-semibold rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                            >
+                                Rechazar
+                            </button>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Flecha Derecha */}
+                <button 
+                    onClick={userNext} 
+                    disabled={userPage >= userPages - 1} 
+                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage >= userPages - 1 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                >
+                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                    <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
             </div>
           </div>
         </section>
@@ -458,28 +460,23 @@ export default function AdminHome() {
 
       {/* Report details modal */}
       {isModalOpen && selectedReport && (
-        <div role="dialog" aria-modal="true" aria-labelledby="report-modal-title" className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={closeModal} aria-hidden />
-
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 id="report-modal-title" className="text-xl font-semibold">{selectedReport.title}</h2>
+                <h2 className="text-xl font-semibold">{selectedReport.title}</h2>
                 <div className="text-sm text-slate-500">#{selectedReport.id} — Reportado por: {selectedReport.reporter}</div>
               </div>
-              <button onClick={closeModal} aria-label="Cerrar" className="text-slate-500 hover:text-slate-700">✕</button>
+              <button onClick={closeModal} className="text-slate-500 hover:text-slate-700">✕</button>
             </div>
-
             <div className="mt-4 text-sm text-gray-700">
               <p>{selectedReport.details ?? "No hay detalles adicionales."}</p>
               <p className="mt-3 text-xs text-slate-500">Fecha: {selectedReport.createdAt ?? "No disponible"}</p>
             </div>
-
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button onClick={() => startConfirm("suspend_account")} className="w-full py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100">Suspender cuenta</button>
-
-              <button onClick={() => startConfirm("suspend_profile")} className="w-full py-2 rounded-lg border border-orange-400 bg-orange-50 text-orange-700 font-medium hover:bg-orange-100">Suspender perfil</button>
-
+              <button onClick={() => { setSelectedUser({ id: "dummy", name: selectedReport.reporter } as UserCard); startConfirm("suspend_account"); }} className="w-full py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100">Suspender cuenta</button>
+              <button onClick={() => { setSelectedUser({ id: "dummy", name: selectedReport.reporter } as UserCard); startConfirm("suspend_profile"); }} className="w-full py-2 rounded-lg border border-orange-400 bg-orange-50 text-orange-700 font-medium hover:bg-orange-100">Suspender perfil</button>
               <button onClick={() => startConfirm("archive")} className="w-full py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 font-medium hover:bg-green-100 sm:col-span-2">Archivar</button>
             </div>
           </div>
@@ -488,93 +485,85 @@ export default function AdminHome() {
 
       {/* User detail modal */}
       {isUserModalOpen && selectedUser && (
-        <div role="dialog" aria-modal="true" aria-labelledby="user-modal-title" className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={closeUserModal} aria-hidden />
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeUserModal} />
+          <div className="relative z-10 w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6">
+            
+            {/* Close Button Top Right */}
+            <button onClick={closeUserModal} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
 
-          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
-            <div className="flex items-start gap-6">
-              {/* Avatar */}
-              <div className="flex flex-col items-center">
-                {selectedUser.avatar ? (
-                  <img 
-                    src={selectedUser.avatar} 
-                    alt={selectedUser.name}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 mb-3"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-slate-100 mb-3 flex items-center justify-center text-2xl font-semibold text-slate-700 border-4 border-blue-100">
-                    {selectedUser.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                  </div>
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 id="user-modal-title" className="text-xl font-semibold">{selectedUser.name}</h2>
-                    <div className="text-sm text-slate-500 mt-1">{
-                    selectedUser.email}</div>
+            <div className="flex items-start gap-5 mb-6">
+                <div className="flex-shrink-0">
+                    {selectedUser.avatar ? (
+                        <img src={selectedUser.avatar} alt={selectedUser.name} className="w-24 h-24 rounded-full object-cover border-4 border-blue-50" />
+                    ) : (
+                        <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-2xl font-bold text-slate-400">
+                            {selectedUser.name.charAt(0)}
+                        </div>
+                    )}
+                </div>
+                
+                <div className="flex-1 mt-1">
+                    <h2 className="text-2xl font-bold text-slate-800 leading-tight">{selectedUser.name}</h2>
+                    <div className="text-sm text-slate-500 mt-1">{selectedUser.email}</div>
                     <div className="text-sm text-slate-500">{selectedUser.phone}</div>
-                  </div>
-                  <button onClick={closeUserModal} aria-label="Cerrar" className="text-slate-500 hover:text-slate-700 text-xl">
-                    ✕
-                  </button>
-                </div>
-
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex gap-2">
-                    <span className="font-medium text-slate-700">Rol:</span>
-                    <span className="text-slate-600">{selectedUser.role}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="font-medium text-slate-700">Estado:</span>
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-700">
-                      {selectedUser.status}
-                    </span>
-                  </div>
-                  {selectedUser.plate && (
-                    <div className="flex gap-2">
-                      <span className="font-medium text-slate-700">Placa:</span>
-                      <span className="text-slate-600">{selectedUser.plate}</span>
+                    
+                    <div className="mt-4 grid grid-cols-1 gap-y-1 text-sm">
+                        <div className="flex gap-2">
+                            <span className="font-bold text-slate-700 w-20">Rol:</span>
+                            <span className="text-slate-600">{selectedUser.role}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="font-bold text-slate-700 w-20">Estado:</span>
+                            <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-semibold">{selectedUser.status}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="font-bold text-slate-700 w-20">Placa:</span>
+                            <span className="text-slate-600">{selectedUser.plate || "N/A"}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="font-bold text-slate-700 w-20">Vehículo:</span>
+                            <span className="text-slate-600">{selectedUser.vehicle || "N/A"}</span>
+                        </div>
                     </div>
-                  )}
-                  {selectedUser.vehicle && (
-                    <div className="flex gap-2">
-                      <span className="font-medium text-slate-700">Vehículo:</span>
-                      <span className="text-slate-600">{selectedUser.vehicle}</span>
-                    </div>
-                  )}
                 </div>
-              </div>
             </div>
 
-            {/* Acciones */}
-            <div className="mt-6 flex gap-3 justify-end">
-              <button
-                onClick={() => startConfirm("approve")}
-                className="px-6 py-2 rounded-lg border border-green-400 bg-green-50 text-green-700 font-medium hover:bg-green-100"
-              >
-                Aprobar
-              </button>
-              <button
-                onClick={() => startConfirm("reject")}
-                className="px-6 py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100"
-              >
-                Rechazar
-              </button>
+            {/* Actions Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+                <button 
+                    onClick={() => startConfirm("suspend_account")}
+                    className="py-2.5 rounded-lg border border-red-300 text-red-700 bg-red-50 font-semibold hover:bg-red-100 transition-colors"
+                >
+                    Suspender cuenta
+                </button>
+                <button 
+                    onClick={() => startConfirm("suspend_profile")}
+                    className="py-2.5 rounded-lg border border-orange-300 text-orange-700 bg-orange-50 font-semibold hover:bg-orange-100 transition-colors"
+                >
+                    Suspender perfil
+                </button>
             </div>
+            <button 
+                onClick={() => startConfirm("archive")}
+                className="w-full py-2.5 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 font-semibold hover:bg-blue-100 transition-colors"
+            >
+                Archivar
+            </button>
+
           </div>
         </div>
       )}
 
       {/* Confirmation modal (reusable) */}
       {confirmOpen && (selectedReport || selectedUser) && (
-        <div role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title" className="fixed inset-0 z-60 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmOpen(false)} aria-hidden />
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-60 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setConfirmOpen(false)} />
 
           <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-            <h3 id="confirm-modal-title" className="text-lg font-semibold">
+            <h3 className="text-lg font-semibold">
               {pendingAction === "suspend_account" 
                 ? "Confirmar suspensión de cuenta" 
                 : pendingAction === "suspend_profile" 
@@ -588,9 +577,9 @@ export default function AdminHome() {
 
             <p className="mt-2 text-sm text-slate-600">
               {pendingAction === "suspend_account" 
-                ? `Vas a suspender la cuenta asociada al reporte ${selectedReport?.id}. Esta acción bloqueará el acceso del usuario.` 
+                ? `Vas a suspender la cuenta de ${selectedUser?.name || selectedReport?.id}.` 
                 : pendingAction === "suspend_profile" 
-                ? `Selecciona qué perfil suspender para ${selectedReport?.id}.` 
+                ? `Selecciona qué perfil suspender para ${selectedUser?.name || selectedReport?.id}.` 
                 : pendingAction === "approve"
                 ? `Vas a aprobar a ${selectedUser?.name} como conductor.`
                 : pendingAction === "reject"
@@ -602,8 +591,8 @@ export default function AdminHome() {
               <fieldset className="mt-4">
                 <legend className="text-sm font-medium text-slate-700">Tipo de perfil</legend>
                 <div className="mt-2 flex gap-2">
-                  {(["Acompañante", "Conductor", "Administrador"] as const).map((r) => (
-                    <label key={r} className={`flex-1 border rounded-lg p-2 cursor-pointer text-center ${selectedRole === r ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}>
+                  {(["Acompañante", "Conductor", "Pasajero"] as const).map((r) => (
+                    <label key={r} className={`flex-1 border rounded-lg p-2 cursor-pointer text-center ${selectedRole === r ? "border-blue-500 bg-blue-50 text-blue-700 font-bold" : "border-gray-200 text-slate-600"}`}>
                       <input type="radio" name="profile" value={r} className="sr-only" checked={selectedRole === r} onChange={() => setSelectedRole(r)} />
                       <div className="text-sm font-medium">{r}</div>
                     </label>
@@ -618,15 +607,11 @@ export default function AdminHome() {
               <button
                 onClick={performAction}
                 disabled={actionLoading}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  pendingAction === "suspend_account" || pendingAction === "reject"
-                    ? "bg-red-600 text-white hover:bg-red-700" 
-                    : pendingAction === "suspend_profile" 
-                    ? "bg-orange-600 text-white hover:bg-orange-700" 
-                    : pendingAction === "archive" || pendingAction === "approve"
-                    ? "bg-green-600 text-white hover:bg-green-700" 
-                    : "bg-yellow-600 text-white hover:bg-yellow-700"
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium text-white shadow-sm ${
+                  pendingAction?.includes("suspend") || pendingAction === "reject"
+                    ? "bg-red-600 hover:bg-red-700" 
+                    : "bg-green-600 hover:bg-green-700"
+                } ${actionLoading ? "opacity-70 cursor-wait" : ""}`}
               >
                 {actionLoading ? "Procesando..." : "Confirmar"}
               </button>
@@ -637,8 +622,8 @@ export default function AdminHome() {
 
       {/* Error modal */}
       {errorState.open && (
-        <div role="alertdialog" aria-modal="true" aria-labelledby="error-title" className="fixed inset-0 z-70 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setErrorState({ open: false })} aria-hidden />
+        <div role="alertdialog" aria-modal="true" className="fixed inset-0 z-70 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setErrorState({ open: false })} />
 
           <div className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 border-2 border-red-50">
             <div className="flex flex-col items-center gap-4">
@@ -648,26 +633,13 @@ export default function AdminHome() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01" />
                 </svg>
               </div>
-
-              <h3 id="error-title" className="text-lg font-semibold text-slate-800">{errorState.title}</h3>
+              <h3 className="text-lg font-semibold text-slate-800">{errorState.title}</h3>
               <p className="text-sm text-slate-600 text-center">{errorState.message}</p>
 
               <div className="mt-3 w-full flex justify-center gap-3">
                 <button onClick={retryFromError} className="px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50">Reintentar</button>
                 <button onClick={() => setErrorState({ open: false })} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Cerrar</button>
               </div>
-            </div>
-
-            <div className="mt-4 text-xs text-slate-400 text-center">
-              {errorState.kind === "file" 
-                ? "Error: generación de archivo" 
-                : errorState.kind === "report" 
-                ? "Error: reporte no encontrado" 
-                : errorState.kind === "approve"
-                ? "Error: aprobación de usuario"
-                : errorState.kind === "reject"
-                ? "Error: rechazo de usuario"
-                : "Error: acción de usuario"}
             </div>
           </div>
         </div>

@@ -5,18 +5,17 @@ import avatar2 from "../assets/avatar-2.png";
 import avatar3 from "../assets/avatar-3.png";
 
 /**
- * AdminUsers.tsx - Versión actualizada
- * - Aprobar/Rechazar solo para conductores pendientes
- * - Suspender/Activar para todos los usuarios
- * - Rating de estrellas en el modal
- * - Sin botón de advertir ni suspender externo
+ * AdminUsers.tsx - Versión actualizada con corrección de Carrusel
+ * - Estructura Flexbox para evitar superposición de flechas.
+ * - Animación suave (slide) en lugar de salto brusco.
+ * - "Administrador" reemplazado por "Pasajero".
  */
 
 type UserCard = {
   id: string;
   name: string;
   email?: string;
-  role?: "Acompañante" | "Conductor" | "Administrador" | "Estudiante" | "Profesor" | string;
+  role?: "Acompañante" | "Conductor" | "Pasajero" | "Estudiante" | "Profesor" | string;
   plate?: string;
   avatar?: string | null;
   status?: "Pendiente" | "Verificado" | "Suspendido" | string;
@@ -33,7 +32,7 @@ const mockUsers = (): UserCard[] => [
   { id: "U002", name: "María Gómez", email: "maria.gomez@mail.escuelaing.edu.co", role: "Acompañante", plate: "XYZ-789", avatar: avatar2, status: "Verificado", vehicle: "Hyundai Accent 2023", rating: 4.5, phone: "+57 310 1234567" },
   { id: "U003", name: "Juan Sánchez", email: "juan.sanchez@mail.escuelaing.edu.co", role: "Conductor", plate: "LMN-456", avatar: avatar3, status: "Suspendido", vehicle: "Renault Logan 2021", rating: 4.8, phone: "+57 300 9876543" },
   { id: "U004", name: "Natalia Perez", email: "natalia.p@mail.escuelaing.edu.co", role: "Profesor", plate: "DEF-222", avatar: avatar1, status: "Verificado", vehicle: null, rating: 3.2, phone: "+57 315 5555555" },
-  { id: "U005", name: "Andrés Velas", email: "andres.v@mail.escuelaing.edu.co", role: "Administrador", plate: "GHI-333", avatar: avatar2, status: "Verificado", vehicle: null, rating: 5.0, phone: "+57 321 4444444" },
+  { id: "U005", name: "Andrés Velas", email: "andres.v@mail.escuelaing.edu.co", role: "Pasajero", plate: "GHI-333", avatar: avatar2, status: "Verificado", vehicle: null, rating: 5.0, phone: "+57 321 4444444" },
   { id: "U006", name: "Paola Rojas", email: "paola.r@mail.escuelaing.edu.co", role: "Conductor", plate: "JKL-444", avatar: avatar3, status: "Pendiente", vehicle: "Chevrolet Spark 2020", rating: 0, phone: "+57 318 7777777" },
 ];
 
@@ -124,7 +123,7 @@ const ConfirmModal: React.FC<{
           <fieldset className="mt-4">
             <legend className="text-sm font-medium text-slate-700">Tipo de perfil</legend>
             <div className="mt-2 flex gap-2">
-              {["Acompañante", "Conductor", "Administrador"].map((r) => (
+              {["Acompañante", "Conductor", "Pasajero"].map((r) => (
                 <label
                   key={r}
                   className={`flex-1 border rounded-lg p-2 cursor-pointer text-center ${
@@ -194,8 +193,7 @@ const AdminUsers: React.FC = () => {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Pagination
-  const [userPage, setUserPage] = useState(0);
+  // Filter logic
   const filteredUsers = users.filter((u) => {
     const q = search.trim().toLowerCase();
     if (q && !(u.name.toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q) || (u.plate ?? "").toLowerCase().includes(q))) {
@@ -206,14 +204,19 @@ const AdminUsers: React.FC = () => {
     return true;
   });
 
-  const userPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
-  useEffect(() => setUserPage((p) => Math.min(p, Math.max(0, userPages - 1))), [itemsPerPage, userPages]);
-  
-  const userStart = userPage * itemsPerPage;
-  const visibleUsers = filteredUsers.slice(userStart, userStart + itemsPerPage);
+  // --- LÓGICA DEL CARRUSEL NUEVA (Track suave) ---
+  const userChunks = [];
+  for (let i = 0; i < filteredUsers.length; i += itemsPerPage) {
+    userChunks.push(filteredUsers.slice(i, i + itemsPerPage));
+  }
+
+  const [userPage, setUserPage] = useState(0);
+
+  // Reseteamos página al filtrar
+  useEffect(() => setUserPage(0), [filteredUsers.length, itemsPerPage]);
 
   const userPrev = useCallback(() => setUserPage((p) => Math.max(0, p - 1)), []);
-  const userNext = useCallback(() => setUserPage((p) => Math.min(userPages - 1, p + 1)), [userPages]);
+  const userNext = useCallback(() => setUserPage((p) => Math.min(userChunks.length - 1, p + 1)), [userChunks.length]);
 
   // Modal states
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null);
@@ -225,8 +228,6 @@ const AdminUsers: React.FC = () => {
   const [errorState, setErrorState] = useState<{ open: boolean; kind?: ErrorKind; title?: string; message?: string }>({ 
     open: false 
   });
-
-  const attemptsRef = useRef<Record<string, number>>({});
 
   const openUser = (u: UserCard) => {
     setSelectedUser(u);
@@ -245,8 +246,8 @@ const AdminUsers: React.FC = () => {
     setConfirmOpen(true);
   };
 
-  const showError = (kind: ErrorKind, title?: string, message?: string) => 
-    setErrorState({ open: true, kind, title, message });
+  const closeError = () => setErrorState({ open: false });
+  const retryFromError = () => { setErrorState({ open: false }); setConfirmOpen(true); };
 
   const performAction = async () => {
     if (!selectedUser || !pendingAction) return;
@@ -261,13 +262,6 @@ const AdminUsers: React.FC = () => {
     setPendingAction(null);
     closeUserModal();
   };
-
-  const retryFromError = () => {
-    setErrorState({ open: false });
-    setConfirmOpen(true);
-  };
-
-  const closeError = () => setErrorState({ open: false });
 
   // ESC handling
   useEffect(() => {
@@ -322,7 +316,7 @@ const AdminUsers: React.FC = () => {
               <option>Profesor</option>
               <option>Acompañante</option>
               <option>Conductor</option>
-              <option>Administrador</option>
+              <option>Pasajero</option>
             </select>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg p-3 border border-gray-200 bg-white">
               <option>Todos</option>
@@ -334,117 +328,133 @@ const AdminUsers: React.FC = () => {
           </div>
         </section>
 
-        {/* Users Carousel */}
+        {/* === USERS CAROUSEL (CORREGIDO CON FLEXBOX Y SLIDER) === */}
         <section className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-          <div className="relative overflow-hidden px-14">
-            <button
-              onClick={userPrev}
-              disabled={userPage === 0}
-              className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                userPage === 0 ? "opacity-40 cursor-not-allowed" : ""
-              }`}
-            >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-
-            <div 
-              className="flex gap-6 transition-transform duration-700 ease-out"
-              style={{ 
-                transform: `translateX(-${userPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
-              }}
-            >
-              {filteredUsers.map((u) => (
-                <div 
-                  key={u.id} 
-                  className="flex-shrink-0 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-                  style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+            
+            {/* Contenedor FLEX: Flecha - Track - Flecha */}
+            <div className="flex items-center gap-4">
+                
+                {/* Botón Izquierda */}
+                <button
+                    onClick={userPrev}
+                    disabled={userPage === 0}
+                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                        userPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <img 
-                        src={u.avatar || avatar1} 
-                        alt={u.name} 
-                        className="w-20 h-20 rounded-full object-cover border-2 border-blue-100"
-                      />
-                    </div>
+                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                        <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-800 truncate">{u.name}</h3>
-                          <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                        </div>
-                        <div className="flex-shrink-0 text-right">
-                          <div className="text-xs text-slate-500 mb-0.5">Placa</div>
-                          <div className="font-semibold text-sm whitespace-nowrap">{u.plate ?? "-"}</div>
-                        </div>
-                      </div>
-
-                      <div className="mt-2 space-y-1">
-                        <div className="text-xs text-slate-600">
-                          <span className="font-medium">{u.role}</span>
-                        </div>
-                        {u.vehicle && (
-                          <div className="text-xs text-slate-500 truncate">{u.vehicle}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status & Actions */}
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                        u.status === "Pendiente"
-                          ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                          : u.status === "Verificado"
-                          ? "bg-green-50 text-green-700 border border-green-200"
-                          : "bg-purple-50 text-purple-700 border border-purple-200"
-                      }`}
+                {/* Contenedor con overflow hidden */}
+                <div className="flex-1 overflow-hidden">
+                    {/* Track Deslizante */}
+                    <div 
+                        className="flex transition-transform duration-500 ease-out"
+                        style={{ transform: `translateX(-${userPage * 100}%)` }}
                     >
-                      {u.status}
-                    </span>
-                    
-                    <div className="flex gap-2 flex-shrink-0">
-                      <button 
-                        onClick={() => openUser(u)} 
-                        className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors text-sm font-medium"
-                      >
-                        Ver
-                      </button>
-                      {u.status === "Suspendido" && (
-                        <button 
-                          onClick={() => {
-                            setSelectedUser(u);
-                            startConfirm("activate_account");
-                          }}
-                          className="px-4 py-1.5 bg-green-50 text-green-700 rounded-lg border border-green-200 hover:bg-green-100 transition-colors text-sm font-medium whitespace-nowrap"
-                        >
-                          Activar
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                        {userChunks.length > 0 ? (
+                            userChunks.map((chunk, i) => (
+                                <div key={i} className="min-w-full flex gap-4 px-1">
+                                    {chunk.map((u) => (
+                                        <div 
+                                            key={u.id} 
+                                            className="flex-1 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div className="flex-shrink-0">
+                                                    <img 
+                                                        src={u.avatar || avatar1} 
+                                                        alt={u.name} 
+                                                        className="w-20 h-20 rounded-full object-cover border-2 border-blue-100"
+                                                    />
+                                                </div>
 
-            <button
-              onClick={userNext}
-              disabled={userPage >= userPages - 1}
-              className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                userPage >= userPages - 1 ? "opacity-40 cursor-not-allowed" : ""
-              }`}
-            >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-semibold text-gray-800 truncate">{u.name}</h3>
+                                                            <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                                                        </div>
+                                                        <div className="flex-shrink-0 text-right">
+                                                            <div className="text-xs text-slate-500 mb-0.5">Placa</div>
+                                                            <div className="font-semibold text-sm whitespace-nowrap">{u.plate ?? "-"}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-2 space-y-1">
+                                                        <div className="text-xs text-slate-600">
+                                                            <span className="font-medium">{u.role}</span>
+                                                        </div>
+                                                        {u.vehicle && (
+                                                            <div className="text-xs text-slate-500 truncate">{u.vehicle}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 flex items-center justify-between gap-3">
+                                                <span
+                                                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                                                        u.status === "Pendiente"
+                                                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                                                        : u.status === "Verificado"
+                                                        ? "bg-green-50 text-green-700 border border-green-200"
+                                                        : "bg-purple-50 text-purple-700 border border-purple-200"
+                                                    }`}
+                                                >
+                                                    {u.status}
+                                                </span>
+                                                
+                                                <div className="flex gap-2 flex-shrink-0">
+                                                    <button 
+                                                        onClick={() => openUser(u)} 
+                                                        className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors text-sm font-medium"
+                                                    >
+                                                        Ver
+                                                    </button>
+                                                    {u.status === "Suspendido" && (
+                                                        <button 
+                                                            onClick={() => {
+                                                                setSelectedUser(u);
+                                                                startConfirm("activate_account");
+                                                            }}
+                                                            className="px-4 py-1.5 bg-green-50 text-green-700 rounded-lg border border-green-200 hover:bg-green-100 transition-colors text-sm font-medium whitespace-nowrap"
+                                                        >
+                                                            Activar
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {/* Rellenos vacíos */}
+                                    {chunk.length < itemsPerPage && Array.from({ length: itemsPerPage - chunk.length }).map((_, idx) => (
+                                        <div key={`empty-${idx}`} className="flex-1 opacity-0 pointer-events-none" />
+                                    ))}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="min-w-full text-center py-10 text-slate-500">No se encontraron usuarios.</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Botón Derecha */}
+                <button
+                    onClick={userNext}
+                    disabled={userPage >= userChunks.length - 1}
+                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                        userPage >= userChunks.length - 1 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                >
+                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                        <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+
+            </div>
         </section>
 
         {/* Listado Completo */}
@@ -475,7 +485,6 @@ const AdminUsers: React.FC = () => {
                   </button>
                 </div>
                 
-                {/* Botones Aprobar/Rechazar solo para conductores pendientes */}
                 {u.role === "Conductor" && u.status === "Pendiente" && (
                   <div className="mt-4 flex gap-2">
                     <button

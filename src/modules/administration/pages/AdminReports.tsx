@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"; 
+import React, { useCallback, useEffect, useState } from "react";
 import pdfIcon from "../assets/pdf.png";
 import excelIcon from "../assets/excel.png";
 
@@ -135,7 +135,7 @@ const ConfirmModal: React.FC<{
           <fieldset className="mt-4">
             <legend className="text-sm font-medium text-slate-700">Tipo de perfil</legend>
             <div className="mt-2 flex gap-2">
-              {["Acompañante", "Conductor", "Administrador"].map((r) => (
+              {["Acompañante", "Conductor", "Pasajero"].map((r) => (
                 <label
                   key={r}
                   className={`flex-1 border rounded-lg p-2 cursor-pointer text-center ${
@@ -183,17 +183,85 @@ const ConfirmModal: React.FC<{
   );
 };
 
+// Action chooser
+const ActionChooser: React.FC<{
+  open: boolean;
+  report?: Report | null;
+  onClose: () => void;
+  onChoose: (action: Exclude<PendingAction, "archive">) => void;
+}> = ({ open, report, onClose, onChoose }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-65 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-xl p-4">
+        <h4 className="text-lg font-semibold mb-2">Acciones para {report?.id}</h4>
+        <p className="text-sm text-slate-600 mb-4">Selecciona la acción que quieres realizar.</p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => onChoose("suspend_account")}
+            className="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+          >
+            Suspender cuenta
+          </button>
+          <button
+            onClick={() => onChoose("suspend_profile")}
+            className="flex-1 px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600"
+          >
+            Suspender perfil
+          </button>
+        </div>
+
+        <div className="mt-3 text-right">
+          <button onClick={onClose} className="px-3 py-1 rounded-lg text-slate-600 hover:bg-slate-50">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Final confirmation
+const FinalConfirm: React.FC<{
+  open: boolean;
+  title?: string;
+  message?: string;
+  loading?: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}> = ({ open, title, message, loading, onCancel, onConfirm }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-70 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="mt-2 text-sm text-slate-600">{message}</p>
+
+        <div className="mt-5 flex justify-end gap-3">
+          <button onClick={onCancel} className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-slate-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button onClick={onConfirm} disabled={loading} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+            {loading ? "Procesando..." : "Confirmar suspensión"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminReports: React.FC = () => {
   const [reports] = useState<Report[]>(() => mockReports);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("Todos");
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("Todas");
 
-  // Export states
   const [exportingPDF, setExportingPDF] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
 
-  // Responsive items per page
+  // Responsive items logic
   const [itemsPerPage, setItemsPerPage] = useState<number>(3);
   useEffect(() => {
     const calc = () => {
@@ -207,19 +275,10 @@ const AdminReports: React.FC = () => {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Pagination
-  const [reportPage, setReportPage] = useState(0);
+  // Filter logic
   const filteredReports = reports.filter((r) => {
     const q = search.trim().toLowerCase();
-    if (
-      q &&
-      !(
-        r.id.toLowerCase().includes(q) ||
-        r.title.toLowerCase().includes(q) ||
-        r.reporter.toLowerCase().includes(q) ||
-        r.conductor.toLowerCase().includes(q)
-      )
-    ) {
+    if (q && !(r.id.toLowerCase().includes(q) || r.title.toLowerCase().includes(q) || r.reporter.toLowerCase().includes(q) || r.conductor.toLowerCase().includes(q))) {
       return false;
     }
     if (statusFilter !== "Todos" && r.status !== statusFilter) return false;
@@ -227,14 +286,20 @@ const AdminReports: React.FC = () => {
     return true;
   });
 
-  const reportPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
-  useEffect(() => setReportPage((p) => Math.min(p, Math.max(0, reportPages - 1))), [itemsPerPage, reportPages]);
+  // --- LÓGICA DEL CARRUSEL MODIFICADA ---
+  // En lugar de cortar el array (visibleReports), agrupamos en páginas para animar el contenedor
+  const chunks = [];
+  for (let i = 0; i < filteredReports.length; i += itemsPerPage) {
+    chunks.push(filteredReports.slice(i, i + itemsPerPage));
+  }
 
-  const reportStart = reportPage * itemsPerPage;
-  const visibleReports = filteredReports.slice(reportStart, reportStart + itemsPerPage);
+  const [reportPage, setReportPage] = useState(0);
+  
+  // Reseteamos página al filtrar
+  useEffect(() => setReportPage(0), [filteredReports.length, itemsPerPage]);
 
   const reportPrev = useCallback(() => setReportPage((p) => Math.max(0, p - 1)), []);
-  const reportNext = useCallback(() => setReportPage((p) => Math.min(reportPages - 1, p + 1)), [reportPages]);
+  const reportNext = useCallback(() => setReportPage((p) => Math.min(chunks.length - 1, p + 1)), [chunks.length]);
 
   // Modal states
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -246,6 +311,9 @@ const AdminReports: React.FC = () => {
   const [errorState, setErrorState] = useState<{ open: boolean; kind?: ErrorKind; title?: string; message?: string }>({
     open: false,
   });
+
+  const [actionChooserOpen, setActionChooserOpen] = useState(false);
+  const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
 
   const statusCounts = {
     ABIERTO: reports.filter((r) => r.status === "ABIERTO").length,
@@ -266,90 +334,84 @@ const AdminReports: React.FC = () => {
     setConfirmOpen(false);
   };
 
-  const startConfirm = (action: PendingAction) => {
+  const onActuarClick = (r: Report) => {
+    setSelectedReport(r);
+    setActionChooserOpen(true);
+  };
+
+  const onChooseAction = (action: Exclude<PendingAction, "archive">) => {
+    setActionChooserOpen(false);
     setPendingAction(action);
     setConfirmOpen(true);
   };
 
-  const showError = (kind: ErrorKind, title?: string, message?: string) =>
-    setErrorState({ open: true, kind, title, message });
-
   const performAction = async () => {
     if (!selectedReport || !pendingAction) return;
     setActionLoading(true);
-
     await new Promise((res) => setTimeout(res, 700));
-
-    console.log(`Acción ${pendingAction} ejecutada para reporte ${selectedReport.id}`);
-
+    console.log(`Acción ${pendingAction} ejecutada.`);
     setActionLoading(false);
+    setFinalConfirmOpen(false);
     setConfirmOpen(false);
     setPendingAction(null);
+    setSelectedRole("Conductor");
     closeReportModal();
-  };
-
-  const retryFromError = () => {
-    setErrorState({ open: false });
-    setConfirmOpen(true);
   };
 
   const closeError = () => setErrorState({ open: false });
 
-  // Export handlers
   const handleExportPDF = async () => {
     setExportingPDF(true);
     await new Promise((res) => setTimeout(res, 1500));
-    console.log("Exportando reportes a PDF...");
     setExportingPDF(false);
   };
 
   const handleExportExcel = async () => {
     setExportingExcel(true);
     await new Promise((res) => setTimeout(res, 1500));
-    console.log("Exportando reportes a Excel...");
     setExportingExcel(false);
   };
 
-  // ESC handling
+  const handleConfirmFromModal = () => {
+    if (pendingAction === "suspend_profile") {
+      setConfirmOpen(false);
+      setFinalConfirmOpen(true);
+    } else {
+      performAction();
+    }
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (errorState.open) closeError();
+        else if (finalConfirmOpen) setFinalConfirmOpen(false);
         else if (confirmOpen) setConfirmOpen(false);
         else if (isReportModalOpen) closeReportModal();
+        else if (actionChooserOpen) setActionChooserOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [confirmOpen, errorState.open, isReportModalOpen]);
+  }, [confirmOpen, errorState.open, isReportModalOpen, actionChooserOpen, finalConfirmOpen]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "CRÍTICA":
-        return "bg-red-100 text-red-700";
-      case "ALTA":
-        return "bg-orange-100 text-orange-700";
-      case "MEDIA":
-        return "bg-purple-100 text-purple-700";
-      case "BAJA":
-        return "bg-blue-100 text-blue-700";
-      default:
-        return "bg-gray-100 text-gray-700";
+      case "CRÍTICA": return "bg-red-100 text-red-700";
+      case "ALTA": return "bg-orange-100 text-orange-700";
+      case "MEDIA": return "bg-purple-100 text-purple-700";
+      case "BAJA": return "bg-blue-100 text-blue-700";
+      default: return "bg-gray-100 text-gray-700";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "ABIERTO":
-        return "bg-red-50 text-red-700 border border-red-200";
-      case "EN INVESTIGACIÓN":
-        return "bg-yellow-50 text-yellow-700 border border-yellow-200";
-      case "RESUELTO":
-        return "bg-green-50 text-green-700 border border-green-200";
-      case "CRÍTICO":
-        return "bg-purple-50 text-purple-700 border border-purple-200";
-      default:
-        return "bg-gray-50 text-gray-700 border border-gray-200";
+      case "ABIERTO": return "bg-red-50 text-red-700 border border-red-200";
+      case "EN INVESTIGACIÓN": return "bg-yellow-50 text-yellow-700 border border-yellow-200";
+      case "RESUELTO": return "bg-green-50 text-green-700 border border-green-200";
+      case "CRÍTICO": return "bg-purple-50 text-purple-700 border border-purple-200";
+      default: return "bg-gray-50 text-gray-700 border border-gray-200";
     }
   };
 
@@ -380,29 +442,13 @@ const AdminReports: React.FC = () => {
       <main className="relative z-10 p-6 max-w-7xl mx-auto">
         {/* Status Cards */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <article className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="text-3xl font-bold text-slate-800 mb-1">{statusCounts.ABIERTO}</div>
-            <div className="text-sm text-slate-600 uppercase tracking-wide">Abiertos</div>
-            <div className="text-xs text-slate-400 mt-2">Última actualización</div>
-          </article>
-
-          <article className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="text-3xl font-bold text-slate-800 mb-1">{statusCounts["EN INVESTIGACIÓN"]}</div>
-            <div className="text-sm text-slate-600 uppercase tracking-wide">En Investigación</div>
-            <div className="text-xs text-slate-400 mt-2">Última actualización</div>
-          </article>
-
-          <article className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="text-3xl font-bold text-slate-800 mb-1">{statusCounts.RESUELTO}</div>
-            <div className="text-sm text-slate-600 uppercase tracking-wide">Resueltos</div>
-            <div className="text-xs text-slate-400 mt-2">Última actualización</div>
-          </article>
-
-          <article className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div className="text-3xl font-bold text-slate-800 mb-1">{statusCounts.CRÍTICO}</div>
-            <div className="text-sm text-slate-600 uppercase tracking-wide">Críticos</div>
-            <div className="text-xs text-slate-400 mt-2">Última actualización</div>
-          </article>
+            {Object.entries(statusCounts).map(([key, val]) => (
+                <article key={key} className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <div className="text-3xl font-bold text-slate-800 mb-1">{val}</div>
+                    <div className="text-sm text-slate-600 uppercase tracking-wide">{key}</div>
+                    <div className="text-xs text-slate-400 mt-2">Última actualización</div>
+                </article>
+            ))}
         </section>
 
         {/* Search & Filters */}
@@ -432,14 +478,18 @@ const AdminReports: React.FC = () => {
           </div>
         </section>
 
-        {/* Reports Carousel */}
+        {/* === Reports Carousel (CORREGIDO) === */}
         <section className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-          <div className="relative overflow-hidden px-16">
+          
+          {/* Usamos FLEX para poner FLECHA - CONTENIDO - FLECHA en una línea física */}
+          <div className="flex items-center gap-4">
+            
+            {/* Flecha Izquierda (Ahora ocupa su propio espacio, no flota) */}
             <button
               onClick={reportPrev}
               disabled={reportPage === 0}
-              className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                reportPage === 0 ? "opacity-40 cursor-not-allowed" : ""
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                reportPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
             >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
@@ -447,87 +497,97 @@ const AdminReports: React.FC = () => {
               </svg>
             </button>
 
-            <div
-              className="flex gap-6 transition-transform duration-700 ease-out px-2"
-              style={{
-                transform: `translateX(-${reportPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
-              }}
-            >
-              {filteredReports.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex-shrink-0 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-                  style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+            {/* Contenedor central con Overflow Hidden (Recorta lo que sobra) */}
+            <div className="flex-1 overflow-hidden">
+                {/* Track animado con TranslateX (Elimina el salto brusco) */}
+                <div 
+                    className="flex transition-transform duration-500 ease-out"
+                    style={{ transform: `translateX(-${reportPage * 100}%)` }}
                 >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="text-sm font-bold text-blue-600">#{r.id}</div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSeverityColor(r.severity)}`}>
-                      {r.severity}
-                    </span>
-                  </div>
+                    {chunks.length > 0 ? (
+                        chunks.map((chunk, i) => (
+                            <div key={i} className="min-w-full flex gap-4 px-1">
+                                {chunk.map((r) => (
+                                    <div
+                                        key={r.id}
+                                        className="flex-1 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                                    >
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="text-sm font-bold text-blue-600">#{r.id}</div>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSeverityColor(r.severity)}`}>
+                                            {r.severity}
+                                            </span>
+                                        </div>
 
-                  {/* Title */}
-                  <h3 className="font-bold text-slate-800 mb-3">{r.title}</h3>
+                                        <h3 className="font-bold text-slate-800 mb-3">{r.title}</h3>
 
-                  {/* Details */}
-                  <div className="space-y-1 text-xs mb-3">
-                    <div className="text-slate-500">
-                      Reportado por: <span className="text-slate-700 font-medium">{r.reporter}</span>
-                    </div>
-                    <div className="text-slate-500">
-                      Conductor: <span className="text-slate-700 font-medium">{r.conductor}</span>
-                    </div>
-                    <div className="text-slate-500">
-                      Fecha: <span className="text-slate-700 font-medium">{r.date}</span>
-                    </div>
-                    <div className="text-slate-500">
-                      Hora: <span className="text-slate-700 font-medium">{r.time}</span>
-                    </div>
-                    <div className="text-slate-500">
-                      Ruta: <span className="text-slate-700 font-medium">{r.route}</span>
-                    </div>
-                    {r.amount && (
-                      <div className="text-slate-500">
-                        Monto: <span className="text-slate-700 font-medium">{r.amount}</span>
-                      </div>
+                                        <div className="space-y-1 text-xs mb-3">
+                                            <div className="text-slate-500">
+                                            Reportado por: <span className="text-slate-700 font-medium">{r.reporter}</span>
+                                            </div>
+                                            <div className="text-slate-500">
+                                            Conductor: <span className="text-slate-700 font-medium">{r.conductor}</span>
+                                            </div>
+                                            <div className="text-slate-500">
+                                            Fecha: <span className="text-slate-700 font-medium">{r.date} - {r.time}</span>
+                                            </div>
+                                            <div className="text-slate-500">
+                                            Ruta: <span className="text-slate-700 font-medium">{r.route}</span>
+                                            </div>
+                                            {r.amount && (
+                                            <div className="text-slate-500">
+                                                Monto: <span className="text-slate-700 font-medium">{r.amount}</span>
+                                            </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(r.status)}`}>
+                                            {r.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button
+                                            onClick={() => openReport(r)}
+                                            className="flex-1 py-2 px-3 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm"
+                                            >
+                                            Ver
+                                            </button>
+                                            <button
+                                            onClick={() => onActuarClick(r)}
+                                            className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                                            >
+                                            Actuar
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {/* Rellenos vacíos para mantener tamaño si la última página no está llena */}
+                                {chunk.length < itemsPerPage && Array.from({ length: itemsPerPage - chunk.length }).map((_, idx) => (
+                                    <div key={`empty-${idx}`} className="flex-1 opacity-0 pointer-events-none" />
+                                ))}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="min-w-full text-center py-10 text-slate-500">No hay reportes.</div>
                     )}
-                  </div>
-
-                  {/* Status Badge */}
-                  <div className="mb-3">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(r.status)}`}>
-                      {r.status}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => openReport(r)}
-                      className="flex-1 py-2 px-3 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm"
-                    >
-                      Ver
-                    </button>
-                    <button className="flex-1 py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
-                      Actuar
-                    </button>
-                  </div>
                 </div>
-              ))}
             </div>
 
+            {/* Flecha Derecha (Ocupa espacio propio) */}
             <button
               onClick={reportNext}
-              disabled={reportPage >= reportPages - 1}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                reportPage >= reportPages - 1 ? "opacity-40 cursor-not-allowed" : ""
+              disabled={reportPage >= chunks.length - 1}
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                reportPage >= chunks.length - 1 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
               }`}
             >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
                 <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
+
           </div>
         </section>
 
@@ -536,46 +596,36 @@ const AdminReports: React.FC = () => {
           <h2 className="text-xl font-semibold text-slate-800 mb-6">Reportes de Seguridad</h2>
 
           <div className="flex items-center justify-between">
-            {/* Export Options */}
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={handleExportPDF}
                 disabled={exportingPDF}
                 className={`flex items-center gap-3 px-6 py-3 bg-white rounded-xl border border-gray-200 hover:bg-gray-50 transition-all relative overflow-hidden ${
                   exportingPDF ? "cursor-wait" : ""
                 }`}
               >
-                {exportingPDF && (
-                  <div className="absolute inset-0 bg-red-50 animate-pulse" />
-                )}
+                {exportingPDF && <div className="absolute inset-0 bg-red-50 animate-pulse" />}
                 <div className="relative w-12 h-12 flex items-center justify-center">
                   <img src={pdfIcon} alt="PDF" className={`w-full h-full object-contain ${exportingPDF ? "animate-bounce" : ""}`} />
                 </div>
-                <span className="relative font-medium text-slate-700">
-                  {exportingPDF ? "Exportando..." : "PDF"}
-                </span>
+                <span className="relative font-medium text-slate-700">{exportingPDF ? "Exportando..." : "PDF"}</span>
               </button>
 
-              <button 
+              <button
                 onClick={handleExportExcel}
                 disabled={exportingExcel}
                 className={`flex items-center gap-3 px-6 py-3 bg-white rounded-xl border border-gray-200 hover:bg-gray-50 transition-all relative overflow-hidden ${
                   exportingExcel ? "cursor-wait" : ""
                 }`}
               >
-                {exportingExcel && (
-                  <div className="absolute inset-0 bg-green-50 animate-pulse" />
-                )}
+                {exportingExcel && <div className="absolute inset-0 bg-green-50 animate-pulse" />}
                 <div className="relative w-12 h-12 flex items-center justify-center">
                   <img src={excelIcon} alt="Excel" className={`w-full h-full object-contain ${exportingExcel ? "animate-bounce" : ""}`} />
                 </div>
-                <span className="relative font-medium text-slate-700">
-                  {exportingExcel ? "Exportando..." : "Excel"}
-                </span>
+                <span className="relative font-medium text-slate-700">{exportingExcel ? "Exportando..." : "Excel"}</span>
               </button>
             </div>
 
-            {/* Emergency Button */}
             <button className="flex items-center gap-4 px-8 py-4 bg-red-50 rounded-2xl border-2 border-red-200 hover:bg-red-100 transition-colors">
               <div className="w-14 h-14 bg-red-200 rounded-xl flex items-center justify-center">
                 <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -608,7 +658,7 @@ const AdminReports: React.FC = () => {
             </div>
 
             <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-2gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Reportado por</div>
                   <div className="font-semibold text-slate-800">{selectedReport.reporter}</div>
@@ -651,55 +701,62 @@ const AdminReports: React.FC = () => {
             </div>
 
             <div className="flex gap-3 justify-end">
-              <button onClick={() => startConfirm("suspend_account")} className="px-4 py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100">
-                Suspender cuenta
+              <button
+                onClick={() => {
+                  setPendingAction("archive");
+                  setConfirmOpen(true);
+                }}
+                className="px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium"
+              >
+                Archivar reporte
               </button>
-
-              <button onClick={() => startConfirm("suspend_profile")} className="px-4 py-2 rounded-lg border border-orange-400 bg-orange-50 text-orange-700 font-medium hover:bg-orange-100">
-                Suspender perfil
-              </button>
-
-              <button onClick={() => startConfirm("archive")} className="px-4 py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 font-medium hover:bg-green-100">
-                Archivar
+              <button
+                onClick={closeReportModal}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Cerrar
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Confirm Modal */}
-      <ConfirmModal
-        open={confirmOpen}
-        title={
-          pendingAction === "suspend_account"
-            ? "Confirmar suspensión de cuenta"
-            : pendingAction === "suspend_profile"
-            ? "Suspender perfil"
-            : "Archivar reporte"
-        }
-        description={
-          pendingAction === "suspend_account"
-            ? `Vas a suspender la cuenta asociada al reporte ${selectedReport?.id ?? ""}. Esta acción bloqueará el acceso del usuario.`
-            : pendingAction === "suspend_profile"
-            ? `Selecciona qué perfil suspender para ${selectedReport?.id ?? ""}.`
-            : `Archivarás el reporte ${selectedReport?.id ?? ""}.`
-        }
-        pendingAction={pendingAction}
-        selectedRole={selectedRole}
-        onRoleChange={(r) => setSelectedRole(r)}
-        loading={actionLoading}
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={performAction}
-      />
-
-      {/* Error Modal */}
+      {/* Inject Modals */}
       <ErrorModal
         open={errorState.open}
         kind={errorState.kind}
         title={errorState.title}
         message={errorState.message}
-        onRetry={retryFromError}
-        onClose={() => setErrorState({ open: false })}
+        onRetry={() => { setErrorState({ open: false }); setConfirmOpen(true); }}
+        onClose={closeError}
+      />
+
+      <ActionChooser
+        open={actionChooserOpen}
+        report={selectedReport}
+        onClose={() => setActionChooserOpen(false)}
+        onChoose={onChooseAction}
+      />
+
+      <ConfirmModal
+        open={confirmOpen}
+        title={pendingAction === "suspend_account" ? "Suspender cuenta" : pendingAction === "suspend_profile" ? "Suspender perfil" : "Confirmar acción"}
+        description="Esta acción afectará el estado del usuario."
+        pendingAction={pendingAction}
+        selectedRole={selectedRole}
+        onRoleChange={setSelectedRole}
+        loading={actionLoading}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmFromModal}
+      />
+
+      <FinalConfirm
+        open={finalConfirmOpen}
+        title="Confirmación adicional"
+        message={`Vas a suspender el perfil de ${selectedRole}. ¿Estás seguro?`}
+        loading={actionLoading}
+        onCancel={() => setFinalConfirmOpen(false)}
+        onConfirm={performAction} // Fixed typo here (performAction, not handleFinalConfirm loop)
       />
     </div>
   );
