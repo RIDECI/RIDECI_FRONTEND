@@ -5,14 +5,15 @@ import { Button } from "@/components/ui/button";
 
 type Props = {
   onConfirm: () => void;
+  loading?: boolean;
 };
 
-export default function SaveChangesButton({ onConfirm }: Props) {
+export default function SaveChangesButton({ onConfirm, loading }: Props) {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-base rounded-xl shadow-lg shadow-blue-200">
-          Guardar Cambios
+        <Button disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-base rounded-xl shadow-lg shadow-blue-200">
+          {loading ? "Guardando..." : "Guardar Cambios"}
         </Button>
       </Dialog.Trigger>
 
@@ -31,7 +32,7 @@ export default function SaveChangesButton({ onConfirm }: Props) {
               <Button variant="outline">Cancelar</Button>
             </Dialog.Close>
 
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={onConfirm}>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={onConfirm} disabled={loading}>
               Confirmar
             </Button>
           </div>

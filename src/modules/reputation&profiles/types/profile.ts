@@ -13,8 +13,8 @@ export interface Profile {
     reputation: Reputation;
     identificationType: IdentificationType;
     identificationNumber: string;
-    address: String;
-    profilePictureUrl: String;
+    address: string;
+    profilePictureUrl: string;
     birthDate: Date;
 
 }

@@ -8,6 +8,7 @@ import UpdateProfile from './modules/reputation&profiles/pages/UpdateProfile/Upd
 import Profile from './modules/reputation&profiles/pages/ConsultProfile/Profile'
 import TripHistory from './modules/reputation&profiles/pages/TripHistory/TripHistory'
 import CreateProfile from './modules/reputation&profiles/pages/CreateProfile/CreateProfile'
+import ViewAllComments from './modules/reputation&profiles/pages/ViewAllComments/ViewAllComments'
 
 
 
@@ -25,6 +26,7 @@ function App(){
                     <Route path="profile" element={<Profile />} />
                     <Route path="trip-history" element={<TripHistory />} />
                     <Route path="create-profile" element={<CreateProfile />} />
+                    <Route path="comments" element={<ViewAllComments />} />
                 </Route>
             </Routes>
         </BrowserRouter>

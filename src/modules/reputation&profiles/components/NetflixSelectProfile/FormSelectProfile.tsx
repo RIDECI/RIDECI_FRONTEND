@@ -37,8 +37,11 @@ export default function FormSelectProfile() {
       return;
     }
 
-    // 👇 redirigir a create-profile
-    navigate("/create-profile");
+    navigate("/create-profile", {
+    state: {
+    selectedRole: selected?.name,
+  },
+  });
   };
 
   return (

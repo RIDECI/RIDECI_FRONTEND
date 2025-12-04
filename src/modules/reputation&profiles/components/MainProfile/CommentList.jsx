@@ -1,5 +1,6 @@
 import momo from '../../../../assets/momo.jpeg';
 import ok from '../../../../assets/ok.jpeg';
+import { useNavigate } from "react-router-dom";
 
 const comments = [
   {
@@ -17,10 +18,10 @@ const comments = [
 ];
 
 export default function CommentList() {
+  const navigate = useNavigate();
 
   const handleSeeAll = () => {
-    // Aquí puedes navegar o abrir un modal
-    console.log("Ver todos los comentarios");
+    navigate("/comments");
   };
 
   return (
@@ -43,7 +44,7 @@ export default function CommentList() {
           </div>
         ))}
 
-        {/* Botón Ver Todos */}
+    
         <button
           onClick={handleSeeAll}
           className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"

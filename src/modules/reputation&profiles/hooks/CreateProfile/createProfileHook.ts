@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { Profile, Reputation } from '../types';
-import type { ProfileType, IdentificationType } from '../types';
+import type { Profile } from '../../types/profile';
+import type { Reputation } from '../../types/reputation';
+import type { ProfileType, IdentificationType } from '../../types/enums';
 
 export interface ProfileRequest {
     id: number;
@@ -33,7 +34,7 @@ export function useCreateProfile() {
     const [profile, setProfile] = useState<Profile | null>(null);
 
     const createProfile = async (
-        type: "DRIVER" | "COMPANIANT" | "PASSENGER",
+        type: "driver" | "companiant" | "passenger",
         profileRequest: ProfileRequest
     ): Promise<ProfileResponse> => {
         setLoading(true);
@@ -60,7 +61,7 @@ export function useCreateProfile() {
 
             setProfile({
                 ...result,
-                birthDate: new Date(result.birthDate).getTime(),
+                birthDate: new Date(result.birthDate),
             });
 
             return {
