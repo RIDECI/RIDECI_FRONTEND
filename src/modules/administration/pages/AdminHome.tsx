@@ -24,9 +24,13 @@ type UserCard = {
   plate?: string;
   avatar?: string | null;
   status?: string;
+  email?: string;
+  phone?: string;
+  vehicle?: string | null;
+  role?: string;
 };
 
-type ErrorKind = "file" | "report" | "user";
+type ErrorKind = "file" | "report" | "user" | "approve" | "reject";
 
 export default function AdminHome() {
   const { metrics } = useAdminMetrics();
@@ -43,12 +47,12 @@ export default function AdminHome() {
   ]);
 
   const [users] = useState<UserCard[]>(() => [
-    { id: "U001", name: "Carlos Ruiz", plate: "ABC-123", avatar: avatar1, status: "Pendiente" },
-    { id: "U002", name: "María Gómez", plate: "XYZ-789", avatar: avatar2, status: "Pendiente" },
-    { id: "U003", name: "Juan Sánchez", plate: "LMN-456", avatar: avatar3, status: "Pendiente" },
-    { id: "U004", name: "Natalia P.", plate: "DEF-222", avatar: null, status: "Pendiente" },
-    { id: "U005", name: "Andrés V.", plate: "GHI-333", avatar: null, status: "Pendiente" },
-    { id: "U006", name: "Paola R.", plate: "JKL-444", avatar: null, status: "Pendiente" },
+    { id: "U001", name: "Carlos Ruiz", plate: "ABC-123", avatar: avatar1, status: "Pendiente", email: "carlos.ruiz@mail.escuelaing.edu.co", phone: "+57 320 7654321", vehicle: "Toyota Prius 2022", role: "Conductor" },
+    { id: "U002", name: "María Gómez", plate: "XYZ-789", avatar: avatar2, status: "Pendiente", email: "maria.gomez@mail.escuelaing.edu.co", phone: "+57 310 1234567", vehicle: "Hyundai Accent 2023", role: "Conductor" },
+    { id: "U003", name: "Juan Sánchez", plate: "LMN-456", avatar: avatar3, status: "Pendiente", email: "juan.sanchez@mail.escuelaing.edu.co", phone: "+57 300 9876543", vehicle: "Renault Logan 2021", role: "Conductor" },
+    { id: "U004", name: "Natalia P.", plate: "DEF-222", avatar: null, status: "Pendiente", email: "natalia.p@mail.escuelaing.edu.co", phone: "+57 315 5555555", vehicle: "Chevrolet Spark 2020", role: "Conductor" },
+    { id: "U005", name: "Andrés V.", plate: "GHI-333", avatar: null, status: "Pendiente", email: "andres.v@mail.escuelaing.edu.co", phone: "+57 321 4444444", vehicle: "Mazda 3 2019", role: "Conductor" },
+    { id: "U006", name: "Paola R.", plate: "JKL-444", avatar: null, status: "Pendiente", email: "paola.r@mail.escuelaing.edu.co", phone: "+57 318 7777777", vehicle: "Nissan Versa 2021", role: "Conductor" },
   ]);
 
   // responsive items per page
@@ -86,9 +90,13 @@ export default function AdminHome() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // User detail modal
+  const [selectedUser, setSelectedUser] = useState<UserCard | null>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
   // confirmation flow
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<null | "suspend_account" | "suspend_profile" | "warn" | "archive">(null);
+  const [pendingAction, setPendingAction] = useState<null | "suspend_account" | "suspend_profile" | "archive" | "approve" | "reject">(null);
   const [selectedRole, setSelectedRole] = useState<"Acompañante" | "Conductor" | "Administrador">("Conductor");
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -107,12 +115,22 @@ export default function AdminHome() {
     setSelectedReport(r);
     setIsModalOpen(true);
   };
+  
   const closeModal = () => {
     setIsModalOpen(false);
-    // also reset pending flow only when modal fully closed
     setPendingAction(null);
     setConfirmOpen(false);
     setSelectedReport(null);
+  };
+
+  const openUser = (u: UserCard) => {
+    setSelectedUser(u);
+    setIsUserModalOpen(true);
+  };
+
+  const closeUserModal = () => {
+    setIsUserModalOpen(false);
+    setSelectedUser(null);
   };
 
   // starts confirmation for sensitive actions
@@ -128,7 +146,7 @@ export default function AdminHome() {
 
   // performAction: for demo: first attempt fails with specific error, retry succeeds
   const performAction = async () => {
-    if (!selectedReport || !pendingAction) return;
+    if (!pendingAction) return;
     setActionLoading(true);
 
     // increase attempts counter
@@ -145,27 +163,37 @@ export default function AdminHome() {
       if (attempt === 1) {
         showError("file", "No se ha generado el archivo", "No se ha generado el archivo. Intenta nuevamente.");
       } else {
-        console.log(`Reporte ${selectedReport.id} archivado (reintento).`);
+        console.log(`Reporte ${selectedReport?.id} archivado (reintento).`);
         closeModal();
       }
     } else if (pendingAction === "suspend_account") {
       if (attempt === 1) {
         showError("report", "No existe el reporte", "No existe el reporte. Verifica y reintenta.");
       } else {
-        console.log(`Cuenta suspendida: ${selectedReport.id}`);
+        console.log(`Cuenta suspendida: ${selectedReport?.id}`);
         closeModal();
       }
     } else if (pendingAction === "suspend_profile") {
       if (attempt === 1) {
         showError("user", "No se ha podido suspender el usuario", "No se ha podido suspender el usuario. Reintentar.");
       } else {
-        console.log(`Perfil suspendido (${selectedRole}): ${selectedReport.id}`);
+        console.log(`Perfil suspendido (${selectedRole}): ${selectedReport?.id}`);
         closeModal();
       }
-    } else if (pendingAction === "warn") {
-      // warn usually succeeds
-      console.log(`Advertencia enviada: ${selectedReport.id}`);
-      closeModal();
+    } else if (pendingAction === "approve") {
+      if (attempt === 1) {
+        showError("approve", "No se ha podido aprobar el usuario", "No se ha podido aprobar el usuario. Reintentar.");
+      } else {
+        console.log(`Conductor ${selectedUser?.id} aprobado`);
+        closeUserModal();
+      }
+    } else if (pendingAction === "reject") {
+      if (attempt === 1) {
+        showError("reject", "No se ha podido rechazar el usuario", "No se ha podido rechazar el usuario. Reintentar.");
+      } else {
+        console.log(`Conductor ${selectedUser?.id} rechazado`);
+        closeUserModal();
+      }
     }
 
     setActionLoading(false);
@@ -173,15 +201,9 @@ export default function AdminHome() {
     setPendingAction(null);
   };
 
-  // allow retry from error modal
+  // allow retry from error
   const retryFromError = () => {
     setErrorState({ open: false });
-
-    // reopen confirm modal with the same pendingAction so performAction will rerun
-    // but we cleared pendingAction above; for UX, allow re-opening the confirm screen
-    // We'll keep lastPending in ref to rehydrate
-    // Simpler: reopen confirm and set pendingAction based on last action type stored briefly
-    // For the demo we just re-open confirm and user clicks confirmar again
     setConfirmOpen(true);
   };
 
@@ -196,12 +218,13 @@ export default function AdminHome() {
       if (e.key === "Escape") {
         if (errorState.open) closeError();
         else if (confirmOpen) setConfirmOpen(false);
+        else if (isUserModalOpen) closeUserModal();
         else closeModal();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [confirmOpen, errorState.open]);
+  }, [confirmOpen, errorState.open, isUserModalOpen]);
 
   const severityLabel = useCallback((s?: string) => (s ? s.toUpperCase() : "N/A"), []);
 
@@ -279,16 +302,31 @@ export default function AdminHome() {
             <div className="text-sm text-slate-500">{reports.length} encontrados</div>
           </div>
 
-          <div className="relative">
-            <button onClick={repPrev} disabled={repPage === 0} aria-label="Anterior reporte" title="Anterior" className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/95 shadow flex items-center justify-center hover:bg-gray-100 transition ${repPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}>
+          <div className="relative overflow-hidden px-16">
+            <button 
+              onClick={repPrev} 
+              disabled={repPage === 0} 
+              aria-label="Anterior reporte" 
+              title="Anterior" 
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
+            >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
                 <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
-            <div className="flex gap-6 overflow-hidden px-14">
-              {visibleReports.map((r) => (
-                <article key={r.id} className="min-w-0 flex-1 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+            <div 
+              className="flex gap-6 transition-transform duration-700 ease-out px-2"
+              style={{ 
+                transform: `translateX(-${repPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
+              }}
+            >
+              {reports.map((r) => (
+                <article 
+                  key={r.id} 
+                  className="flex-shrink-0 bg-white p-6 rounded-xl border border-gray-100 shadow-sm"
+                  style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-xs font-semibold text-blue-600">#{r.id}</div>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${r.severity === "high" ? "bg-red-100 text-red-600" : r.severity === "medium" ? "bg-yellow-100 text-yellow-600" : "bg-green-100 text-green-600"}`}>
@@ -305,7 +343,13 @@ export default function AdminHome() {
               ))}
             </div>
 
-            <button onClick={repNext} disabled={repPage >= repPages - 1} aria-label="Siguiente reporte" title="Siguiente" className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white/95 shadow flex items-center justify-center hover:bg-gray-100 transition ${repPage >= repPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}>
+            <button 
+              onClick={repNext} 
+              disabled={repPage >= repPages - 1} 
+              aria-label="Siguiente reporte" 
+              title="Siguiente" 
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${repPage >= repPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}
+            >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
                 <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -323,16 +367,31 @@ export default function AdminHome() {
           </div>
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-            <div className="relative">
-              <button onClick={userPrev} disabled={userPage === 0} aria-label="Anterior usuario" title="Anterior usuario" className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white/95 shadow flex items-center justify-center hover:bg-gray-100 transition ${userPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}>
+            <div className="relative overflow-hidden px-16">
+              <button 
+                onClick={userPrev} 
+                disabled={userPage === 0} 
+                aria-label="Anterior usuario" 
+                title="Anterior usuario" 
+                className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
+              >
                 <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
                   <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
 
-              <div className="flex gap-6 overflow-hidden px-16">
-                {visibleUsers.map((u) => (
-                  <div key={u.id} className="min-w-0 flex-1 bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col items-center text-center">
+              <div 
+                className="flex gap-6 transition-transform duration-700 ease-out px-2"
+                style={{ 
+                  transform: `translateX(-${userPage * (100 / itemsPerPage + (itemsPerPage > 1 ? 2.5 : 0))}%)`,
+                }}
+              >
+                {users.map((u) => (
+                  <div 
+                    key={u.id} 
+                    className="flex-shrink-0 bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col items-center text-center"
+                    style={{ width: `calc((100% - ${(itemsPerPage - 1) * 24}px) / ${itemsPerPage})` }}
+                  >
                     {u.avatar ? (
                       <div className="w-20 h-20 rounded-full overflow-hidden mb-3 shadow-md">
                         <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
@@ -352,14 +411,42 @@ export default function AdminHome() {
                     </div>
 
                     <div className="flex gap-2 mt-3 w-full">
-                      <button className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100">Aprobar</button>
-                      <button className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100">Rechazar</button>
+                      <button 
+                        onClick={() => openUser(u)}
+                        className="flex-1 py-2 text-sm rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      >
+                        Ver
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedUser(u);
+                          startConfirm("approve");
+                        }}
+                        className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                      >
+                        Aprobar
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedUser(u);
+                          startConfirm("reject");
+                        }}
+                        className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                      >
+                        Rechazar
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <button onClick={userNext} disabled={userPage >= userPages - 1} aria-label="Siguiente usuario" title="Siguiente usuario" className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white/95 shadow flex items-center justify-center hover:bg-gray-100 transition ${userPage >= userPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}>
+              <button 
+                onClick={userNext} 
+                disabled={userPage >= userPages - 1} 
+                aria-label="Siguiente usuario" 
+                title="Siguiente usuario" 
+                className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 h-12 w-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${userPage >= userPages - 1 ? "opacity-40 cursor-not-allowed" : ""}`}
+              >
                 <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none" aria-hidden>
                   <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -393,23 +480,123 @@ export default function AdminHome() {
 
               <button onClick={() => startConfirm("suspend_profile")} className="w-full py-2 rounded-lg border border-orange-400 bg-orange-50 text-orange-700 font-medium hover:bg-orange-100">Suspender perfil</button>
 
-              <button onClick={() => startConfirm("warn")} className="w-full py-2 rounded-lg border border-yellow-400 bg-yellow-50 text-yellow-700 font-medium hover:bg-yellow-100">Advertir</button>
+              <button onClick={() => startConfirm("archive")} className="w-full py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 font-medium hover:bg-green-100 sm:col-span-2">Archivar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <button onClick={() => startConfirm("archive")} className="w-full py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 font-medium hover:bg-green-100">Archivar</button>
+      {/* User detail modal */}
+      {isUserModalOpen && selectedUser && (
+        <div role="dialog" aria-modal="true" aria-labelledby="user-modal-title" className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={closeUserModal} aria-hidden />
+
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-start gap-6">
+              {/* Avatar */}
+              <div className="flex flex-col items-center">
+                {selectedUser.avatar ? (
+                  <img 
+                    src={selectedUser.avatar} 
+                    alt={selectedUser.name}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 mb-3"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-slate-100 mb-3 flex items-center justify-center text-2xl font-semibold text-slate-700 border-4 border-blue-100">
+                    {selectedUser.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                  </div>
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 id="user-modal-title" className="text-xl font-semibold">{selectedUser.name}</h2>
+                    <div className="text-sm text-slate-500 mt-1">{
+                    selectedUser.email}</div>
+                    <div className="text-sm text-slate-500">{selectedUser.phone}</div>
+                  </div>
+                  <button onClick={closeUserModal} aria-label="Cerrar" className="text-slate-500 hover:text-slate-700 text-xl">
+                    ✕
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <span className="font-medium text-slate-700">Rol:</span>
+                    <span className="text-slate-600">{selectedUser.role}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-medium text-slate-700">Estado:</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs bg-yellow-50 text-yellow-700">
+                      {selectedUser.status}
+                    </span>
+                  </div>
+                  {selectedUser.plate && (
+                    <div className="flex gap-2">
+                      <span className="font-medium text-slate-700">Placa:</span>
+                      <span className="text-slate-600">{selectedUser.plate}</span>
+                    </div>
+                  )}
+                  {selectedUser.vehicle && (
+                    <div className="flex gap-2">
+                      <span className="font-medium text-slate-700">Vehículo:</span>
+                      <span className="text-slate-600">{selectedUser.vehicle}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="mt-6 flex gap-3 justify-end">
+              <button
+                onClick={() => startConfirm("approve")}
+                className="px-6 py-2 rounded-lg border border-green-400 bg-green-50 text-green-700 font-medium hover:bg-green-100"
+              >
+                Aprobar
+              </button>
+              <button
+                onClick={() => startConfirm("reject")}
+                className="px-6 py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100"
+              >
+                Rechazar
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* Confirmation modal (reusable) */}
-      {confirmOpen && selectedReport && (
+      {confirmOpen && (selectedReport || selectedUser) && (
         <div role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title" className="fixed inset-0 z-60 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmOpen(false)} aria-hidden />
 
           <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-            <h3 id="confirm-modal-title" className="text-lg font-semibold">{pendingAction === "suspend_account" ? "Confirmar suspensión de cuenta" : pendingAction === "suspend_profile" ? "Suspender perfil" : pendingAction === "warn" ? "Enviar advertencia" : "Archivar reporte"}</h3>
+            <h3 id="confirm-modal-title" className="text-lg font-semibold">
+              {pendingAction === "suspend_account" 
+                ? "Confirmar suspensión de cuenta" 
+                : pendingAction === "suspend_profile" 
+                ? "Suspender perfil" 
+                : pendingAction === "approve"
+                ? "Aprobar conductor"
+                : pendingAction === "reject"
+                ? "Rechazar conductor"
+                : "Archivar reporte"}
+            </h3>
 
-            <p className="mt-2 text-sm text-slate-600">{pendingAction === "suspend_account" ? `Vas a suspender la cuenta asociada al reporte ${selectedReport.id}. Esta acción bloqueará el acceso del usuario.` : pendingAction === "suspend_profile" ? `Selecciona qué perfil suspender para ${selectedReport.id}.` : pendingAction === "warn" ? `Enviarás una advertencia al usuario relacionado con ${selectedReport.id}.` : `Archivarás el reporte ${selectedReport.id}.`}</p>
+            <p className="mt-2 text-sm text-slate-600">
+              {pendingAction === "suspend_account" 
+                ? `Vas a suspender la cuenta asociada al reporte ${selectedReport?.id}. Esta acción bloqueará el acceso del usuario.` 
+                : pendingAction === "suspend_profile" 
+                ? `Selecciona qué perfil suspender para ${selectedReport?.id}.` 
+                : pendingAction === "approve"
+                ? `Vas a aprobar a ${selectedUser?.name} como conductor.`
+                : pendingAction === "reject"
+                ? `Vas a rechazar la solicitud de ${selectedUser?.name}.`
+                : `Archivarás el reporte ${selectedReport?.id}.`}
+            </p>
 
             {pendingAction === "suspend_profile" && (
               <fieldset className="mt-4">
@@ -431,16 +618,24 @@ export default function AdminHome() {
               <button
                 onClick={performAction}
                 disabled={actionLoading}
-                className={`px-4 py-2 rounded-lg font-medium ${pendingAction === "suspend_account" ? "bg-red-600 text-white hover:bg-red-700" : pendingAction === "suspend_profile" ? "bg-orange-600 text-white hover:bg-orange-700" : pendingAction === "archive" ? "bg-green-600 text-white hover:bg-green-700" : "bg-yellow-600 text-white hover:bg-yellow-700"}`}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  pendingAction === "suspend_account" || pendingAction === "reject"
+                    ? "bg-red-600 text-white hover:bg-red-700" 
+                    : pendingAction === "suspend_profile" 
+                    ? "bg-orange-600 text-white hover:bg-orange-700" 
+                    : pendingAction === "archive" || pendingAction === "approve"
+                    ? "bg-green-600 text-white hover:bg-green-700" 
+                    : "bg-yellow-600 text-white hover:bg-yellow-700"
+                }`}
               >
-                {actionLoading ? "Procesando..." : pendingAction === "suspend_account" ? "Confirmar suspensión" : pendingAction === "suspend_profile" ? `Suspender (${selectedRole})` : pendingAction === "warn" ? "Enviar advertencia" : "Archivar"}
+                {actionLoading ? "Procesando..." : "Confirmar"}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Error modal (3 variants used) */}
+      {/* Error modal */}
       {errorState.open && (
         <div role="alertdialog" aria-modal="true" aria-labelledby="error-title" className="fixed inset-0 z-70 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={() => setErrorState({ open: false })} aria-hidden />
@@ -463,8 +658,17 @@ export default function AdminHome() {
               </div>
             </div>
 
-            {/* hint: different visual for different error kinds (optional) */}
-            <div className="mt-4 text-xs text-slate-400 text-center">{errorState.kind === "file" ? "Error: generación de archivo" : errorState.kind === "report" ? "Error: reporte no encontrado" : "Error: acción de usuario"}</div>
+            <div className="mt-4 text-xs text-slate-400 text-center">
+              {errorState.kind === "file" 
+                ? "Error: generación de archivo" 
+                : errorState.kind === "report" 
+                ? "Error: reporte no encontrado" 
+                : errorState.kind === "approve"
+                ? "Error: aprobación de usuario"
+                : errorState.kind === "reject"
+                ? "Error: rechazo de usuario"
+                : "Error: acción de usuario"}
+            </div>
           </div>
         </div>
       )}
