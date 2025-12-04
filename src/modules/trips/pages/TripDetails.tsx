@@ -21,11 +21,10 @@ export function TripDetails() {
     // TODO: Crear reserva y navegar a confirmación o pago
     console.log('Reservando viaje con método:', selectedPaymentMethod);
     
-    // Simular creación de booking
     const bookingId = `BOOK-${Date.now()}`;
     
-    // Navegar a la pantalla de pago correspondiente
-    navigate(`/payment/${bookingId}`);
+  
+    navigate(`/payment/${bookingId}/confirm`);
   };
 
   const handlePaymentMethodChange = (methodId: string) => {

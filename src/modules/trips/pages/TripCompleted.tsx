@@ -11,10 +11,8 @@ export function TripCompleted() {
   const trip = useCompletedTrip(tripId || 'UNKNOWN');
 
   const handleMakePayment = () => {
-    // Crear un bookingId basado en el tripId
     const bookingId = `BOOK-${tripId || Date.now()}`;
     
-    // Navegar a la pantalla de selección de método de pago
     navigate(`/payment/${bookingId}`);
   };
 
