@@ -2,6 +2,9 @@ import { ArrowLeft, MapPin, LocateFixed, Clock, Car, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { TravelBackendResponse } from "../hooks/createTravelHook";
+import { deleteTravelHook } from "../hooks/deleteTravelHook";
+
+
 
 const mockTripDetails = {
     origin: "Portal Norte",
@@ -18,12 +21,28 @@ const mockTripDetails = {
         color: "Negro"
     }
 };
+
 function DetailsOfTravelComponent(){
     const navigate = useNavigate();
     const location = useLocation();
     const travel = location.state?.travel as TravelBackendResponse | undefined;
     
     console.log('Travel data in details:', travel);
+
+    const handleConfirmDelete = async (id: string) => {
+        if (!confirm('¿Estás seguro de que deseas cancelar este viaje?')) {
+            return;
+        }
+        
+        try {
+            await deleteTravelHook(id);
+            alert('Viaje cancelado exitosamente');
+            navigate('/sectionTravel');
+        } catch (error) {
+            console.error('Error al eliminar viaje:', error);
+            alert('Error al cancelar el viaje. Por favor intenta de nuevo.');
+        }
+    };
 
     let availableSlotsText = 'Viaje completo';
     if (travel?.availableSlots && travel.availableSlots > 0) {
@@ -55,6 +74,14 @@ function DetailsOfTravelComponent(){
                     <Button 
                         variant="outline" 
                         className="border-red-300 text-red-500 hover:bg-red-50 rounded-lg px-6"
+                        onClick={() => {
+                            if (travel?.id) {
+                                handleConfirmDelete(travel.id);
+                            } else {
+                                console.error('No travel id to delete', travel);
+                                alert('No se encontró el id del viaje para eliminar');
+                            }
+                        }}
                     >
                         Cancelar viaje
                     </Button>

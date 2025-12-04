@@ -51,28 +51,40 @@ const items = [
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" className="[&>div]:bg-[#2196F3]/20 backdrop-blur-2xl border-r border-white/20 h-screen [&>div]:shadow-lg">
-      <SidebarHeader className="bg-transparent h-16 flex items-center px-4">
-        <div className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center">
-          <SidebarTrigger className="text-white hover:bg-white/20" />
+    <Sidebar collapsible="icon" className="[&>div]:bg-white/10 [&>div]:backdrop-blur-md border-r border-white/20 h-screen [&>div]:shadow-lg">
+      <SidebarHeader className="bg-transparent flex flex-col gap-4 px-4 py-6 border-b border-white/20">
+        <div className="flex items-center justify-center w-full group-data-[collapsible=icon]:justify-center">
           <img 
             src="/RiiDECI.png" 
             alt="Rideci Logo" 
-            className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden"
+            className="h-12 w-auto object-contain drop-shadow-md group-data-[collapsible=icon]:hidden"
           />
         </div>
+        <div className="flex items-center gap-2 px-2 py-2 bg-white/5 rounded-lg backdrop-blur-sm group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:bg-transparent">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <User className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-white text-sm font-medium group-data-[collapsible=icon]:hidden">
+            Bienvenido Usuario
+          </span>
+        </div>
       </SidebarHeader>
-      <SidebarContent className="bg-transparent">
+      <SidebarContent className="bg-transparent py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white font-semibold">Menú</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/80 font-semibold text-xs uppercase tracking-wider px-2">
+            Menú
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-white hover:bg-white/20 hover:text-white transition-all">
+                  <SidebarMenuButton 
+                    asChild 
+                    className="text-white hover:bg-white/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md"
+                  >
                     <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                      <item.icon className="w-5 h-5" />
+                      <span className="font-medium">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -81,13 +93,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-transparent border-t border-white/20">
+      <SidebarFooter className="bg-transparent border-t border-white/20 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="text-white hover:bg-red-600/30 hover:text-white transition-all">
+            <SidebarMenuButton 
+              asChild 
+              className="text-white hover:bg-red-500/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md border border-transparent hover:border-red-500/30"
+            >
               <a href="#">
-                <ArrowLeftFromLine />
-                <span>Cerrar Sesión</span>
+                <ArrowLeftFromLine className="w-5 h-5" />
+                <span className="font-medium">Cerrar Sesión</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
