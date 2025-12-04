@@ -75,7 +75,7 @@ export default function FormSelectProfile() {
                 <img
                   src={p.avatarUrl}
                   alt={p.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover filter saturate-150 hue-rotate-0"
                 />
               </div>
 
