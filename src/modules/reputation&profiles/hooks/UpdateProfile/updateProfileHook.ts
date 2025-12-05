@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ProfileBackend } from '../../types/profile';
 import type { Reputation } from '../../types/reputation';
 import type { ProfileType, IdentificationType } from '../../types/enums';
 
@@ -16,29 +17,12 @@ export interface UpdateProfileRequest {
     identificationNumber: string;
     address: string;
     profilePictureUrl: string;
-    birthDate: Date;
-}
-
-export interface UpdateProfileBackendResponse {
-    id: number;
-    name: string;
-    email: string;
-    vehicles: string[];
-    phoneNumber: string;
-    ratings: string[];
-    badges: string[];
-    profileType: ProfileType;
-    reputation: Reputation;
-    identificationType: IdentificationType;
-    identificationNumber: string;
-    address: string;
-    profilePictureUrl: string;
-    birthDate: Date;
+    birthDate: Date | string;
 }
 
 export interface UpdateProfileResponse {
     success: boolean;
-    data?: UpdateProfileBackendResponse;
+    data?: ProfileBackend;
     error?: string;
 }
 
@@ -56,7 +40,7 @@ export function useUpdateProfile() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(profileRequest),
+                body: JSON.stringify(requestBody),
             });
 
             if (!response.ok) {
@@ -64,7 +48,7 @@ export function useUpdateProfile() {
                 throw new Error(errorData.message || `Error: ${response.status}`);
             }
 
-            const result: UpdateProfileBackendResponse = await response.json();
+            const result: ProfileBackend = await response.json();
 
             return {
                 success: true,

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import UpdateProfilePopUp from "./UpdateProfilePopUp";
 import DeleteProfilePopUp from "./DeleteProfilePopUp";
 
-export default function Buttons() {
+export default function Buttons({ onProfileDeleted, profileId }) {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -56,6 +56,8 @@ export default function Buttons() {
       <DeleteProfilePopUp
         open={openDelete}
         onClose={() => setOpenDelete(false)}
+        onProfileDeleted={handleProfileDeleted}
+        profileId={profileId}
       />
     </>
   );

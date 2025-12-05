@@ -15,7 +15,7 @@ export default function TripHistory() {
         <div className="flex items-center gap-3 mb-8">
           <ArrowLeft
             className="w-6 h-6 text-slate-700 cursor-pointer hover:text-slate-900 transition"
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/app/profile")}
           />
           <h1 className="text-3xl font-bold text-slate-900">Historial de Viajes</h1>
         </div>

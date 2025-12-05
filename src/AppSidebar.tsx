@@ -1,4 +1,4 @@
-import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus, User } from "lucide-react"
+import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus, User, MessageCircleMore } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import {
@@ -12,67 +12,88 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 
 const items = [
   {
     title: "Home",
-    url: "/home",
+    url: "/app",
     icon: House,
   },
   {
+    title: "Perfil",
+    url: "/app/selectProfile",
+    icon: User,
+  },
+  {
     title: "Calendario",
-    url: "/calendar",
+    url: "/app/calendar",
     icon: Calendar,
   },
   {
     title: "Estadisticas",
-    url: "/statistics",
+    url: "/app/statistics",
     icon: ChartColumn,
   },
   {
     title: "Alertas",
-    url: "/alerts",
+    url: "/app/alerts",
     icon: CircleAlert,
   },
   {
     title: "Crear Viaje",
-    url: "/travels",
+    url: "/app/sectionTravel",
     icon: Map,
   },
   {
     title: "Notificaciones",
-    url: "/notifications",
+    url: "/app/notifications",
     icon: BellPlus,
+  },
+  {
+    title: "Conversaciones",
+    url: "/app/conversations",
+    icon: MessageCircleMore,
   },
 ]
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon" className="[&>div]:bg-[#2196F3]/20 backdrop-blur-2xl border-r border-white/20 h-screen [&>div]:shadow-lg">
-      <SidebarHeader className="bg-transparent h-16 flex items-center px-4">
-        <div className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center">
-          <SidebarTrigger className="text-white hover:bg-white/20" />
+    <Sidebar collapsible="icon" className="[&>div]:bg-white/10 [&>div]:backdrop-blur-md border-r border-white/20 h-screen [&>div]:shadow-lg">
+      <SidebarHeader className="bg-transparent flex flex-col gap-4 px-4 py-6 border-b border-white/20">
+        <div className="flex items-center justify-center w-full group-data-[collapsible=icon]:justify-center">
           <img 
-            src="/RidECISidebarF.png" 
+            src="/RiiDECI.png" 
             alt="Rideci Logo" 
-            className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden"
+            className="h-12 w-auto object-contain drop-shadow-md group-data-[collapsible=icon]:hidden"
           />
         </div>
+        <div className="flex items-center gap-2 px-2 py-2 bg-white/5 rounded-lg backdrop-blur-sm group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:bg-transparent">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <User className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-white text-sm font-medium group-data-[collapsible=icon]:hidden">
+            Bienvenido Usuario
+          </span>
+        </div>
       </SidebarHeader>
-      <SidebarContent className="bg-transparent">
+      <SidebarContent className="bg-transparent py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white font-semibold">Menú</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white/80 font-semibold text-xs uppercase tracking-wider px-2 mb-5">
+            Menú
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-5">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-white hover:bg-white/20 hover:text-white transition-all">
+                  <SidebarMenuButton 
+                    asChild 
+                    className="text-white hover:bg-white/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md px-3 py-2"
+                  >
                     <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                      <item.icon className="w-5 h-5 mr-3" />
+                      <span className="font-medium">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -81,14 +102,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-transparent border-t border-white/20">
+      <SidebarFooter className="bg-transparent border-t border-white/20 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="text-white hover:bg-red-600/30 hover:text-white transition-all">
-              <a href="#">
-                <ArrowLeftFromLine />
-                <span>Cerrar Sesión</span>
-              </a>
+            <SidebarMenuButton 
+              className="text-white hover:bg-red-500/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md border border-transparent hover:border-red-500/30 px-3 py-2"
+              onClick={() => {
+                localStorage.clear();
+                globalThis.location.href = '/login';
+              }}
+            >
+              <ArrowLeftFromLine className="w-5 h-5 mr-3" />
+              <span className="font-medium">Cerrar Sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

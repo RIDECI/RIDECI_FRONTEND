@@ -1,4 +1,9 @@
-export async function deleteProfileHook(profileId: string): Promise<void> {
+export interface DeleteProfileResponse {
+    success: boolean;
+    error?: string;
+}
+
+export async function deleteProfileHook(profileId: string): Promise<DeleteProfileResponse> {
     try {
         const response = await fetch(
             `https://troyareputationbackend-production.up.railway.app/profiles/${profileId}`,
@@ -11,12 +16,19 @@ export async function deleteProfileHook(profileId: string): Promise<void> {
         );
 
         if (!response.ok) {
-            throw new Error(`Error al eliminar perfil: ${response.statusText}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Error al eliminar perfil: ${response.statusText}`);
         }
 
-        return;
+        return {
+            success: true
+        };
     } catch (err) {
         console.error('Error en deleteProfileHook:', err);
-        throw err;
+        const errorMessage = err instanceof Error ? err.message : 'Error al eliminar el perfil';
+        return {
+            success: false,
+            error: errorMessage
+        };
     }
 }

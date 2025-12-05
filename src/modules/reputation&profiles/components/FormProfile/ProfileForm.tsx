@@ -20,6 +20,22 @@ export default function ProfileForm() {
   };
 
   const [photo, setPhoto] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    id: 0,
+    name: "",
+    email: "",
+    vehicles: [] as string[],
+    phoneNumber: "",
+    ratings: [] as string[],
+    badges: [] as string[],
+    profileType: "PASSENGER" as const,
+    reputation: { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
+    identificationType: "CC" as const,
+    identificationNumber: "",
+    address: "",
+    profilePictureUrl: "",
+    birthDate: new Date(),
+  });
 
   // ESTADO: Almacena lo que el usuario escribe
   const [formData, setFormData] = useState({
@@ -76,7 +92,7 @@ export default function ProfileForm() {
 
     const response = await createProfile(profileType, profileData as any);
 
-    if (response.success) navigate("/profile");
+    if (response.success) navigate("/app/profile");
   };
 
   return (
