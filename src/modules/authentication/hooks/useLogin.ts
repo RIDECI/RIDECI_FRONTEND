@@ -28,7 +28,7 @@ export const useLogin = () => {
     }
 
     try {
-      const response = await fetch("https://kratosauthenticationbackend-develop.up.railway.app/auth/login",
+      const response = await fetch("https://kratosauthenticationbackend-production.up.railway.app/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

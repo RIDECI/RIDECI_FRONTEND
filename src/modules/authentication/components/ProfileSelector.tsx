@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Car, UserCircle, Users } from 'lucide-react';
-import type {Profile, ProfileType} from '../types/user.d.ts';
+import type { Profile, ProfileType } from '../types/user.d.ts';
 
 import ImgConductor from "../../../assets/Conductor.jpeg";
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileSelectorProps {
     onProfileSelect?: (profileId: ProfileType) => void;
 }
 
-export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
-                                                                    onProfileSelect
-                                                                }) => {
+export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelect }) => {
     const [selectedProfile, setSelectedProfile] = useState<ProfileType | null>(null);
+    const navigate = useNavigate();
 
     const profiles: Profile[] = [
         {
@@ -36,20 +36,33 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
 
     const handleProfileSelect = (profileId: ProfileType) => {
         setSelectedProfile(profileId);
+
         if (onProfileSelect) {
             onProfileSelect(profileId);
+        }
+
+        // Navegar inmediatamente según perfil
+        switch (profileId) {
+            case 'conductor':
+                navigate('/app/homeDriver');
+                break;
+            case 'pasajero':
+                navigate('/app/homePassenger');
+                break;
+            case 'acompanante':
+                navigate('/app/homeCompanion');
+                break;
+            default:
+                break;
         }
     };
 
     return (
         <div className="w-full">
-            {/* Title*/}
             <h2 className="text-white text-5xl font-semibold text-center mb-16 drop-shadow-lg">
-                Escoge tu rol para el registro
                 ¿Qué rol deseas hoy?
             </h2>
 
-            {/* Profile Cards */}
             <div className="flex justify-center items-center gap-8 px-4">
                 {profiles.map((profile) => {
                     const Icon = profile.icon;
@@ -101,17 +114,6 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
                     );
                 })}
             </div>
-
-            {selectedProfile && (
-                <div className="mt-12 text-center">
-                    <button
-                        onClick={() => console.log('Continuar con:', selectedProfile)}
-                        className="bg-white text-blue-600 px-12 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                    >
-                        Continuar
-                    </button>
-                </div>
-            )}
         </div>
     );
 };

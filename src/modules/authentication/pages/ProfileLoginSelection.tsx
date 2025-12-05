@@ -1,17 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ProfileSelector } from '../components/ProfileSelector';
 import type {ProfileType} from '../types/profile.types';
 
-export const ProfileRegisterSelectionPage: React.FC = () => {
-    const navigate = useNavigate();
+export const ProfileSelectionPage: React.FC = () => {
 
     const handleProfileSelect = (profileId: ProfileType) => {
         console.log('Perfil seleccionado:', profileId);
         localStorage.setItem('selectedProfile', profileId);
-
-        // Navegar al home
-        navigate('/app');
     };
 
     return (

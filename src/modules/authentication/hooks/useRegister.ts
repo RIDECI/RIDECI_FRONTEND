@@ -39,7 +39,7 @@ export const useRegister = () => {
         }
 
         try{
-            const response = await fetch("https://kratosauthenticationbackend-develop.up.railway.app/auth/register",
+            const response = await fetch("https://kratosauthenticationbackend-production.up.railway.app/auth/register",
                 {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
