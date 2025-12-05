@@ -5,10 +5,11 @@ import avatar2 from "../assets/avatar-2.png";
 import avatar3 from "../assets/avatar-3.png";
 
 /**
- * AdminUsers.tsx - Versión actualizada con corrección de Carrusel
- * - Estructura Flexbox para evitar superposición de flechas.
- * - Animación suave (slide) en lugar de salto brusco.
- * - "Administrador" reemplazado por "Pasajero".
+ * AdminUsers.tsx - Versión actualizada
+ * Cambios realizados:
+ * - Añadido estado "Bloqueado".
+ * - Eliminado botón "Archivar" en modal de usuario.
+ * - Header muestra 2547 usuarios activos (valor fijo).
  */
 
 type UserCard = {
@@ -18,19 +19,20 @@ type UserCard = {
   role?: "Acompañante" | "Conductor" | "Pasajero" | "Estudiante" | "Profesor" | string;
   plate?: string;
   avatar?: string | null;
-  status?: "Pendiente" | "Verificado" | "Suspendido" | string;
+  status?: "Pendiente" | "Verificado" | "Suspendido" | "Bloqueado" | string;
   vehicle?: string | null;
   rating?: number; // Rating de 0-5
   phone?: string;
 };
 
 type ErrorKind = "file" | "report" | "user";
-type PendingAction = null | "suspend_account" | "suspend_profile" | "activate_account" | "approve" | "reject" | "archive";
+type PendingAction = null | "suspend_account" | "suspend_profile" | "activate_account" | "approve" | "reject";
 
 const mockUsers = (): UserCard[] => [
   { id: "U001", name: "Carlos Ruiz", email: "carlos.ruiz@mail.escuelaing.edu.co", role: "Conductor", plate: "ABC-123", avatar: avatar1, status: "Pendiente", vehicle: "Toyota Prius 2022", rating: 0, phone: "+57 320 7654321" },
   { id: "U002", name: "María Gómez", email: "maria.gomez@mail.escuelaing.edu.co", role: "Acompañante", plate: "XYZ-789", avatar: avatar2, status: "Verificado", vehicle: "Hyundai Accent 2023", rating: 4.5, phone: "+57 310 1234567" },
-  { id: "U003", name: "Juan Sánchez", email: "juan.sanchez@mail.escuelaing.edu.co", role: "Conductor", plate: "LMN-456", avatar: avatar3, status: "Suspendido", vehicle: "Renault Logan 2021", rating: 4.8, phone: "+57 300 9876543" },
+  // Ejemplo con Bloqueado para demostrar el nuevo estado
+  { id: "U003", name: "Juan Sánchez", email: "juan.sanchez@mail.escuelaing.edu.co", role: "Conductor", plate: "LMN-456", avatar: avatar3, status: "Bloqueado", vehicle: "Renault Logan 2021", rating: 4.8, phone: "+57 300 9876543" },
   { id: "U004", name: "Natalia Perez", email: "natalia.p@mail.escuelaing.edu.co", role: "Profesor", plate: "DEF-222", avatar: avatar1, status: "Verificado", vehicle: null, rating: 3.2, phone: "+57 315 5555555" },
   { id: "U005", name: "Andrés Velas", email: "andres.v@mail.escuelaing.edu.co", role: "Pasajero", plate: "GHI-333", avatar: avatar2, status: "Verificado", vehicle: null, rating: 5.0, phone: "+57 321 4444444" },
   { id: "U006", name: "Paola Rojas", email: "paola.r@mail.escuelaing.edu.co", role: "Conductor", plate: "JKL-444", avatar: avatar3, status: "Pendiente", vehicle: "Chevrolet Spark 2020", rating: 0, phone: "+57 318 7777777" },
@@ -205,7 +207,7 @@ const AdminUsers: React.FC = () => {
   });
 
   // --- LÓGICA DEL CARRUSEL NUEVA (Track suave) ---
-  const userChunks = [];
+  const userChunks: UserCard[][] = [];
   for (let i = 0; i < filteredUsers.length; i += itemsPerPage) {
     userChunks.push(filteredUsers.slice(i, i + itemsPerPage));
   }
@@ -292,7 +294,8 @@ const AdminUsers: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-lg font-bold text-blue-600">{filteredUsers.filter(u => u.status === "Verificado").length}</div>
+            {/* Valor fijo solicitado */}
+            <div className="text-lg font-bold text-blue-600">2547</div>
           </div>
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
             A
@@ -323,6 +326,7 @@ const AdminUsers: React.FC = () => {
               <option>Pendiente</option>
               <option>Verificado</option>
               <option>Suspendido</option>
+              <option>Bloqueado</option>
             </select>
             <div className="text-sm text-slate-500">{filteredUsers.length} resultados</div>
           </div>
@@ -401,7 +405,11 @@ const AdminUsers: React.FC = () => {
                                                         ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
                                                         : u.status === "Verificado"
                                                         ? "bg-green-50 text-green-700 border border-green-200"
-                                                        : "bg-purple-50 text-purple-700 border border-purple-200"
+                                                        : u.status === "Suspendido"
+                                                        ? "bg-purple-50 text-purple-700 border border-purple-200"
+                                                        : u.status === "Bloqueado"
+                                                        ? "bg-red-50 text-red-700 border border-red-200"
+                                                        : "bg-gray-50 text-slate-700"
                                                     }`}
                                                 >
                                                     {u.status}
@@ -414,7 +422,7 @@ const AdminUsers: React.FC = () => {
                                                     >
                                                         Ver
                                                     </button>
-                                                    {u.status === "Suspendido" && (
+                                                    {(u.status === "Suspendido" || u.status === "Bloqueado") && (
                                                         <button 
                                                             onClick={() => {
                                                                 setSelectedUser(u);
@@ -519,7 +527,7 @@ const AdminUsers: React.FC = () => {
           <div className="absolute inset-0 bg-black/40" onClick={closeUserModal} />
           <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
             <div className="flex items-start gap-6">
-              {/* Avatar y Rating */}
+              {/* Avatar y Rating (estrellas debajo del avatar) */}
               <div className="flex flex-col items-center">
                 <img 
                   src={selectedUser.avatar || avatar1} 
@@ -555,7 +563,11 @@ const AdminUsers: React.FC = () => {
                           ? "bg-yellow-50 text-yellow-700"
                           : selectedUser.status === "Verificado"
                           ? "bg-green-50 text-green-700"
-                          : "bg-purple-50 text-purple-700"
+                          : selectedUser.status === "Suspendido"
+                          ? "bg-purple-50 text-purple-700"
+                          : selectedUser.status === "Bloqueado"
+                          ? "bg-red-50 text-red-700"
+                          : "bg-gray-50 text-slate-700"
                       }`}
                     >
                       {selectedUser.status}
@@ -579,7 +591,8 @@ const AdminUsers: React.FC = () => {
 
             {/* Acciones */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {selectedUser.status === "Suspendido" ? (
+              {/* Si está Suspendido o Bloqueado mostrar Activar, si no mostrar Suspender */}
+              {(selectedUser.status === "Suspendido" || selectedUser.status === "Bloqueado") ? (
                 <button
                   onClick={() => startConfirm("activate_account")}
                   className="w-full py-2 rounded-lg border border-green-400 bg-green-50 text-green-700 font-medium hover:bg-green-100"
@@ -602,12 +615,7 @@ const AdminUsers: React.FC = () => {
                 Suspender perfil
               </button>
 
-              <button
-                onClick={() => startConfirm("archive")}
-                className="w-full py-2 rounded-lg border border-blue-400 bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 sm:col-span-2"
-              >
-                Archivar
-              </button>
+              {/* NOTE: botón "Archivar" eliminado por petición */}
             </div>
           </div>
         </div>

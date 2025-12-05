@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Star } from "lucide-react";
 import avatar1 from "../assets/avatar-1.png";
 import avatar2 from "../assets/avatar-2.png";
 import avatar3 from "../assets/avatar-3.png";
@@ -24,6 +25,7 @@ type UserCard = {
   phone?: string;
   vehicle?: string | null;
   role?: string;
+  rating?: number; // reputación / puntuación 0-5
 };
 
 type ErrorKind = "file" | "report" | "user" | "approve" | "reject";
@@ -43,13 +45,14 @@ export default function AdminHome() {
     { id: "REP008", title: "Ruta cancelada", reporter: "Sofía L.", severity: "low", details: "El conductor canceló la ruta sin avisar." },
   ]);
 
+  // Añadí rating a los usuarios de ejemplo para que se muestre la reputación
   const [users] = useState<UserCard[]>(() => [
-    { id: "U001", name: "Carlos Ruiz", plate: "ABC-123", avatar: avatar1, status: "Pendiente", email: "carlos.ruiz@mail.escuelaing.edu.co", phone: "+57 320 7654321", vehicle: "Toyota Prius 2022", role: "Conductor" },
-    { id: "U002", name: "María Gómez", plate: "XYZ-789", avatar: avatar2, status: "Pendiente", email: "maria.gomez@mail.escuelaing.edu.co", phone: "+57 310 1234567", vehicle: "Hyundai Accent 2023", role: "Conductor" },
-    { id: "U003", name: "Juan Sánchez", plate: "LMN-456", avatar: avatar3, status: "Pendiente", email: "juan.sanchez@mail.escuelaing.edu.co", phone: "+57 300 9876543", vehicle: "Renault Logan 2021", role: "Conductor" },
-    { id: "U004", name: "Natalia P.", plate: "DEF-222", avatar: null, status: "Pendiente", email: "natalia.p@mail.escuelaing.edu.co", phone: "+57 315 5555555", vehicle: "Chevrolet Spark 2020", role: "Conductor" },
-    { id: "U005", name: "Andrés V.", plate: "GHI-333", avatar: null, status: "Pendiente", email: "andres.v@mail.escuelaing.edu.co", phone: "+57 321 4444444", vehicle: "Mazda 3 2019", role: "Conductor" },
-    { id: "U006", name: "Paola R.", plate: "JKL-444", avatar: null, status: "Pendiente", email: "paola.r@mail.escuelaing.edu.co", phone: "+57 318 7777777", vehicle: "Nissan Versa 2021", role: "Conductor" },
+    { id: "U001", name: "Carlos Ruiz", plate: "ABC-123", avatar: avatar1, status: "Pendiente", email: "carlos.ruiz@mail.escuelaing.edu.co", phone: "+57 320 7654321", vehicle: "Toyota Prius 2022", role: "Conductor", rating: 0 },
+    { id: "U002", name: "María Gómez", plate: "XYZ-789", avatar: avatar2, status: "Pendiente", email: "maria.gomez@mail.escuelaing.edu.co", phone: "+57 310 1234567", vehicle: "Hyundai Accent 2023", role: "Conductor", rating: 4.5 },
+    { id: "U003", name: "Juan Sánchez", plate: "LMN-456", avatar: avatar3, status: "Pendiente", email: "juan.sanchez@mail.escuelaing.edu.co", phone: "+57 300 9876543", vehicle: "Renault Logan 2021", role: "Conductor", rating: 4.8 },
+    { id: "U004", name: "Natalia P.", plate: "DEF-222", avatar: null, status: "Pendiente", email: "natalia.p@mail.escuelaing.edu.co", phone: "+57 315 5555555", vehicle: "Chevrolet Spark 2020", role: "Conductor", rating: 3.2 },
+    { id: "U005", name: "Andrés V.", plate: "GHI-333", avatar: null, status: "Pendiente", email: "andres.v@mail.escuelaing.edu.co", phone: "+57 321 4444444", vehicle: "Mazda 3 2019", role: "Conductor", rating: 5.0 },
+    { id: "U006", name: "Paola R.", plate: "JKL-444", avatar: null, status: "Pendiente", email: "paola.r@mail.escuelaing.edu.co", phone: "+57 318 7777777", vehicle: "Nissan Versa 2021", role: "Conductor", rating: 0 },
   ]);
 
   // responsive items per page
@@ -217,6 +220,32 @@ export default function AdminHome() {
 
   const severityLabel = useCallback((s?: string) => (s ? s.toUpperCase() : "N/A"), []);
 
+  // --- StarRating (copiado / igual a AdminUsers) ---
+  const StarRating: React.FC<{ rating: number; size?: number }> = ({ rating, size = 18 }) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              size={size}
+              className={`${
+                i < fullStars
+                  ? "fill-yellow-400 text-yellow-400"
+                  : i === fullStars && hasHalfStar
+                  ? "fill-yellow-400 text-yellow-400 opacity-50"
+                  : "fill-gray-200 text-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+        <span className="text-sm font-medium text-slate-700">{rating.toFixed(1)}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative">
       <div className="absolute inset-0 opacity-6 pointer-events-none" />
@@ -284,7 +313,7 @@ export default function AdminHome() {
           </article>
         </section>
 
-        {/* Reportes (carousel) - ARREGLADO FLEXBOX */}
+        {/* Reportes (carousel) */}
         <section className="mb-8 relative">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Nuevos reportes</h2>
@@ -292,7 +321,6 @@ export default function AdminHome() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Flecha Izquierda */}
             <button 
               onClick={repPrev} 
               disabled={repPage === 0} 
@@ -305,7 +333,6 @@ export default function AdminHome() {
               </svg>
             </button>
 
-            {/* Track Contenedor */}
             <div className="flex-1 overflow-hidden">
                 <div 
                 className="flex gap-6 transition-transform duration-700 ease-out px-1"
@@ -336,7 +363,6 @@ export default function AdminHome() {
                 </div>
             </div>
 
-            {/* Flecha Derecha */}
             <button 
               onClick={repNext} 
               disabled={repPage >= repPages - 1} 
@@ -362,7 +388,6 @@ export default function AdminHome() {
 
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
             <div className="flex items-center gap-4">
-                {/* Flecha Izquierda */}
                 <button 
                     onClick={userPrev} 
                     disabled={userPage === 0} 
@@ -373,7 +398,6 @@ export default function AdminHome() {
                     </svg>
                 </button>
 
-                {/* Track Contenedor */}
                 <div className="flex-1 overflow-hidden">
                     <div 
                         className="flex gap-6 transition-transform duration-700 ease-out px-1"
@@ -443,7 +467,6 @@ export default function AdminHome() {
                     </div>
                 </div>
 
-                {/* Flecha Derecha */}
                 <button 
                     onClick={userNext} 
                     disabled={userPage >= userPages - 1} 
@@ -483,7 +506,7 @@ export default function AdminHome() {
         </div>
       )}
 
-      {/* User detail modal */}
+      {/* User detail modal - estrellas debajo del avatar */}
       {isUserModalOpen && selectedUser && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeUserModal} />
@@ -495,13 +518,20 @@ export default function AdminHome() {
             </button>
 
             <div className="flex items-start gap-5 mb-6">
-                <div className="flex-shrink-0">
+                {/* Avatar + Estrellas debajo (alineado similar a la imagen) */}
+                <div className="flex-shrink-0 flex flex-col items-center">
                     {selectedUser.avatar ? (
                         <img src={selectedUser.avatar} alt={selectedUser.name} className="w-24 h-24 rounded-full object-cover border-4 border-blue-50" />
                     ) : (
                         <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-2xl font-bold text-slate-400">
                             {selectedUser.name.charAt(0)}
                         </div>
+                    )}
+                    {/* Estrellas debajo del avatar */}
+                    {typeof selectedUser.rating === "number" && (
+                      <div className="mt-3">
+                        <StarRating rating={selectedUser.rating} />
+                      </div>
                     )}
                 </div>
                 
@@ -531,7 +561,7 @@ export default function AdminHome() {
                 </div>
             </div>
 
-            {/* Actions Grid */}
+            {/* Actions Grid: eliminé "Acción rápida" */}
             <div className="grid grid-cols-2 gap-3 mb-3">
                 <button 
                     onClick={() => startConfirm("suspend_account")}
@@ -546,12 +576,6 @@ export default function AdminHome() {
                     Suspender perfil
                 </button>
             </div>
-            <button 
-                onClick={() => startConfirm("archive")}
-                className="w-full py-2.5 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 font-semibold hover:bg-blue-100 transition-colors"
-            >
-                Archivar
-            </button>
 
           </div>
         </div>
