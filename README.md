@@ -375,6 +375,11 @@ This section provides a visual demostration of how the web application will work
 
 ---
 
+# 👾 WEBSOCKET
+
+https://www.youtube.com/watch?v=YdA5qlW7NCg
+
+
 ## 🚀 Getting Started
 
 This section guides you through setting up the project locally. This project requires **Node.js**, please ensure you have it installed on your system before running the project commands. 

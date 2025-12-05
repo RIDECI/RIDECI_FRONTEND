@@ -1,4 +1,4 @@
-import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus, User } from "lucide-react"
+import { House, Calendar, ChartColumn, CircleAlert, Map, ArrowLeftFromLine, BellPlus, User, MessageCircleMore } from "lucide-react"
 import { Link } from "react-router-dom"
 
 import {
@@ -46,6 +46,12 @@ const items = [
     title: "Notificaciones",
     url: "/notifications",
     icon: BellPlus,
+  },
+
+  {
+    title: "Conversaciones",
+    url: "/conversations",
+    icon: MessageCircleMore,
   },
 ]
 

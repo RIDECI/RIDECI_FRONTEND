@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
+import { Conversations } from './modules/security/pages/Conversations'
 import { Travel } from './modules/trips'
 import SectionTravel from './modules/trips/pages/SectionTravel'
 import DetailsOfTravel from './modules/trips/pages/DetailsOfTravel'
@@ -17,6 +18,8 @@ function App(){
                     <Route index element={<Navigate to="/home" replace />} />
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
+                    <Route path="conversations" element={<Conversations />} />
+                    
                     <Route path="travels" element={<Travel />} />
                     <Route path="sectionTravel" element={<SectionTravel />} />
                     <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
@@ -24,6 +27,7 @@ function App(){
                 </Route>
             </Routes>
         </BrowserRouter>
+        
     )
 }
 
