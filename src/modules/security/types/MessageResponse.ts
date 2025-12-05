@@ -5,4 +5,5 @@ export interface MessageResponse {
     receiverId: string;
     content: string;
     timestamp?: Date;
+    status?: 'sent' | 'delivered' | 'read';
 }

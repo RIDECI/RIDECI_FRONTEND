@@ -31,6 +31,67 @@ export function Conversations(): JSX.Element {
   const [newMessage, setNewMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [currentUserId, setCurrentUserId] = useState<number>(55);
+  const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
+
+  const STORAGE_KEY = `chat_messages_${currentUserId}`;
+  const UNREAD_STORAGE_KEY = `unread_counts_${currentUserId}`;
+
+  const saveMessagesToStorage = (allMessages: MessageResponse[]) => {
+    try {
+      const storageData = {
+        userId: currentUserId,
+        timestamp: new Date().toISOString(),
+        messages: allMessages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp instanceof Date ? msg.timestamp.toISOString() : msg.timestamp
+        }))
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+    } catch (error) {
+      console.error('Error al guardar mensajes en localStorage:', error);
+    }
+  };
+
+  const saveUnreadCountsToStorage = (counts: Record<string, number>) => {
+    try {
+      localStorage.setItem(UNREAD_STORAGE_KEY, JSON.stringify(counts));
+    } catch (error) {
+      console.error('Error al guardar conteos no leídos:', error);
+    }
+  };
+
+  const loadMessagesFromStorage = (): MessageResponse[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return [];
+      
+      const data = JSON.parse(stored);
+      
+      if (data.userId === currentUserId && Array.isArray(data.messages)) {
+        return data.messages.map((msg: any) => ({
+          ...msg,
+          timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+          status: msg.status || 'sent' 
+        }));
+      }
+    } catch (error) {
+      console.error('Error al cargar mensajes desde localStorage:', error);
+    }
+    return [];
+  };
+
+  const loadUnreadCountsFromStorage = (): Record<string, number> => {
+    try {
+      const stored = localStorage.getItem(UNREAD_STORAGE_KEY);
+      if (!stored) return {};
+      
+      const data = JSON.parse(stored);
+      return data || {};
+    } catch (error) {
+      console.error('Error al cargar conteos no leídos:', error);
+      return {};
+    }
+  };
 
   const { sendMessage: sendWsMessage, isConnected } = useWebSocket({
     userId: currentUserId.toString(),
@@ -38,6 +99,7 @@ export function Conversations(): JSX.Element {
       const msg: MessageResponse = {
         ...message,
         timestamp: message.timestamp ? new Date(message.timestamp) : new Date(),
+        status: 'delivered' 
       };
       
       setMessages(prev => {
@@ -51,7 +113,20 @@ export function Conversations(): JSX.Element {
         );
         
         if (!exists) {
-          return [...prev, msg];
+          const updatedMessages = [...prev, msg];
+          
+          if (msg.senderId !== currentUserId.toString()) {
+            const chatKey = `${msg.conversationId}-${msg.senderId}`;
+            setUnreadCounts(prevCounts => {
+              const newCount = (prevCounts[chatKey] || 0) + 1;
+              const updatedCounts = { ...prevCounts, [chatKey]: newCount };
+              saveUnreadCountsToStorage(updatedCounts);
+              return updatedCounts;
+            });
+          }
+          
+          saveMessagesToStorage(updatedMessages);
+          return updatedMessages;
         }
         return prev;
       });
@@ -63,12 +138,48 @@ export function Conversations(): JSX.Element {
   const toggleUser = () => {
     setCurrentUserId(prev => (prev === 2002 ? 2001 : 2002));
     setSelectedChat(null);
-    setMessages([]);
   };
 
   useEffect(() => {
     loadConversations();
+    
+    const savedMessages = loadMessagesFromStorage();
+    if (savedMessages.length > 0) {
+      setMessages(savedMessages);
+    }
+    
+    const savedUnreadCounts = loadUnreadCountsFromStorage();
+    setUnreadCounts(savedUnreadCounts);
   }, [currentUserId]);
+
+  useEffect(() => {
+    if (selectedChat) {
+      const chatKey = `${selectedChat.conversationId}-${selectedChat.participantId}`;
+      if (unreadCounts[chatKey] > 0) {
+        sendWsMessage(
+          selectedChat.conversationId,
+          selectedChat.participantId.toString()
+        );
+        
+        setUnreadCounts(prev => {
+          const updated = { ...prev, [chatKey]: 0 };
+          saveUnreadCountsToStorage(updated);
+          return updated;
+        });
+        
+        setMessages(prev => 
+          prev.map(msg => {
+            if (msg.conversationId === selectedChat.conversationId && 
+                msg.senderId === selectedChat.participantId.toString() &&
+                msg.senderId !== currentUserId.toString()) {
+              return { ...msg, status: 'read' as const };
+            }
+            return msg;
+          })
+        );
+      }
+    }
+  }, [selectedChat]);
 
   const generateIndividualChats = (convs: ConversationResponse[]): IndividualChat[] => {
     const chats: IndividualChat[] = [];
@@ -128,6 +239,10 @@ export function Conversations(): JSX.Element {
     setError("");
   };
 
+  const handleCloseChat = (): void => {
+    setSelectedChat(null);
+  };
+
   const handleSendMessage = (): void => {
     if (!newMessage.trim() || !selectedChat || !selectedChat.isActive) return;
 
@@ -142,17 +257,20 @@ export function Conversations(): JSX.Element {
     );
 
     if (sent) {
-      setMessages(prev => [
-        ...prev,
-        { 
-          conversationId, 
-          senderId, 
-          receiverId, 
-          content: newMessage, 
-          timestamp: new Date(),
-          messageId: `temp-${Date.now()}`
-        }
-      ]);
+      const newMsg: MessageResponse = { 
+        conversationId, 
+        senderId, 
+        receiverId, 
+        content: newMessage, 
+        timestamp: new Date(),
+        messageId: `temp-${Date.now()}`,
+        status: 'sent' 
+      };
+      
+      const updatedMessages = [...messages, newMsg];
+      setMessages(updatedMessages);
+      saveMessagesToStorage(updatedMessages);
+      
       setNewMessage("");
     } else {
       setError("No se pudo enviar el mensaje, WebSocket desconectado");
@@ -192,7 +310,17 @@ export function Conversations(): JSX.Element {
       )
     );
     
-    return convMsgs[convMsgs.length - 1]?.content || "No hay mensajes";
+    const lastMsg = convMsgs[convMsgs.length - 1];
+    if (!lastMsg) return "No hay mensajes";
+  
+    return lastMsg.content.length > 40 
+      ? `${lastMsg.content.substring(0, 40)}...` 
+      : lastMsg.content;
+  };
+
+  const getUnreadCount = (conversationId: string, participantId: number): number => {
+    const chatKey = `${conversationId}-${participantId}`;
+    return unreadCounts[chatKey] || 0;
   };
 
   const chatsByTravel = individualChats.reduce((acc, chat) => {
@@ -210,25 +338,30 @@ export function Conversations(): JSX.Element {
           onClick={toggleUser} 
           variant="outline" 
           size="sm"
-          className="text-sm"
+          className="text-sm border-gray-300 shadow-sm"
         >
           Cambiar usuario (actual: {currentUserId})
         </Button>
       </div>
 
-      <ChatSidebar
-        chats={individualChats}
-        selectedChat={selectedChat}
-        onSelectChat={handleSelectChat}
-        getLastMessage={getLastMessage}
-        chatsByTravel={chatsByTravel}
-        currentUserId={currentUserId}
-      />
+      {/* Sidebar con borde derecho */}
+      <div className="border-r-2 border-gray-200">
+        <ChatSidebar
+          chats={individualChats}
+          selectedChat={selectedChat}
+          onSelectChat={handleSelectChat}
+          getLastMessage={getLastMessage}
+          getUnreadCount={getUnreadCount} 
+          chatsByTravel={chatsByTravel}
+          currentUserId={currentUserId}
+        />
+      </div>
 
-      <div className="flex-1 flex flex-col">
+      {/* Área de conversación con borde izquierdo */}
+      <div className="flex-1 flex flex-col border-l-2 border-gray-200">
         {selectedChat ? (
           <>
-            <ChatHeader chat={selectedChat} />
+            <ChatHeader chat={selectedChat} onCloseChat={handleCloseChat} />
             
             <div className="flex-1 overflow-y-auto p-6 bg-white">
               {getMessagesForSelectedChat().length === 0 ? (
@@ -259,6 +392,12 @@ export function Conversations(): JSX.Element {
           </>
         ) : (
           <EmptyChatState />
+        )}
+        
+        {error && (
+          <div className="p-2 mx-4 my-2 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600 text-center">{error}</p>
+          </div>
         )}
       </div>
     </div>
