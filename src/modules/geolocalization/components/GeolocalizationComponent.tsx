@@ -258,6 +258,7 @@ function GeolocalizationComponent() {
           Detalles de Viaje
         </Button>
         <Button 
+          onClick={() => navigate('/app/conversations')}
           className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
         >
           Ir al chat con el conductor

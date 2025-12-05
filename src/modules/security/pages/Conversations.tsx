@@ -10,6 +10,8 @@ import { ChatHeader } from "../components/ChatHeader";
 import { MessageBubble } from "../components/MessageBubble";
 import { ChatInput } from "../components/ChatInput";
 import { EmptyChatState } from "../components/EmptyChatState";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 export interface IndividualChat {
   id: string;
@@ -23,6 +25,7 @@ export interface IndividualChat {
 }
 
 export function Conversations(): JSX.Element {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [individualChats, setIndividualChats] = useState<IndividualChat[]>([]);
   const [selectedChat, setSelectedChat] = useState<IndividualChat | null>(null);
@@ -30,7 +33,12 @@ export function Conversations(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [newMessage, setNewMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [currentUserId, setCurrentUserId] = useState<number>(55);
+  
+  const [currentUserId, setCurrentUserId] = useState<number>(() => {
+    const userId = localStorage.getItem('userId');
+    return userId ? parseInt(userId) : 55;
+  });
+  
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   const STORAGE_KEY = `chat_messages_${currentUserId}`;
@@ -71,7 +79,7 @@ export function Conversations(): JSX.Element {
         return data.messages.map((msg: any) => ({
           ...msg,
           timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-          status: msg.status || 'sent' 
+          status: msg.status || 'sent'
         }));
       }
     } catch (error) {
@@ -99,7 +107,7 @@ export function Conversations(): JSX.Element {
       const msg: MessageResponse = {
         ...message,
         timestamp: message.timestamp ? new Date(message.timestamp) : new Date(),
-        status: 'delivered' 
+        status: 'delivered'
       };
       
       setMessages(prev => {
@@ -140,6 +148,10 @@ export function Conversations(): JSX.Element {
     setSelectedChat(null);
   };
 
+  const handleBackToTravelDetails = () => {
+    navigate('/app/detailsOfTravel');
+  };
+
   useEffect(() => {
     loadConversations();
     
@@ -158,6 +170,7 @@ export function Conversations(): JSX.Element {
       if (unreadCounts[chatKey] > 0) {
         sendWsMessage(
           selectedChat.conversationId,
+          "",
           selectedChat.participantId.toString()
         );
         
@@ -264,7 +277,7 @@ export function Conversations(): JSX.Element {
         content: newMessage, 
         timestamp: new Date(),
         messageId: `temp-${Date.now()}`,
-        status: 'sent' 
+        status: 'sent'
       };
       
       const updatedMessages = [...messages, newMsg];
@@ -333,6 +346,18 @@ export function Conversations(): JSX.Element {
 
   return (
     <div className="h-screen bg-gray-50 flex">
+      <div className="absolute top-4 left-4 z-10">
+        <Button 
+          onClick={handleBackToTravelDetails}
+          variant="outline" 
+          size="sm"
+          className="text-sm border-gray-300 shadow-sm flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Volver a detalles de  viaje
+        </Button>
+      </div>
+
       <div className="absolute top-4 right-4 z-10">
         <Button 
           onClick={toggleUser} 
@@ -344,20 +369,18 @@ export function Conversations(): JSX.Element {
         </Button>
       </div>
 
-      {/* Sidebar con borde derecho */}
       <div className="border-r-2 border-gray-200">
         <ChatSidebar
           chats={individualChats}
           selectedChat={selectedChat}
           onSelectChat={handleSelectChat}
           getLastMessage={getLastMessage}
-          getUnreadCount={getUnreadCount} 
+          getUnreadCount={getUnreadCount}
           chatsByTravel={chatsByTravel}
           currentUserId={currentUserId}
         />
       </div>
 
-      {/* Área de conversación con borde izquierdo */}
       <div className="flex-1 flex flex-col border-l-2 border-gray-200">
         {selectedChat ? (
           <>

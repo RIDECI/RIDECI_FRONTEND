@@ -364,7 +364,9 @@ function DetailsOfTravelComponent(){
             </div>
             <div className="mt-12 pt-8 border-t-2 border-gray-200">
                 <div className="flex justify-between gap-6">
-                    <Button className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50 flex items-center justify-center gap-3">
+                    <Button 
+                        onClick={() => navigate('/app/conversations')}
+                        className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50 flex items-center justify-center gap-3">
                         <MessageSquare className="w-6 h-6" />
                         Chat Con Pasajeros
                     </Button>
