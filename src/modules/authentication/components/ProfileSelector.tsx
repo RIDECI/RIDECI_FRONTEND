@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Car, UserCircle, Users } from 'lucide-react';
 import type {Profile, ProfileType} from '../types/profile.types';
+import type {Profile, ProfileType} from '../types/user.d.ts';
+
+import ImgConductor from "../../../assets/Conductor.jpeg";
 
 interface ProfileSelectorProps {
     onProfileSelect?: (profileId: ProfileType) => void;
@@ -17,6 +20,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             title: 'Conductor',
             icon: Car,
             image: "/conductor.png"
+            image: ImgConductor,
         },
         {
             id: 'pasajero',
@@ -44,6 +48,7 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             {/* Title*/}
             <h2 className="text-white text-5xl font-semibold text-center mb-16 drop-shadow-lg">
                 Escoge tu rol para el registro
+                ¿Qué rol deseas hoy?
             </h2>
 
             {/* Profile Cards */}

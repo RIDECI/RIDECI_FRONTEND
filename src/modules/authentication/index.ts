@@ -4,3 +4,6 @@ export * from './pages/HomePassenger';
 export * from './pages/HomeCompanion';
 export * from './components/ProfileSelector';
 export * from './types/profile.types';
+export * from "./types/user"
+export * from "./pages/login";
+export * from "./pages/register";
