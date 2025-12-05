@@ -15,7 +15,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
   const handleUpdateConfirm = () => {
     setOpenUpdate(false);
-    navigate("/updateProfile");
+    navigate("/app/updateProfile");
   };
 
   return (

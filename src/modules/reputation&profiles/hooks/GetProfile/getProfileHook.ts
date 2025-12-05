@@ -20,7 +20,7 @@ export function useGetProfile() {
 
         try {
             const response = await fetch(
-                `https://troyareputationbackend-production.up.railway.app/profiles/${id}`,
+                `https://troyareputationbackend-production-e75f.up.railway.app/profiles/${id}`,
                 {
                     method: 'GET',
                     headers: {

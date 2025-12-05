@@ -6,7 +6,7 @@ export interface DeleteProfileResponse {
 export async function deleteProfileHook(profileId: string): Promise<DeleteProfileResponse> {
     try {
         const response = await fetch(
-            `https://troyareputationbackend-production.up.railway.app/profiles/${profileId}`,
+            `https://troyareputationbackend-production-e75f.up.railway.app/profiles/${profileId}`,
             {
                 method: 'DELETE',
                 headers: {

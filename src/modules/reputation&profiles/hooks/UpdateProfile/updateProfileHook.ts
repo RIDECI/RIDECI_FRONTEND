@@ -35,7 +35,7 @@ export function useUpdateProfile() {
         setError(null);
 
         try {
-            const response = await fetch(`https://troyareputationbackend-production.up.railway.app/profiles/${id}`, {
+            const response = await fetch(`https://troyareputationbackend-production-e75f.up.railway.app/profiles/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
