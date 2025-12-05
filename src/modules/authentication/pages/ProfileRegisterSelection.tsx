@@ -10,13 +10,13 @@ export const ProfileRegisterSelectionPage: React.FC = () => {
         console.log('Perfil seleccionado:', profileId);
         localStorage.setItem('selectedProfile', profileId);
 
-        // Navegar según el perfil seleccionado
+        // Navegar según el rol
         if (profileId === 'conductor') {
             navigate('/home-driver');
         } else if (profileId === 'pasajero') {
-            navigate('/home'); // o crear /home-passenger
+            navigate('/home-passenger');
         } else if (profileId === 'acompanante') {
-            navigate('/home'); // o crear /home-companion
+            navigate('/home-companion');
         }
     };
 
