@@ -1,24 +1,53 @@
-import { CarouselPick } from "../components/pickCorrousel";
-import "./rolePick.css";
-import Logo from "../../../assets/RIDECI Logo (Blanco).png";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ProfileSelector } from '../components/ProfileSelector';
+import type {ProfileType} from '../types/user.d.ts';
 
-function CarouselSelection() {
-  return (
-    <div className="carousel-page">
-      <div className="logo-container">
-        <img src={Logo} alt="RIDECI Logo" className="logo-image" />
-      </div>
+import RideciLogo from "../../../assets/RIDECI Logo (Blanco).png";
 
-      <div className="selector">
-        <h1 className="selector-title">Selecciona tu rol</h1>
+export const ProfileRegisterSelectionPage: React.FC = () => {
+    const navigate = useNavigate();
 
-        <div className="Carousel">
-          <CarouselPick />
+    const handleProfileSelect = (profileId: ProfileType) => {
+        console.log('Perfil seleccionado:', profileId);
+        localStorage.setItem('selectedProfile', profileId);
+
+        // Navegar según el perfil seleccionado
+        if (profileId === 'conductor') {
+            navigate('/home-driver');
+        } else if (profileId === 'pasajero') {
+            navigate('/home-passenger');
+
+        } else if (profileId === 'acompanante') {
+            navigate('/home-companion');
+        }
+    };
+
+    return (
+        <div
+            className="min-h-screen flex items-center justify-center p-4 relative"
+            style={{
+                backgroundImage: 'url(/background-1920x1080.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+            }}
+        >
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-blue-600/40"></div>
+
+            {/* Logo */}
+            <div className="absolute top-2 right-2 z-20">
+                <img
+                    src={RideciLogo}
+                    alt="Rideci Logo"
+                    className="w-72 h-auto object-contain drop-shadow-2xl"
+                />
+            </div>
+
+            <div className="relative w-full max-w-5xl z-10">
+                <ProfileSelector onProfileSelect={handleProfileSelect} />
+            </div>
         </div>
-      </div>
-
-    </div>
-  );
-}
-
-export default CarouselSelection;
+    );
+};

@@ -1,5 +1,5 @@
 import { useState } from "react";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface LoginRequest {
   email: string;
@@ -17,7 +17,7 @@ interface AuthResponse {
 export const useLogin = () => {
   const [authData, setAuthData] = useState<AuthResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleLogin = async (data: LoginRequest) => {
     setError(null);
@@ -57,7 +57,8 @@ export const useLogin = () => {
       localStorage.setItem("refreshToken", result.refreshToken);
       localStorage.setItem("userId", result.institutionalId.toString());
 
-      //navigate("/dashboard");
+      navigate("/pickRole");
+      
     } catch (err: any) {
       setError("Error de conexión con el servidor.");
       console.log("Error en la solicitud:", err.message);

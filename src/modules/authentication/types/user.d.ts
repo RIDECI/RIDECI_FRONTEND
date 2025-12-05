@@ -32,3 +32,12 @@ export interface User {
   role: Role;
   state: AccountState;
 }
+
+export type ProfileType = 'conductor' | 'pasajero' | 'acompanante';
+
+export interface Profile {
+    id: ProfileType;
+    title: string;
+    icon: LucideIcon;
+    image: string;
+}
