@@ -1,4 +1,4 @@
-import UpdateProfileForm from "@/modules/reputation&profiles/components/FormProfile/UpdateProfileForm";
+import ProfileForm from "@/modules/reputation&profiles/components/FormProfile/ProfileForm";
 
 export default function UpdateProfile() {
   return (
@@ -6,7 +6,7 @@ export default function UpdateProfile() {
       <main className="flex-1 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <div className="min-h-full flex flex-col justify-center items-center p-6 md:p-10">
           <div className="w-full max-w-5xl">
-            <UpdateProfileForm />
+            <ProfileForm />
           </div>
         </div>
       </main>

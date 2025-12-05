@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import UpdateProfilePopUp from "./UpdateProfilePopUp";
 import DeleteProfilePopUp from "./DeleteProfilePopUp";
 
-export default function Buttons({ onProfileDeleted, profileId }) {
+export default function Buttons() {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -34,7 +34,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
       <Button
         className="bg-blue-600 text-white px-6"
-        onClick={() => navigate("/tripHistory")}
+        onClick={() => navigate("/app/tripHistory")}
       >
         Historial de Viajes
       </Button>
@@ -56,8 +56,6 @@ export default function Buttons({ onProfileDeleted, profileId }) {
       <DeleteProfilePopUp
         open={openDelete}
         onClose={() => setOpenDelete(false)}
-        onProfileDeleted={handleProfileDeleted}
-        profileId={profileId}
       />
     </>
   );

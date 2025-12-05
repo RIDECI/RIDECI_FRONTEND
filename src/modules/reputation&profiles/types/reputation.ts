@@ -1,5 +1,6 @@
 export interface Reputation{
-    wightedScores: Record<string, number>;
+    wightedScores: Map<number,number>;
     average: number;
-    totalRatings: number;
+    totalRatings:number
+    
 }

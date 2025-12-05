@@ -1,45 +1,10 @@
 "use client";
-import { useState } from "react";
 import { IoWarningOutline } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { deleteProfileHook } from "../../hooks/DeleteProfile/deleteProfileHook";
 
-export default function DeleteProfilePopUp({ open, onClose, onProfileDeleted, profileId }) {
+export default function DeleteProfilePopUp({ open, onClose }) {
   if (!open) return null;
-
-  const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleDelete = async () => {
-    setError("");
-    setLoading(true);
-
-    // In a real implementation, we would need to authenticate the user before deletion
-    // For now, we'll call the delete hook with the passed profile ID
-    const result = await deleteProfileHook(profileId || "1"); // Use provided ID or default to "1"
-
-    if (result.success) {
-      if (onProfileDeleted) {
-        onProfileDeleted();
-      }
-      onClose();
-    } else {
-      setError(result.error || "Error al eliminar el perfil");
-    }
-
-    setLoading(false);
-  };
-
-  const handleConfirm = () => {
-    if (!password) {
-      setError("Por favor ingresa tu contraseña");
-      return;
-    }
-
-    handleDelete();
-  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -69,11 +34,8 @@ export default function DeleteProfilePopUp({ open, onClose, onProfileDeleted, pr
           <Input
             type="password"
             placeholder="Introduce tu contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             className="w-full"
           />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
 
         {/* Botones */}
@@ -81,17 +43,12 @@ export default function DeleteProfilePopUp({ open, onClose, onProfileDeleted, pr
           <Button
             className="bg-blue-500 text-white px-6"
             onClick={onClose}
-            disabled={loading}
           >
             Cancelar
           </Button>
 
-          <Button
-            className="bg-red-500 text-white px-6"
-            onClick={handleConfirm}
-            disabled={loading}
-          >
-            {loading ? "Eliminando..." : "Eliminar Perfil"}
+          <Button className="bg-red-500 text-white px-6">
+            Eliminar Perfil
           </Button>
         </div>
       </div>

@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Star, ThumbsUp, Clock, MessageCircle } from "lucide-react";
-import type { Profile } from '../../types/profile';
 
-interface BadgesProps {
-  profile: Profile | null;
-}
-
-export default function Badges({ profile }: BadgesProps) {
-  // Mock badges - in a real app, these would come from the profile
+export default function Badges() {
   const badges = [
     { icon: <Star />, label: "Buen Conductor" },
     { icon: <Clock />, label: "Muy Puntual" },
@@ -20,16 +14,6 @@ export default function Badges({ profile }: BadgesProps) {
 
   const [showAll, setShowAll] = useState(false);
 
-  if (!profile) {
-    return (
-      <div>
-        <h3 className="text-xl font-semibold mb-4">Insignias</h3>
-        <p>Cargando insignias...</p>
-      </div>
-    );
-  }
-
-  // In a real implementation, use badges from the profile
   const displayedBadges = showAll ? badges : badges.slice(0, 3);
 
   return (

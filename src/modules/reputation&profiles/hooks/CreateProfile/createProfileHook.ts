@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Profile, ProfileBackend } from '../../types/profile';
+import type { Profile } from '../../types/profile';
 import type { Reputation } from '../../types/reputation';
 import type { ProfileType, IdentificationType } from '../../types/enums';
 
@@ -17,12 +17,14 @@ export interface ProfileRequest {
     identificationNumber: string;
     address: string;
     profilePictureUrl: string;
-    birthDate: Date | string;
+    birthDate: Date;
 }
+
+export interface ProfileBackendResponse extends ProfileRequest {}
 
 export interface ProfileResponse {
     success: boolean;
-    data?: Profile;
+    data?: ProfileBackendResponse;
     error?: string;
 }
 
@@ -39,22 +41,14 @@ export function useCreateProfile() {
         setError(null);
 
         try {
-            // Format the request body to ensure proper date serialization
-            const requestBody = {
-                ...profileRequest,
-                birthDate: typeof profileRequest.birthDate === 'string'
-                    ? profileRequest.birthDate
-                    : profileRequest.birthDate.toISOString(),
-            };
-
             const response = await fetch(
-                `https://troyareputationbackend-production-e75f.up.railway.app/profiles/${type}`,
+                `https://troyareputationbackend-staging.up.railway.app/profiles/${type}`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody),
+                    body: JSON.stringify(profileRequest),
                 }
             );
 
@@ -63,19 +57,16 @@ export function useCreateProfile() {
                 throw new Error(errorData.message || `Error: ${response.status}`);
             }
 
-            const result: ProfileBackend = await response.json();
+            const result: ProfileBackendResponse = await response.json();
 
-            // Create profile object with proper date handling
-            const profileData: Profile = {
+            setProfile({
                 ...result,
                 birthDate: new Date(result.birthDate),
-            };
-
-            setProfile(profileData);
+            });
 
             return {
                 success: true,
-                data: profileData,
+                data: result,
             };
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error creating profile';

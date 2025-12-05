@@ -1,15 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectItem, SelectContent } from "@/components/ui/select";
 import { BookOpen } from "lucide-react";
-import type { UpdateProfileRequest } from "../../hooks/UpdateProfile/updateProfileHook";
-
-interface ProfileInfoProps {
-  photo: string | null;
-  onPhotoChange: (file: File | null) => void;
-  role?: string;
-  formData?: Partial<UpdateProfileRequest>;
-  onFormDataChange?: (data: Partial<UpdateProfileRequest>) => void;
-}
 
 // Definimos la interfaz exacta para recibir los datos del padre
 interface ProfileInfoProps {
@@ -110,7 +101,7 @@ export default function ProfileInfo({
             <label className="font-medium">Rol</label>
             <div className="h-11 flex items-center px-3 bg-slate-100 border border-slate-300 rounded-md">
               <span className="text-slate-700 capitalize">
-                {role ?? formData?.profileType ?? "No asignado"}
+                {role ?? "No asignado"}
               </span>
             </div>
           </div>
@@ -165,7 +156,6 @@ export default function ProfileInfo({
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">Programa</label>
                 <Input
-                  name="program"
                   placeholder="Ingeniería de Sistemas"
                   className="h-11 bg-slate-50 border-slate-200"
                   value={formData.program}
@@ -176,7 +166,6 @@ export default function ProfileInfo({
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">Semestre</label>
                 <Input
-                  name="programSemester"
                   placeholder="7"
                   type="number"
                   className="h-11 bg-slate-50 border-slate-200"
