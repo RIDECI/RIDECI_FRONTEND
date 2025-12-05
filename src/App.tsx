@@ -10,13 +10,8 @@ import { Travel } from './modules/trips'
 import SectionTravel from './modules/trips/pages/SectionTravel'
 import DetailsOfTravel from './modules/trips/pages/DetailsOfTravel'
 import Geolocalization from './modules/geolocalization/pages/Geolocalization'
-import { ProfileRegisterSelectionPage } from './modules/authentication/pages/ProfileRegisterSelection'
-import { HomeDriver } from './modules/authentication/pages/HomeDriver.tsx'
-import { HomePassenger } from './modules/authentication/pages/HomePassenger.tsx'
-import { HomeCompanion } from './modules/authentication/pages/HomeCompanion.tsx'
 import { Layout } from './Layout'
 import { Home } from './Home'
-import { Statistics } from './modules/statistics and sustainability'
 import SelectProfile from './modules/reputation&profiles/pages/SelectProfile/SelectProfile'
 import UpdateProfile from './modules/reputation&profiles/pages/UpdateProfile/UpdateProfile'
 import Profile from './modules/reputation&profiles/pages/ConsultProfile/Profile'
@@ -25,23 +20,10 @@ import CreateProfile from './modules/reputation&profiles/pages/CreateProfile/Cre
 import ViewAllComments from './modules/reputation&profiles/pages/ViewAllComments/ViewAllComments'
 
 
-
-
 function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route
-                    path="/authentication/profile-selection"
-                    element={<ProfileRegisterSelectionPage />}
-                />
-
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Navigate to="/home" replace />} />
-                    <Route path="home" element={<Home />} />
-                    <Route path="home-driver" element={<HomeDriver />} />
-                    <Route path="home-passenger" element={<HomePassenger />} />
-                    <Route path="home-companion" element={<HomeCompanion />} />
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/pickRole" element={<ProfileRegisterSelectionPage />} />
                 <Route path="/login" element={<Login />} />

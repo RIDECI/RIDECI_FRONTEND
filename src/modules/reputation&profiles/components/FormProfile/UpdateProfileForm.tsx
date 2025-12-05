@@ -76,7 +76,7 @@ export default function UpdateProfileForm() {
     const response = await updateProfile(formData.id.toString(), profileData);
 
     if (response.success) {
-      navigate("/profile");
+      navigate("/app/profile");
     }
   };
 

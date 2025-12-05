@@ -37,7 +37,7 @@ export default function FormSelectProfile() {
       return;
     }
 
-    navigate("/createProfile", {
+    navigate("/app/createProfile", {
     state: {
     selectedRole: selected?.name,
   },

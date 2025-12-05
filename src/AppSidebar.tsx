@@ -22,6 +22,11 @@ const items = [
     icon: House,
   },
   {
+    title: "Perfil",
+    url: "/app/selectProfile",
+    icon: User,
+  },
+  {
     title: "Calendario",
     url: "/app/calendar",
     icon: Calendar,
@@ -46,7 +51,6 @@ const items = [
     url: "/app/notifications",
     icon: BellPlus,
   },
-
   {
     title: "Conversaciones",
     url: "/app/conversations",
@@ -102,13 +106,14 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              asChild 
               className="text-white hover:bg-red-500/20 hover:text-white transition-all hover:scale-[1.02] rounded-lg backdrop-blur-sm hover:shadow-md border border-transparent hover:border-red-500/30 px-3 py-2"
+              onClick={() => {
+                localStorage.clear();
+                globalThis.location.href = '/login';
+              }}
             >
-              <a href="#">
-                <ArrowLeftFromLine className="w-5 h-5 mr-3" />
-                <span className="font-medium">Cerrar Sesión</span>
-              </a>
+              <ArrowLeftFromLine className="w-5 h-5 mr-3" />
+              <span className="font-medium">Cerrar Sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

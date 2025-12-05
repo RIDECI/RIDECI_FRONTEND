@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Car, UserCircle, Users } from 'lucide-react';
-import type {Profile, ProfileType} from '../types/profile.types';
 import type {Profile, ProfileType} from '../types/user.d.ts';
 
 import ImgConductor from "../../../assets/Conductor.jpeg";
@@ -19,7 +18,6 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
             id: 'conductor',
             title: 'Conductor',
             icon: Car,
-            image: "/conductor.png"
             image: ImgConductor,
         },
         {

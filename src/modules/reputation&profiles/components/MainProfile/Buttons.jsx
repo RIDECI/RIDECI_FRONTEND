@@ -15,7 +15,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
   const handleUpdateConfirm = () => {
     setOpenUpdate(false);
-    navigate("/updateProfile");
+    navigate("/app/updateProfile");
   };
 
   const handleProfileDeleted = () => {
@@ -42,7 +42,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
       <Button
         className="bg-blue-600 text-white px-6"
-        onClick={() => navigate("/tripHistory")}
+        onClick={() => navigate("/app/tripHistory")}
       >
         Historial de Viajes
       </Button>
