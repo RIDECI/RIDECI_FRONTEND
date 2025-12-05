@@ -1,6 +1,6 @@
 "use client";
 
-import TripCard from "../../components/TripCard/TripCard";
+import TripCard from "@/modules/reputation&profiles/components/TripCard/TripCard";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

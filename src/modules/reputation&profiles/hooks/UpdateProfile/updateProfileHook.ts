@@ -35,14 +35,6 @@ export function useUpdateProfile() {
         setError(null);
 
         try {
-            // Format the request body to ensure proper date serialization
-            const requestBody = {
-                ...profileRequest,
-                birthDate: typeof profileRequest.birthDate === 'string'
-                    ? profileRequest.birthDate
-                    : profileRequest.birthDate.toISOString(),
-            };
-
             const response = await fetch(`https://troyareputationbackend-production.up.railway.app/profiles/${id}`, {
                 method: 'PUT',
                 headers: {

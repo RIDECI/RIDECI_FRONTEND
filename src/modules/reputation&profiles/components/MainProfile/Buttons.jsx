@@ -15,15 +15,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
   const handleUpdateConfirm = () => {
     setOpenUpdate(false);
-    navigate("/app/updateProfile");
-  };
-
-  const handleProfileDeleted = () => {
-    // Navigate to home or create profile screen after deletion
-    navigate("/");
-    if (onProfileDeleted) {
-      onProfileDeleted();
-    }
+    navigate("/updateProfile");
   };
 
   return (
@@ -42,7 +34,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
 
       <Button
         className="bg-blue-600 text-white px-6"
-        onClick={() => navigate("/app/tripHistory")}
+        onClick={() => navigate("/tripHistory")}
       >
         Historial de Viajes
       </Button>
