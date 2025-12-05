@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 
 export interface ButtonProps{
-    title: string
+    readonly title: string
 }
 
-function ButtonCancel({title}: ButtonProps){
+function ButtonCancel({title}: Readonly<ButtonProps>){
     const navigate = useNavigate()
 
     const handleSubmit = () => {

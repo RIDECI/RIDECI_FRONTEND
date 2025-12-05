@@ -39,6 +39,7 @@ export default function ViewAllComments() {
         <div className="flex items-center gap-3 mb-8">
             <button
             onClick={() => navigate("/profile")}
+            onClick={() => navigate("/app/profile")}
             className="p-2 rounded-full hover:bg-gray-200 transition"
             >
             <ChevronLeft className="w-7 h-7" />

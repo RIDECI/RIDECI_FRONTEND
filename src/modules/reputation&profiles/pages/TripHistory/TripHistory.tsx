@@ -1,6 +1,7 @@
 "use client";
 
 import TripCard from "../../components/TripCard/TripCard";
+import TripCard from "@/modules/reputation&profiles/components/TripCard/TripCard";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +17,7 @@ export default function TripHistory() {
           <ArrowLeft
             className="w-6 h-6 text-slate-700 cursor-pointer hover:text-slate-900 transition"
             onClick={() => navigate("/profile")}
+            onClick={() => navigate("/app/profile")}
           />
           <h1 className="text-3xl font-bold text-slate-900">Historial de Viajes</h1>
         </div>

@@ -24,6 +24,7 @@ export default function Buttons({ onProfileDeleted, profileId }) {
     if (onProfileDeleted) {
       onProfileDeleted();
     }
+    navigate("/app/updateProfile");
   };
 
   return (

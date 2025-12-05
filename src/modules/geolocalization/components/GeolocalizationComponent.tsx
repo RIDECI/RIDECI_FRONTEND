@@ -96,7 +96,7 @@ function GeolocalizationComponent() {
           <p className="text-red-700 mb-6">{error}</p>
           <div className="flex gap-3 justify-center">
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => globalThis.location.reload()}
               className="bg-red-500 hover:bg-red-600 text-white"
             >
               Reintentar

@@ -27,6 +27,7 @@ export default function CommentList({ profile }: CommentListProps) {
 
   const handleSeeAll = () => {
     navigate("/comments");
+    navigate("/app/comments");
   };
 
   if (!profile) {

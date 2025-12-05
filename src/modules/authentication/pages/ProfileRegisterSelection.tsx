@@ -18,6 +18,8 @@ export const ProfileRegisterSelectionPage: React.FC = () => {
         } else if (profileId === 'acompanante') {
             navigate('/home-companion');
         }
+        // Navegar al home
+        navigate('/app');
     };
 
     return (

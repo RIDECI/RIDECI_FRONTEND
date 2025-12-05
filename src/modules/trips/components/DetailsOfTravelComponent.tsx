@@ -5,7 +5,48 @@ import type { TravelBackendResponse } from "../hooks/createTravelHook";
 import { deleteTravelHook } from "../hooks/deleteTravelHook";
 import { useGetTravelById } from "../hooks/getTravelByIdHook";
 
+// Helper functions for status styling
+const getStatusCardClasses = (status?: string): string => {
+    if (status === 'ACTIVE') return 'from-yellow-50 to-yellow-100 border-yellow-200/50';
+    if (status === 'IN_COURSE') return 'from-green-50 to-green-100 border-green-200/50';
+    if (status === 'COMPLETED') return 'from-blue-50 to-blue-100 border-blue-200/50';
+    return 'from-red-50 to-red-100 border-red-200/50';
+};
 
+const getStatusIconClasses = (status?: string): string => {
+    if (status === 'ACTIVE') return 'bg-yellow-500';
+    if (status === 'IN_COURSE') return 'bg-green-500';
+    if (status === 'COMPLETED') return 'bg-[#0B8EF5]';
+    return 'bg-red-500';
+};
+
+const getStatusLabelClasses = (status?: string): string => {
+    if (status === 'ACTIVE') return 'text-yellow-700';
+    if (status === 'IN_COURSE') return 'text-green-700';
+    if (status === 'COMPLETED') return 'text-[#0B8EF5]';
+    return 'text-red-700';
+};
+
+const getStatusTextClasses = (status?: string): string => {
+    if (status === 'ACTIVE') return 'text-yellow-900';
+    if (status === 'IN_COURSE') return 'text-green-900';
+    if (status === 'COMPLETED') return 'text-blue-900';
+    return 'text-red-900';
+};
+
+const getStatusText = (status?: string): string => {
+    if (status === 'ACTIVE') return 'Activo';
+    if (status === 'IN_COURSE') return 'En curso';
+    if (status === 'COMPLETED') return 'Completado';
+    return 'Cancelado';
+};
+
+const getStatusSubtextClasses = (status?: string): string => {
+    if (status === 'ACTIVE') return 'text-yellow-600';
+    if (status === 'IN_COURSE') return 'text-green-600';
+    if (status === 'COMPLETED') return 'text-blue-600';
+    return 'text-red-600';
+};
 
 const mockTripDetails = {
     origin: "Portal Norte",
@@ -120,7 +161,7 @@ function DetailsOfTravelComponent(){
                 <Button 
                     variant="ghost" 
                     size="icon"
-                    onClick={() => navigate('/sectionTravel')}
+                    onClick={() => navigate('/app/sectionTravel')}
                     className="hover:bg-gray-100 hover:scale-110 transition-all duration-200 rounded-full"
                 >
                     <ArrowLeft className="w-6 h-6 text-black" />
@@ -135,7 +176,7 @@ function DetailsOfTravelComponent(){
                     <Button
                         onClick={() => {
                             console.log('Navigating to edit with travel:', travel);
-                            navigate('/travels', { state: { travel } });
+                            navigate('/app/travels', { state: { travel } });
                         }}
                         className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-xl px-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50">
                         Editar Viaje
@@ -192,45 +233,17 @@ function DetailsOfTravelComponent(){
                     <p className="text-xs text-gray-500 mt-1">Viaje</p>
                 </div>
 
-                <div className={`bg-gradient-to-br rounded-2xl p-4 border shadow-md hover:shadow-lg transition-all duration-300 ${
-                    travel?.status === 'ACTIVE' ? 'from-yellow-50 to-yellow-100 border-yellow-200/50' :
-                    travel?.status === 'IN_COURSE' ? 'from-green-50 to-green-100 border-green-200/50' :
-                    travel?.status === 'COMPLETED' ? 'from-blue-50 to-blue-100 border-blue-200/50' :
-                    'from-red-50 to-red-100 border-red-200/50'
-                }`}>
+                <div className={`bg-gradient-to-br rounded-2xl p-4 border shadow-md hover:shadow-lg transition-all duration-300 ${getStatusCardClasses(travel?.status)}`}>
                     <div className="flex items-center gap-3 mb-2">
-                        <div className={`rounded-full p-2 ${
-                            travel?.status === 'ACTIVE' ? 'bg-yellow-500' :
-                            travel?.status === 'IN_COURSE' ? 'bg-green-500' :
-                            travel?.status === 'COMPLETED' ? 'bg-[#0B8EF5]' :
-                            'bg-red-500'
-                        }`}>
+                        <div className={`rounded-full p-2 ${getStatusIconClasses(travel?.status)}`}>
                             <Navigation className="w-5 h-5 text-white" />
                         </div>
-                        <span className={`text-xs font-semibold uppercase ${
-                            travel?.status === 'ACTIVE' ? 'text-yellow-700' :
-                            travel?.status === 'IN_COURSE' ? 'text-green-700' :
-                            travel?.status === 'COMPLETED' ? 'text-[#0B8EF5]' :
-                            'text-red-700'
-                        }`}>Estado</span>
+                        <span className={`text-xs font-semibold uppercase ${getStatusLabelClasses(travel?.status)}`}>Estado</span>
                     </div>
-                    <p className={`text-2xl font-bold ${
-                        travel?.status === 'ACTIVE' ? 'text-yellow-900' :
-                        travel?.status === 'IN_COURSE' ? 'text-green-900' :
-                        travel?.status === 'COMPLETED' ? 'text-blue-900' :
-                        'text-red-900'
-                    }`}>
-                        {travel?.status === 'ACTIVE' ? 'Activo' :
-                         travel?.status === 'IN_COURSE' ? 'En curso' :
-                         travel?.status === 'COMPLETED' ? 'Completado' :
-                         'Cancelado'}
+                    <p className={`text-2xl font-bold ${getStatusTextClasses(travel?.status)}`}>
+                        {getStatusText(travel?.status)}
                     </p>
-                    <p className={`text-xs mt-1 ${
-                        travel?.status === 'ACTIVE' ? 'text-yellow-600' :
-                        travel?.status === 'IN_COURSE' ? 'text-green-600' :
-                        travel?.status === 'COMPLETED' ? 'text-blue-600' :
-                        'text-red-600'
-                    }`}>Estado actual</p>
+                    <p className={`text-xs mt-1 ${getStatusSubtextClasses(travel?.status)}`}>Estado actual</p>
                 </div>
             </div>
             <div className="grid grid-cols-3 gap-6 mb-8">

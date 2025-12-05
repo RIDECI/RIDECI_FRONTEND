@@ -49,6 +49,7 @@ export function useCreateProfile() {
 
             const response = await fetch(
                 `https://troyareputationbackend-production.up.railway.app/profiles/${type}`,
+                `https://troyareputationbackend-production-e75f.up.railway.app/profiles/${type}`,
                 {
                     method: 'POST',
                     headers: {

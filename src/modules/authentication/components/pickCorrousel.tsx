@@ -70,7 +70,11 @@ export function CarouselPick() {
                 key={role} 
                 className="basis-1/3" // Como en tu ejemplo
               >
-                <div className="carousel-card-wrapper" onClick={() => handleClick(role)}>
+                <button 
+                  className="carousel-card-wrapper" 
+                  onClick={() => handleClick(role)}
+                  type="button"
+                >
                   <Card
                     className={
                       "carousel-card " +
@@ -85,7 +89,7 @@ export function CarouselPick() {
                       />
                     </CardContent>
                   </Card>
-                </div>
+                </button>
               </CarouselItem>
             );
           })}
