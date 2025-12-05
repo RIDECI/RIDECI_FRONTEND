@@ -3,7 +3,7 @@ import CardMapComponent from './CardMapComponent';
 
 const containerStyle = {
   width: '100%',
-  height: '650px'
+  height: '700px'
 };
 
 const center = {
@@ -11,10 +11,35 @@ const center = {
   lng: -74.0426038
 };
 
-function MyMapComponent() {
+const libraries: ("geometry")[] = ["geometry"];
+
+interface MapComponentProps {
+  origin: string;
+  destination: string;
+  departureDateAndTime: string;
+  estimatedCost: string;
+  onOriginChange: (value: string) => void;
+  onDestinationChange: (value: string) => void;
+  onDateChange: (value: string) => void;
+  onCostChange: (value: string) => void;
+}
+
+function MyMapComponent({
+  origin,
+  destination,
+  departureDateAndTime,
+  estimatedCost,
+  onOriginChange,
+  onDestinationChange,
+  onDateChange,
+  onCostChange
+}: MapComponentProps) {
+
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyBmSX5305EUPHA58uu9DcUOHDXzx3cSSjk"
+    googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU",
+    libraries: libraries
   })
   if (!isLoaded) return <div>Cargando mapa...</div>
 
@@ -27,11 +52,49 @@ function MyMapComponent() {
         options={{
           streetViewControl: false,
           mapTypeControl: false,
-          fullscreenControl: false
+          fullscreenControl: false,
+          disableDefaultUI: false,
+          zoomControl: true,
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "poi.business",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "transit",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "administrative.land_parcel",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            },
+            {
+              featureType: "administrative.neighborhood",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            }
+          ]
         }}
       >
       </GoogleMap>
-      <CardMapComponent />
+      <CardMapComponent 
+        origin={origin}
+        destination={destination}
+        departureDateAndTime={departureDateAndTime}
+        estimatedCost={estimatedCost}
+        onOriginChange={onOriginChange}
+        onDestinationChange={onDestinationChange}
+        onDateChange={onDateChange}
+        onCostChange={onCostChange}
+      />
     </div>
   )
 }
