@@ -7,7 +7,7 @@ import { Travel } from './modules/trips'
 import SectionTravel from './modules/trips/pages/SectionTravel'
 import DetailsOfTravel from './modules/trips/pages/DetailsOfTravel'
 import Geolocalization from './modules/geolocalization/pages/Geolocalization'
-
+import NotificationsPage from './modules/Notifications/pages/NotificationsPage'
 
 function App(){
     return (
@@ -21,6 +21,7 @@ function App(){
                     <Route path="sectionTravel" element={<SectionTravel />} />
                     <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
                     <Route path="geolocalization" element={<Geolocalization />} />
+                    <Route path="notifications" element={<NotificationsPage />} /> {/* 👈 AQUÍ */}
                 </Route>
             </Routes>
         </BrowserRouter>
