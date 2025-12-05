@@ -96,3 +96,11 @@ Formato:
 ---
 
 # 📱 Flujo de Pantallas
+
+
+
+
+
+# 👾 WEBSOCKET
+
+https://www.youtube.com/watch?v=YdA5qlW7NCg
