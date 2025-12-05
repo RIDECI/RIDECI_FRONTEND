@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import UpdateProfilePopUp from "./UpdateProfilePopUp";
 import DeleteProfilePopUp from "./DeleteProfilePopUp";
 
-export default function Buttons() {
+export default function Buttons({ onProfileDeleted, profileId }) {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -15,7 +15,15 @@ export default function Buttons() {
 
   const handleUpdateConfirm = () => {
     setOpenUpdate(false);
-    navigate("/update-profile");
+    navigate("/updateProfile");
+  };
+
+  const handleProfileDeleted = () => {
+    // Navigate to home or create profile screen after deletion
+    navigate("/");
+    if (onProfileDeleted) {
+      onProfileDeleted();
+    }
   };
 
   return (
@@ -34,7 +42,7 @@ export default function Buttons() {
 
       <Button
         className="bg-blue-600 text-white px-6"
-        onClick={() => navigate("/trip-history")}
+        onClick={() => navigate("/tripHistory")}
       >
         Historial de Viajes
       </Button>
@@ -56,6 +64,8 @@ export default function Buttons() {
       <DeleteProfilePopUp
         open={openDelete}
         onClose={() => setOpenDelete(false)}
+        onProfileDeleted={handleProfileDeleted}
+        profileId={profileId}
       />
     </>
   );

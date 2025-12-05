@@ -1,60 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Profile, ProfileBackend } from '../../types/profile';
 import type { Reputation } from '../../types/reputation';
 import type { ProfileType, IdentificationType } from '../../types/enums';
 
-export interface ProfileRequest {
-    id: number;
-    name: string;
-    email: string;
-    vehicles: string[];
-    phoneNumber: string;
-    ratings: string[];
-    badges: string[];
-    profileType: ProfileType;
-    reputation: Reputation;
-    identificationType: IdentificationType;
-    identificationNumber: string;
-    address: string;
-    profilePictureUrl: string;
-    birthDate: Date | string;
-}
-
-export interface ProfileResponse {
+export interface GetProfileResponse {
     success: boolean;
     data?: Profile;
     error?: string;
 }
 
-export function useCreateProfile() {
+export function useGetProfile() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [profile, setProfile] = useState<Profile | null>(null);
 
-    const createProfile = async (
-        type: "driver" | "companiant" | "passenger",
-        profileRequest: ProfileRequest
-    ): Promise<ProfileResponse> => {
+    const getProfile = async (id: string): Promise<GetProfileResponse> => {
         setLoading(true);
         setError(null);
 
         try {
-            // Format the request body to ensure proper date serialization
-            const requestBody = {
-                ...profileRequest,
-                birthDate: typeof profileRequest.birthDate === 'string'
-                    ? profileRequest.birthDate
-                    : profileRequest.birthDate.toISOString(),
-            };
-
             const response = await fetch(
-                `https://troyareputationbackend-production.up.railway.app/profiles/${type}`,
+                `https://troyareputationbackend-production.up.railway.app/profiles/${id}`,
                 {
-                    method: 'POST',
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(requestBody),
                 }
             );
 
@@ -78,7 +49,7 @@ export function useCreateProfile() {
                 data: profileData,
             };
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Error creating profile';
+            const errorMessage = err instanceof Error ? err.message : 'Error fetching profile';
             setError(errorMessage);
 
             return {
@@ -96,7 +67,7 @@ export function useCreateProfile() {
     };
 
     return {
-        createProfile,
+        getProfile,
         loading,
         error,
         profile,

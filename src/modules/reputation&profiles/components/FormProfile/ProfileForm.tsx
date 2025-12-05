@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCreateProfile } from "../../hooks/CreateProfile/createProfileHook";
+import type { Reputation } from "../../types/reputation";
 
 import ProfileInfo from "./ProfileInfo";
 import SaveChangesButton from "./SaveChangesButton";
@@ -20,6 +21,22 @@ export default function ProfileForm() {
   };
 
   const [photo, setPhoto] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    id: 0,
+    name: "",
+    email: "",
+    vehicles: [] as string[],
+    phoneNumber: "",
+    ratings: [] as string[],
+    badges: [] as string[],
+    profileType: "PASSENGER" as const,
+    reputation: { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
+    identificationType: "CC" as const,
+    identificationNumber: "",
+    address: "",
+    profilePictureUrl: "",
+    birthDate: new Date(),
+  });
 
   const { createProfile, loading } = useCreateProfile();
 
@@ -27,22 +44,13 @@ export default function ProfileForm() {
     const profileType = roleMap[selectedRole] || "PASSENGER";
 
     const profileData = {
-      id: 0,
-      name: "",
-      email: "",
-      vehicles: [],
-      phoneNumber: "",
-      ratings: [],
-      badges: [],
-      reputation: { wightedScores: new Map<number, number>(), average: 0, totalRatings: 0 },
-      identificationType: "CC",
-      identificationNumber: "",
-      address: "",
-      profilePictureUrl: photo || "",
-      birthDate: new Date(),
+      ...formData,
+      profileType: profileType as "driver" | "companiant" | "passenger",
+      profilePictureUrl: photo || formData.profilePictureUrl,
+      birthDate: formData.birthDate instanceof Date ? formData.birthDate.toISOString() : formData.birthDate,
     };
 
-    const response = await createProfile(profileType, profileData as any);
+    const response = await createProfile(profileType, profileData);
 
     if (response.success) navigate("/profile");
   };
@@ -62,6 +70,8 @@ export default function ProfileForm() {
             onPhotoChange={(file) =>
               setPhoto(file ? URL.createObjectURL(file) : null)
             }
+            formData={formData}
+            onFormDataChange={setFormData}
           />
 
 
