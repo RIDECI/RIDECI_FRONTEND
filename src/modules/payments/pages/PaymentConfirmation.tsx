@@ -37,7 +37,7 @@ export const PaymentConfirmation: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-8xl mx-auto">
       <PaymentHeader amount={paymentAmount} currency={currency} />
       
       <PaymentMethodList

@@ -24,7 +24,7 @@ export function TripDetails() {
     const bookingId = `BOOK-${Date.now()}`;
     
   
-    navigate(`/payment/${bookingId}/confirm`);
+    navigate(`/booking/confirmed/${bookingId}`);
   };
 
   const handlePaymentMethodChange = (methodId: string) => {

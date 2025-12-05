@@ -29,7 +29,7 @@ export function BookingConfirmed() {
     console.log('Cancelar reserva');
     if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
       // API call to cancel booking
-      navigate('/trips');
+      navigate('/bookings');
     }
   };
 

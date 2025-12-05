@@ -18,7 +18,7 @@ export const PaymentHistory: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-8xl mx-auto">
       <PaymentHistoryHeader onDownloadReport={handleDownloadReport} />
       
       <PaymentHistoryFilters

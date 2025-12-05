@@ -80,7 +80,7 @@ export function SearchTrips() {
   };
 
   const handleViewDetails = (trip: AvailableTrip) => {
-    navigate('/trip-details', { state: { trip } });
+    navigate('/bookings/:bookingId', { state: { trip } });
   };
 
   return (
@@ -89,7 +89,7 @@ export function SearchTrips() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate('/trips')}
+        onClick={() => navigate('/bookings')}
         className="w-fit text-blue-600 hover:bg-transparent hover:text-blue-700 font-medium"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />

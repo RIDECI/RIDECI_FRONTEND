@@ -20,7 +20,7 @@ export const PaymentSuccessDetailed: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-8xl mx-auto">
       <PaymentSuccessIcon />
       
       <TransactionDetailsCard transaction={transaction} />
