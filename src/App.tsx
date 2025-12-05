@@ -21,11 +21,11 @@ function App(){
                     <Route index element={<Navigate to="/home" replace />} />
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
-                    <Route path="select-profile" element={<SelectProfile />} />
-                    <Route path="update-profile" element={<UpdateProfile />} />
+                    <Route path="selectProfile" element={<SelectProfile />} />
+                    <Route path="updateProfile" element={<UpdateProfile />} />
                     <Route path="profile" element={<Profile />} />
-                    <Route path="trip-history" element={<TripHistory />} />
-                    <Route path="create-profile" element={<CreateProfile />} />
+                    <Route path="tripHistory" element={<TripHistory />} />
+                    <Route path="createProfile" element={<CreateProfile />} />
                     <Route path="comments" element={<ViewAllComments />} />
                 </Route>
             </Routes>

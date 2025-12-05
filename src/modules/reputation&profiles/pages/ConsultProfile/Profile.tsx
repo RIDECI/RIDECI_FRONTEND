@@ -1,8 +1,8 @@
-import ProfileHeader from "../../components/MainProfile/ProfileHeader";
-import RatingSummary from "../../components/MainProfile/RatingSummary";
-import CommentList from "../../components/MainProfile/CommentList";
-import Badges from "../../components/MainProfile/Badges";
-import Buttons from "../../components/MainProfile/Buttons";
+import ProfileHeader from "@/modules/reputation&profiles/components/MainProfile/ProfileHeader";
+import RatingSummary from "@/modules/reputation&profiles/components/MainProfile/RatingSummary";
+import CommentList from "@/modules/reputation&profiles/components/MainProfile/CommentList";
+import Badges from "@/modules/reputation&profiles/components/MainProfile/Badges";
+import Buttons from "@/modules/reputation&profiles/components/MainProfile/Buttons";
 
 export default function Profile() {
   return (

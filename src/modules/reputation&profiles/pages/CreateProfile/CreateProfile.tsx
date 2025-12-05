@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useCreateProfile } from "../../hooks/CreateProfile/createProfileHook"; 
+import { useCreateProfile } from "@/modules/reputation&profiles/hooks/CreateProfile/createProfileHook"; 
 import ProfileInfo from "@/modules/reputation&profiles/components/FormProfile/ProfileInfo";
-import SaveChangesButton from "../../components/FormProfile/SaveChangesButton";
+import SaveChangesButton from "@/modules/reputation&profiles/components/FormProfile/SaveChangesButton";
 
 export default function CreateProfile() {
   const navigate = useNavigate();
@@ -17,6 +17,17 @@ export default function CreateProfile() {
   };
 
   const [photo, setPhoto] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    identificationNumber: "",
+    identificationType: "CC",
+    phoneNumber: "",
+    birthDate: "",
+    email: "",
+    address: "",
+    semester: "",
+    program: "",
+  });
 
   const { createProfile, loading } = useCreateProfile();
 
@@ -27,23 +38,30 @@ export default function CreateProfile() {
     }
   };
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const handleConfirm = async () => {
     const profileType = roleMap[roleReceived] || "PASSENGER";
 
     const profileData = {
       id: 0,
-      name: "",
-      email: "",
+      name: formData.name,
+      email: formData.email,
       vehicles: [],
-      phoneNumber: "",
+      phoneNumber: formData.phoneNumber,
       ratings: [],
       badges: [],
       reputation: { wightedScores: new Map<number, number>(), average: 0, totalRatings: 0 },
-      identificationType: "",
-      identificationNumber: "",
-      address: "",
+      identificationType: formData.identificationType,
+      identificationNumber: formData.identificationNumber,
+      address: formData.address,
       profilePictureUrl: photo || "",
-      birthDate: new Date(),
+      birthDate: new Date(formData.birthDate),
     };
 
     const response = await createProfile(profileType, profileData as any);
@@ -60,6 +78,8 @@ export default function CreateProfile() {
           role={roleReceived} 
           photo={photo}
           onPhotoChange={handlePhotoChange}
+          formData={formData}
+          onInputChange={handleInputChange}
         />
 
         <div className="pt-8 flex justify-end border-t border-slate-100 mt-8">

@@ -15,7 +15,7 @@ export default function Buttons() {
 
   const handleUpdateConfirm = () => {
     setOpenUpdate(false);
-    navigate("/update-profile");
+    navigate("/updateProfile");
   };
 
   return (
@@ -34,7 +34,7 @@ export default function Buttons() {
 
       <Button
         className="bg-blue-600 text-white px-6"
-        onClick={() => navigate("/trip-history")}
+        onClick={() => navigate("/tripHistory")}
       >
         Historial de Viajes
       </Button>

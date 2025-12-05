@@ -1,7 +1,7 @@
 export async function deleteProfileHook(profileId: string): Promise<void> {
     try {
         const response = await fetch(
-            `https://troyareputationbackend-staging.up.railway.app/profiles/${profileId}`,
+            `https://troyareputationbackend-production.up.railway.app/profiles/${profileId}`,
             {
                 method: 'DELETE',
                 headers: {

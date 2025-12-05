@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCreateProfile } from "../../hooks/CreateProfile/createProfileHook";
+import { useCreateProfile } from "@/modules/reputation&profiles/hooks/CreateProfile/createProfileHook";
 
 import ProfileInfo from "./ProfileInfo";
 import SaveChangesButton from "./SaveChangesButton";
@@ -21,26 +21,58 @@ export default function ProfileForm() {
 
   const [photo, setPhoto] = useState<string | null>(null);
 
+  // ESTADO: Almacena lo que el usuario escribe
+  const [formData, setFormData] = useState({
+    name: "",
+    identificationNumber: "",
+    identificationType: "CC",
+    phoneNumber: "",
+    birthDate: "", 
+    email: "",
+    address: "",
+    semester: "",
+    program: "",
+  });
+
   const { createProfile, loading } = useCreateProfile();
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleConfirm = async () => {
     const profileType = roleMap[selectedRole] || "PASSENGER";
 
     const profileData = {
-      id: 0,
-      name: "",
-      email: "",
+      userId: null,
+      name: formData.name,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      address: formData.address,
+      
+      identificationType: formData.identificationType,
+      identificationNumber: formData.identificationNumber,
+      
+      birthDate: formData.birthDate ? `${formData.birthDate}T00:00:00` : new Date().toISOString(),
+      
+      profileType: profileType.toUpperCase(), 
+
+      profilePictureUrl: photo || "https://via.placeholder.com/150",
       vehicles: [],
-      phoneNumber: "",
       ratings: [],
       badges: [],
-      reputation: { wightedScores: new Map<number, number>(), average: 0, totalRatings: 0 },
-      identificationType: "CC",
-      identificationNumber: "",
-      address: "",
-      profilePictureUrl: photo || "",
-      birthDate: new Date(),
+      
+      calification: { 
+        average: 0, 
+        totalRatings: 0,
+        wightedScores: {} 
+      },
     };
+
+    console.log("Enviando JSON:", profileData);
 
     const response = await createProfile(profileType, profileData as any);
 
@@ -58,12 +90,12 @@ export default function ProfileForm() {
       <div className="flex flex-col lg:flex-row gap-12">
         <div className="flex-1 space-y-10">
           <ProfileInfo
-            photo={photo}
-            onPhotoChange={(file) =>
-              setPhoto(file ? URL.createObjectURL(file) : null)
-            }
-          />
-
+              photo={photo}
+              onPhotoChange={(file) => setPhoto(file ? URL.createObjectURL(file) : null)}
+              role={selectedRole}
+              formData={formData}            
+              onInputChange={handleInputChange}
+            />
 
           <div className="pt-4 flex justify-end">
             <SaveChangesButton
