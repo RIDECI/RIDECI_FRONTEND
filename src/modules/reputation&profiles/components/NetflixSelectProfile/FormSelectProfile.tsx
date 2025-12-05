@@ -24,7 +24,7 @@ export default function FormSelectProfile() {
   const [selected, setSelected] = useState<Profile | null>(null);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     const result = SelectImagesPropsSchema.safeParse({
@@ -38,14 +38,14 @@ export default function FormSelectProfile() {
     }
 
     navigate("/app/createProfile", {
-    state: {
-    selectedRole: selected?.name,
-  },
-  });
+      state: {
+        selectedRole: selected?.name,
+      },
+    });
   };
 
   return (
-    <div className="h-full flex flex-col justify-center items-center text-white p-6">
+    <div className="min-h-screen flex flex-col justify-center items-center text-white p-6 bg-transparent">
       <h1 className="text-4xl mb-10 font-bold">Selecciona un Rol</h1>
 
       <RadioGroup className="flex gap-16">
@@ -64,7 +64,7 @@ export default function FormSelectProfile() {
             <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  "w-40 h-40 rounded-xl overflow-hidden transition-all border-4",
+                  "w-52 h-52 rounded-xl overflow-hidden transition-all border-4",
                   "flex items-center justify-center",
 
                   selected?.name === p.name
@@ -90,7 +90,7 @@ export default function FormSelectProfile() {
       <button
         onClick={handleSubmit}
         className="mt-10 bg-teal-500 px-8 py-3 rounded-xl text-xl font-semibold 
-             hover:bg-teal-400 transition-all shadow-lg shadow-teal-500/30"
+               hover:bg-teal-400 transition-all shadow-lg shadow-teal-500/30"
       >
         Continuar
       </button>

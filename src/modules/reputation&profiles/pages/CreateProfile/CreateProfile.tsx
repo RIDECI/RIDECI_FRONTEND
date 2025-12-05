@@ -69,26 +69,29 @@ export default function CreateProfile() {
     if (response.success) navigate("/profile");
   };
 
+  
   return (
-    <div className="p-10 max-w-4xl mx-auto pb-20">
-      <h1 className="text-3xl font-bold mb-8">Completa tu Perfil</h1>
-      
-      <div className="space-y-10">
-        <ProfileInfo 
-          role={roleReceived} 
-          photo={photo}
-          onPhotoChange={handlePhotoChange}
-          formData={formData}
-          onInputChange={handleInputChange}
-        />
+  <div className="p-12 max-w-6xl mx-auto pb-24 bg-[#e8f1fd] rounded-2xl shadow-md border border-slate-200">
+    <h1 className="text-4xl font-bold mb-10 text-slate-800">Completa tu Perfil</h1>
 
-        <div className="pt-8 flex justify-end border-t border-slate-100 mt-8">
-          <SaveChangesButton
-            onConfirm={handleConfirm} 
-            loading={loading} 
-          />
-        </div>
+    <div className="space-y-12 w-full">
+      <ProfileInfo 
+        role={roleReceived} 
+        photo={photo}
+        onPhotoChange={handlePhotoChange}
+        formData={formData}
+        onInputChange={handleInputChange}
+      />
+
+      <div className="pt-10 flex justify-end border-t border-slate-300 mt-10">
+        <SaveChangesButton
+          onConfirm={handleConfirm} 
+          loading={loading} 
+        />
       </div>
     </div>
-  );
+  </div>
+);
+
+
 }

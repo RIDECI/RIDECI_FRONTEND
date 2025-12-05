@@ -25,29 +25,35 @@ export default function CommentList() {
   };
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-3">Comentarios</h3>
+    <div className="text-lg">
+      <h3 className="text-2xl font-semibold mb-5">Comentarios</h3>
 
-      <div className="space-y-4 bg-white border rounded-xl p-4 shadow-sm">
+      <div className="space-y-8 bg-white border shadow-xl rounded-3xl p-8">
+
         {comments.map((c, idx) => (
-          <div key={idx} className="flex gap-4 items-start">
+          <div key={idx} className="flex gap-5 items-start">
             <img
               src={c.avatar}
-              className="w-10 h-10 rounded-full object-cover"
+              className="w-14 h-14 rounded-full object-cover shadow-md"
               alt={c.user}
             />
             <div>
-              <div className="font-medium">{c.user}</div>
+              <div className="font-semibold text-slate-900 text-lg">{c.user}</div>
               <div className="text-sm text-gray-500">{c.date}</div>
-              <p className="text-gray-700 mt-1">{c.text}</p>
+              <p className="text-gray-700 mt-2 leading-relaxed">
+                {c.text}
+              </p>
             </div>
           </div>
         ))}
 
-    
         <button
           onClick={handleSeeAll}
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition"
+          className="
+            w-full mt-2 bg-blue-600 hover:bg-blue-700 
+            text-white py-3 rounded-xl text-base font-semibold 
+            transition shadow-md
+          "
         >
           Ver todos los comentarios
         </button>

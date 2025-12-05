@@ -21,7 +21,8 @@ export default function Buttons() {
   return (
     <>
       {/* Botones */}
-      <Button className="bg-blue-600 text-white px-6">
+      <Button className="bg-blue-600 text-white px-6" 
+      onClick={() => navigate("/selectProfile")}>
         Crear Perfil
       </Button>
 

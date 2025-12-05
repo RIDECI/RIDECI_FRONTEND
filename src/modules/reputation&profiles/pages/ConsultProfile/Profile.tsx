@@ -6,26 +6,26 @@ import Buttons from "@/modules/reputation&profiles/components/MainProfile/Button
 
 export default function Profile() {
   return (
-    <div className="flex w-full h-screen bg-gray-100 overflow-hidden">
+    <div className="flex w-full h-screen bg-[#e8f1fd] overflow-hidden text-lg">
       {/* Contenido */}
-      <main className="flex-1 p-10 overflow-y-auto">
-        <div className="bg-white shadow-xl rounded-2xl p-10 max-w-5xl mx-auto">
+      <main className="flex-1 p-12 overflow-y-auto">
+        <div className="bg-white shadow-2xl rounded-3xl p-14 max-w-6xl mx-auto">
 
           <ProfileHeader />
 
-          <div className="mt-10">
+          <div className="mt-12">
             <RatingSummary />
           </div>
 
-          <div className="mt-10">
+          <div className="mt-12">
             <CommentList />
           </div>
 
-          <div className="mt-10">
+          <div className="mt-12">
             <Badges />
           </div>
 
-          <div className="mt-10 flex justify-end gap-4">
+          <div className="mt-12 flex justify-end gap-6">
             <Buttons />
           </div>
         </div>

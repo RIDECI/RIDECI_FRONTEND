@@ -31,10 +31,10 @@ function App() {
                 <Route path="/pickRole" element={<ProfileSelectionPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="selectProfile" element={<SelectProfile />} />
                 <Route path="/app" element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
-                    <Route path="selectProfile" element={<SelectProfile />} />
                     <Route path="updateProfile" element={<UpdateProfile />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="tripHistory" element={<TripHistory />} />
@@ -45,7 +45,6 @@ function App() {
                     <Route path="sectionTravel" element={<SectionTravel />} />
                     <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
                     <Route path="geolocalization" element={<Geolocalization />} />
-
                     <Route path="homeDriver" element={<HomeDriver />} />
                     <Route path="homePassenger" element={<HomePassenger />} />
                     <Route path="homeCompanion" element={<HomeCompanion />} />
