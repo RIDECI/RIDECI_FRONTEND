@@ -16,6 +16,15 @@ import { HomePassenger } from './modules/authentication/pages/HomePassenger.tsx'
 import { HomeCompanion } from './modules/authentication/pages/HomeCompanion.tsx'
 import { Layout } from './Layout'
 import { Home } from './Home'
+import { Statistics } from './modules/statistics and sustainability'
+import SelectProfile from './modules/reputation&profiles/pages/SelectProfile/SelectProfile'
+import UpdateProfile from './modules/reputation&profiles/pages/UpdateProfile/UpdateProfile'
+import Profile from './modules/reputation&profiles/pages/ConsultProfile/Profile'
+import TripHistory from './modules/reputation&profiles/pages/TripHistory/TripHistory'
+import CreateProfile from './modules/reputation&profiles/pages/CreateProfile/CreateProfile'
+import ViewAllComments from './modules/reputation&profiles/pages/ViewAllComments/ViewAllComments'
+
+
 
 
 function App() {
@@ -40,6 +49,12 @@ function App() {
                 <Route path="/app" element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
+                    <Route path="selectProfile" element={<SelectProfile />} />
+                    <Route path="updateProfile" element={<UpdateProfile />} />
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="tripHistory" element={<TripHistory />} />
+                    <Route path="createProfile" element={<CreateProfile />} />
+                    <Route path="comments" element={<ViewAllComments />} />
                     <Route path="conversations" element={<Conversations />} />
                     <Route path="travels" element={<Travel />} />
                     <Route path="sectionTravel" element={<SectionTravel />} />
