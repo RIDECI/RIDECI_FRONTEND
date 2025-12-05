@@ -16,9 +16,9 @@ import ImgPasajero from "../../../assets/imagenLogin (1).png";
 
 const ROLES = ["Conductor", "Acompañante", "Pasajero"] as const;
 const ROLE_ROUTES: Record<(typeof ROLES)[number], string> = {
-  Conductor: "/home-conductor",
-  Acompañante: "/home-acompanante",
-  Pasajero: "/home-pasajero",
+  Conductor: "/app",
+  Acompañante: "/app",
+  Pasajero: "/app",
 };
 const ROLE_IMAGES: Record<(typeof ROLES)[number], string> = {
   Conductor: ImgConductor,

@@ -102,7 +102,7 @@ function GeolocalizationComponent() {
               Reintentar
             </Button>
             <Button 
-              onClick={() => navigate('/sectionTravel')}
+              onClick={() => navigate('/app/sectionTravel')}
               variant="outline"
               className="border-red-300 text-red-700 hover:bg-red-50"
             >
@@ -124,7 +124,7 @@ function GeolocalizationComponent() {
           <h3 className="text-xl font-bold text-yellow-900 mb-2">Ruta no disponible</h3>
           <p className="text-yellow-700 mb-6">No se encontró información de ruta para este viaje.</p>
           <Button 
-            onClick={() => navigate('/sectionTravel')}
+            onClick={() => navigate('/app/sectionTravel')}
             className="bg-yellow-500 hover:bg-yellow-600 text-white"
           >
             Volver a viajes
@@ -252,7 +252,7 @@ function GeolocalizationComponent() {
       </div>
       <div className="flex justify-between mt-6">
         <Button 
-          onClick={() => navigate(`/detailsOfTravel?travelId=${travelId}`)}
+          onClick={() => navigate(`/app/detailsOfTravel?travelId=${travelId}`)}
           className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
         >
           Detalles de Viaje

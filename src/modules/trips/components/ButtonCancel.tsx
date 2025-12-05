@@ -9,7 +9,7 @@ function ButtonCancel({title}: ButtonProps){
     const navigate = useNavigate()
 
     const handleSubmit = () => {
-        navigate('/sectionTravel')
+        navigate('/app/sectionTravel')
     }
     
     return (

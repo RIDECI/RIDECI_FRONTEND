@@ -50,7 +50,7 @@ function DetailsOfTravelComponent(){
         try {
             await deleteTravelHook(id);
             alert('Viaje cancelado exitosamente');
-            navigate('/sectionTravel');
+            navigate('/app/sectionTravel');
         } catch (error) {
             console.error('Error al eliminar viaje:', error);
             alert('Error al cancelar el viaje. Por favor intenta de nuevo.');
@@ -84,7 +84,7 @@ function DetailsOfTravelComponent(){
                     <h3 className="text-xl font-bold text-red-900 mb-2">Error al cargar el viaje</h3>
                     <p className="text-red-700 mb-6">{error}</p>
                     <Button 
-                        onClick={() => navigate('/sectionTravel')}
+                        onClick={() => navigate('/app/sectionTravel')}
                         className="bg-red-500 hover:bg-red-600 text-white"
                     >
                         Volver a viajes
@@ -104,7 +104,7 @@ function DetailsOfTravelComponent(){
                     <h3 className="text-xl font-bold text-yellow-900 mb-2">Viaje no encontrado</h3>
                     <p className="text-yellow-700 mb-6">No se encontró información de este viaje.</p>
                     <Button 
-                        onClick={() => navigate('/sectionTravel')}
+                        onClick={() => navigate('/app/sectionTravel')}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                     >
                         Volver a viajes
@@ -371,7 +371,7 @@ function DetailsOfTravelComponent(){
                     <Button 
                         onClick={() => {
                             if (travel?.id) {
-                                navigate(`/geolocalization?travelId=${travel.id}`);
+                                navigate(`/app/geolocalization?travelId=${travel.id}`);
                             } else {
                                 alert('No se encontró el ID del viaje');
                             }

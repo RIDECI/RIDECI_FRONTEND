@@ -12,45 +12,44 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 
 const items = [
   {
     title: "Home",
-    url: "/home",
+    url: "/app",
     icon: House,
   },
   {
     title: "Calendario",
-    url: "/calendar",
+    url: "/app/calendar",
     icon: Calendar,
   },
   {
     title: "Estadisticas",
-    url: "/statistics",
+    url: "/app/statistics",
     icon: ChartColumn,
   },
   {
     title: "Alertas",
-    url: "/alerts",
+    url: "/app/alerts",
     icon: CircleAlert,
   },
   {
     title: "Crear Viaje",
-    url: "/sectionTravel",
+    url: "/app/sectionTravel",
     icon: Map,
   },
   {
     title: "Notificaciones",
-    url: "/notifications",
+    url: "/app/notifications",
     icon: BellPlus,
   },
 
   {
     title: "Conversaciones",
-    url: "/conversations",
+    url: "/app/conversations",
     icon: MessageCircleMore,
   },
 ]
