@@ -8,14 +8,6 @@ export function Layout() {
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
       <SidebarInset className="bg-transparent">
-        <header className="flex h-16 shrink-0 items-center justify-end gap-2 px-4 bg-[#2196F3]/20 backdrop-blur-2xl shadow-lg">
-          <div className="flex items-center gap-3">
-            <span className="text-white text-sm">Bienvenido Usuario</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white text-sm">
-              U
-            </div>
-          </div>
-        </header>
         <AppMainCard>
           <Outlet />
         </AppMainCard>
