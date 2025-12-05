@@ -1,8 +1,9 @@
 import { ArrowLeft, MapPin, LocateFixed, Clock, Car, User, Navigation, Users, DollarSign, Route, MessageSquare, MapPinned, Info} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import type { TravelBackendResponse } from "../hooks/createTravelHook";
 import { deleteTravelHook } from "../hooks/deleteTravelHook";
+import { useGetTravelById } from "../hooks/getTravelByIdHook";
 
 
 
@@ -25,7 +26,19 @@ const mockTripDetails = {
 function DetailsOfTravelComponent(){
     const navigate = useNavigate();
     const location = useLocation();
-    const travel = location.state?.travel as TravelBackendResponse | undefined;
+    const [searchParams] = useSearchParams();
+    
+    // Obtener travelId desde query params o desde location.state
+    const travelIdFromParams = searchParams.get('travelId');
+    const travelFromState = location.state?.travel as TravelBackendResponse | undefined;
+    
+    // Si viene de state, usar ese, si no, hacer fetch con el ID
+    const { travel: travelFromApi, loading, error } = useGetTravelById(
+        travelFromState ? null : travelIdFromParams
+    );
+    
+    // Usar el travel que esté disponible
+    const travel = travelFromState || travelFromApi;
     
     console.log('Travel data in details:', travel);
 
@@ -48,6 +61,57 @@ function DetailsOfTravelComponent(){
     if (travel?.availableSlots && travel.availableSlots > 0) {
         const plural = travel.availableSlots > 1;
         availableSlotsText = `${travel.availableSlots} cupo${plural ? 's' : ''} disponible${plural ? 's' : ''}`;
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B8EF5] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Cargando detalles del viaje...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen p-6">
+                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 max-w-md text-center">
+                    <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <Info className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-red-900 mb-2">Error al cargar el viaje</h3>
+                    <p className="text-red-700 mb-6">{error}</p>
+                    <Button 
+                        onClick={() => navigate('/sectionTravel')}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                    >
+                        Volver a viajes
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!travel) {
+        return (
+            <div className="flex items-center justify-center h-screen p-6">
+                <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-8 max-w-md text-center">
+                    <div className="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <Info className="w-8 h-8 text-yellow-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-yellow-900 mb-2">Viaje no encontrado</h3>
+                    <p className="text-yellow-700 mb-6">No se encontró información de este viaje.</p>
+                    <Button 
+                        onClick={() => navigate('/sectionTravel')}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                    >
+                        Volver a viajes
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -304,7 +368,16 @@ function DetailsOfTravelComponent(){
                         <MessageSquare className="w-6 h-6" />
                         Chat Con Pasajeros
                     </Button>
-                    <Button className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50 flex items-center justify-center gap-3">
+                    <Button 
+                        onClick={() => {
+                            if (travel?.id) {
+                                navigate(`/geolocalization?travelId=${travel.id}`);
+                            } else {
+                                alert('No se encontró el ID del viaje');
+                            }
+                        }}
+                        className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50 flex items-center justify-center gap-3"
+                    >
                         <MapPinned className="w-6 h-6" />
                         Seguimiento del Viaje
                     </Button>

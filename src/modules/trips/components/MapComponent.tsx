@@ -11,6 +11,8 @@ const center = {
   lng: -74.0426038
 };
 
+const libraries: ("geometry")[] = ["geometry"];
+
 interface MapComponentProps {
   origin: string;
   destination: string;
@@ -36,7 +38,8 @@ function MyMapComponent({
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU"
+    googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU",
+    libraries: libraries
   })
   if (!isLoaded) return <div>Cargando mapa...</div>
 
