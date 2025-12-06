@@ -330,6 +330,23 @@ corresponding to each of the other individuals.
 
 ![Security & Communication Companion Screen Flow Diagram](./docs/ComunicaciónYSeguridadCompanion.png)
 
+
+
+### Institutional administration Flow Diagram
+
+This section is accessed by logging into the admin account and features a main screen where you can review metrics, validate or reject drivers, and review reports to take action based on their severity.
+
+Next, there's the user screen, where you can also validate or reject drivers, suspend accounts or profiles, reactivate accounts, and view user details.
+
+We also have general application statistics.
+
+The admin has a reports screen where they can take action by suspending the account or profile depending on the severity of the issue. They can also export these reports to Excel or PDF for archiving.
+
+Finally, there's the settings screen where you can set driver schedules and enable or disable notifications.
+
+![Institutional administration Flow Diagram](./docs/AdminFlow.png)
+
+
 ## Continious Integration & Continious Deployment
 
 In this section, we will address the deployment and continuous integration of the frontend where we can see the workflow in pre-production and production.
