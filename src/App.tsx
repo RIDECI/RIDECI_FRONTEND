@@ -35,6 +35,7 @@ import AdminStatistics from './modules/administration/pages/AdminStatistics'
 import AdminReports from './modules/administration/pages/AdminReports'
 import AdminMonitor from './modules/administration/pages/AdminMonitor'
 import AdminSettings from './modules/administration/pages/AdminSettings'
+import EndTripRating from './modules/reputation&profiles/pages/EndCalificateTravel/EndTripRating'
 
 function App() {
   return (
@@ -75,6 +76,7 @@ function App() {
           <Route path="homeDriver" element={<HomeDriver />} />
           <Route path="homePassenger" element={<HomePassenger />} />
           <Route path="homeCompanion" element={<HomeCompanion />} />
+          <Route path ="calificationEndTrip" element={<EndTripRating />} />
         </Route>
 
         {/* fallback 404 */}
