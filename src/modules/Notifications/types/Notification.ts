@@ -3,4 +3,5 @@ export interface Notification {
   type: "info" | "message" | "trip" | "success";
   title: string;
   timeAgo: string;
+  timestamp: Date;
 }
