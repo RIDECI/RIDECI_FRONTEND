@@ -75,7 +75,7 @@ function GeolocalizationComponent() {
           accuracy: accuracy
         };
 
-        axios.post(`http://localhost:8080/geolocations/${travelId}/traveltracking/lastlocation`, locationData)
+        axios.put(`http://localhost:8080/geolocations/${travelId}/traveltracking/location`, locationData)
               .then(() => console.log("Location Sent"))
               .catch(e => console.error("Error sending location", e))
       },
