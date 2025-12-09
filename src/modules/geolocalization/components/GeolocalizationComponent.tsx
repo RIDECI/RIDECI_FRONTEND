@@ -4,6 +4,8 @@ import { Navigation, Clock, Users, MapPin, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
+import type { LocationDocument } from '../types/location';
+import axios from "axios"
 
 const containerStyle = {
   width: '100%',
@@ -21,6 +23,8 @@ function GeolocalizationComponent() {
   
   const [decodedPath, setDecodedPath] = useState<google.maps.LatLngLiteral[]>([]);
   const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 4.7827109, lng: -74.0426038 });
+
+  const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null> (null);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -45,6 +49,42 @@ function GeolocalizationComponent() {
       });
     }
   }, [route, isLoaded]);
+
+  useEffect(() => {
+    if(!travelId) return;
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    };
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, speed, accuracy} = pos.coords;
+
+        setDriverPosition({lat: latitude, lng: longitude});
+
+        const locationData: LocationDocument = {
+          latitude: latitude,
+          longitude: longitude,
+          timeStamp: new Date().toISOString(),
+          speed: speed || 0,
+          placeId: "driver-live",
+          direction: "",
+          accuracy: accuracy
+        };
+
+        axios.post(`http://localhost:8080/geolocations/${travelId}/traveltracking/lastlocation`, locationData)
+              .then(() => console.log("Location Sent"))
+              .catch(e => console.error("Error sending location", e))
+      },
+      (err) => console.error("Error with GPS", err),
+      options
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  },[travelId]); 
 
   const formatDistance = (meters: number): string => {
     if (meters < 1000) {
@@ -206,6 +246,18 @@ function GeolocalizationComponent() {
                 strokeColor: 'white',
                 strokeWeight: 2
               }}
+            />
+          )}
+
+          {driverPosition && (
+            <Marker
+              position={driverPosition}
+              title='Mi Ubicacion'
+              icon={{
+                url:"https://maps.gstatic.com/mapfiles/ms2/micons/cabs.png",
+                scaledSize: new window.google.maps.Size(40,40)
+              }}
+              zIndex={1000}
             />
           )}
           
