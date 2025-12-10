@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 import "./reset-password.css";
-import RideciLogo from "../../../assets/RIDECI Logo (Blanco).png";
+import RideciLogo from "../../../assets/rideci-logo-blanco.png";
 import ResetImage from "../../../assets/resetGroup.png";
 
 function ResetPasswordPage() {

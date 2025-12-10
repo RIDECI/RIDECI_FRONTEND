@@ -1,7 +1,7 @@
 import "./forgot-password.css";
 import { ForgotPasswordForm } from "../components/ForgotPasswordForm";
 
-import RideciLogo from "../../../assets/RIDECI Logo (Blanco).png";
+import RideciLogo from "../../../assets/rideci-logo-blanco.png";
 import ForgotImage from "../../../assets/forgotPerson.png";
 
 function ForgotPasswordPage() {
