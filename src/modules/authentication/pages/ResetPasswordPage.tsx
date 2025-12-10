@@ -98,11 +98,11 @@ function ResetPasswordPage() {
 
                             <div className="space-y-4">
                                 <CardTitle className="text-2xl font-bold text-gray-900">
-                                    Crear nueva contraseña
+                                    Reestablece tu contraseña
                                 </CardTitle>
 
                                 <CardDescription className="text-lg text-gray-700">
-                                    Ingresa tu nueva contraseña segura.
+                                    Crea tu nueva contraseña para poder ingresar a tu cuenta
                                 </CardDescription>
                             </div>
                         </CardHeader>
@@ -132,7 +132,7 @@ function ResetPasswordPage() {
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-gray-800 flex items-center gap-2">
                                         <Lock className="h-4 w-4" />
-                                        Nueva contraseña
+                                        Ingresa nueva contraseña
                                     </label>
 
                                     <div className="relative">
@@ -204,7 +204,7 @@ function ResetPasswordPage() {
                                 {/* Confirm password */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-gray-800">
-                                        Confirmar nueva contraseña
+                                        Confirma la contraseña
                                     </label>
 
                                     <div className="relative">

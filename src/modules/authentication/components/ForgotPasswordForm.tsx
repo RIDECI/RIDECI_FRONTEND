@@ -36,13 +36,7 @@ export function ForgotPasswordForm() {
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     
-                    <div className="flex-1 flex justify-center">
-                        <img 
-                            src="/RIDECI-logo-blanco.png" 
-                            alt="RIDECI Logo" 
-                            className="h-16"
-                        />
-                    </div>
+           
                     
                     <div className="w-10"></div>
                 </div>
