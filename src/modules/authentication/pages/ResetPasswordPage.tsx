@@ -83,14 +83,6 @@ function ResetPasswordPage() {
                     <Card className="w-full max-w-md mx-auto shadow-xl border-0 bg-white/95 backdrop-blur-sm">
                         <CardHeader className="text-center space-y-6 pb-8">
                             <div className="flex justify-center">
-                                <img
-                                    src={RideciLogo}
-                                    alt="RIDECI Logo"
-                                    className="h-16"
-                                />
-                            </div>
-
-                            <div className="flex justify-center">
                                 <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center">
                                     <ShieldCheck className="h-12 w-12 text-blue-600" />
                                 </div>
