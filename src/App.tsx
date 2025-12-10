@@ -37,6 +37,11 @@ import AdminMonitor from './modules/administration/pages/AdminMonitor'
 import AdminSettings from './modules/administration/pages/AdminSettings'
 import EndTripRating from './modules/reputation&profiles/pages/EndCalificateTravel/EndTripRating'
 
+import Alerts from './modules/security/pages/Alerts'
+import AlertForm from './modules/security/pages/AlertForm';
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -59,26 +64,29 @@ function App() {
         </Route>
 
         {/* main app (user) layout vive en /app */}
-        <Route path="/app/*" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="home" element={<Home />} />
-          <Route path="statistics" element={<Statistics />} />
-          <Route path="updateProfile" element={<UpdateProfile />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="tripHistory" element={<TripHistory />} />
-          <Route path="createProfile" element={<CreateProfile />} />
-          <Route path="comments" element={<ViewAllComments />} />
-          <Route path="conversations" element={<div>Conversations</div>} />
-          <Route path="travels" element={<Travel />} />
-          <Route path="sectionTravel" element={<SectionTravel />} />
-          <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
-          <Route path="geolocalization" element={<Geolocalization />} />
-          <Route path="homeDriver" element={<HomeDriver />} />
-          <Route path="homePassenger" element={<HomePassenger />} />
-          <Route path="homeCompanion" element={<HomeCompanion />} />
-          <Route path ="calificationEndTrip" element={<EndTripRating />} />
-        </Route>
+       <Route path="/app/*" element={<Layout />}>
+  <Route index element={<Home />} />
+  <Route path="home" element={<Home />} />
+  <Route path="statistics" element={<Statistics />} />
+  <Route path="updateProfile" element={<UpdateProfile />} />
+  <Route path="profile" element={<Profile />} />
+  <Route path="tripHistory" element={<TripHistory />} />
+  <Route path="createProfile" element={<CreateProfile />} />
+  <Route path="comments" element={<ViewAllComments />} />
+  <Route path="conversations" element={<div>Conversations</div>} />
+  <Route path="travels" element={<Travel />} />
+  <Route path="sectionTravel" element={<SectionTravel />} />
+  <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
+  <Route path="geolocalization" element={<Geolocalization />} />
+  <Route path="homeDriver" element={<HomeDriver />} />
+  <Route path="homePassenger" element={<HomePassenger />} />
+  <Route path="homeCompanion" element={<HomeCompanion />} />
+  <Route path="calificationEndTrip" element={<EndTripRating />} />
 
+  {/* Rutas de Alerts */}
+  <Route path="alerts" element={<Alerts />} />
+  <Route path="alerts/new" element={<AlertForm />} />
+</Route>
         {/* fallback 404 */}
         <Route path="*" element={<div className="p-8">Página no encontrada — <a href="/">Ir al inicio</a></div>} />
       </Routes>
