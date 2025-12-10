@@ -5,7 +5,7 @@ import { Home } from './Home'
 import { Statistics } from './modules/statistics and sustainability'
 import Login from './modules/authentication/pages/login'
 import Register from './modules/authentication/pages/register'
-import ForgotPasswordForm  from './modules/authentication/pages/ForgotPasswordPage' 
+import ForgotPasswordForm from './modules/authentication/pages/ForgotPasswordPage'
 import EmailSentPage from './modules/authentication/pages/EmailSentPage'
 import ResetPasswordPage from './modules/authentication/pages/ResetPasswordPage'
 
@@ -13,23 +13,23 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Ruta principal redirige a login */}
+                {/* Redirigir raíz hacia login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
-                
-                {/* Rutas de autenticación SIN Layout */}
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
-                <Route path="forgot-password" element={<ForgotPasswordForm />} /> 
-                <Route path="email-sent" element={<EmailSentPage />} />
-                <Route path="reset-password" element={<ResetPasswordPage />} />
-                
-                {/* Rutas protegidas CON Layout */}
-                <Route path="/" element={<Layout />}>
+
+                {/* Rutas de autenticación */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPasswordForm />} /> 
+                <Route path="/email-sent" element={<EmailSentPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                {/* Rutas protegidas bajo /app */}
+                <Route path="/app" element={<Layout />}>
                     <Route path="home" element={<Home />} />
                     <Route path="statistics" element={<Statistics />} />
                 </Route>
-                
-                {/* Ruta 404 */}
+
+                {/* Página 404 */}
                 <Route path="*" element={
                     <div className="min-h-screen flex items-center justify-center">
                         <div className="text-center">
