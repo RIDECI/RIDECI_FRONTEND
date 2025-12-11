@@ -1,3 +1,4 @@
+// src/modules/administration/pages/AdminMonitor.tsx
 import React, { useMemo, useState } from "react";
 import car1 from "../assets/car-1.png";
 import car2 from "../assets/car-2.png";
@@ -5,57 +6,28 @@ import car3 from "../assets/car-3.png";
 import car4 from "../assets/car-4.png";
 import logo from "../assets/RIDECI.png";
 
-import { useAdminMetrics } from "../hooks/useAdminMetrics";
+import { useTrips } from "../hooks/useTrips";
 
 type Trip = {
   id: string;
   driverName: string;
   role?: string;
   route?: string;
-  status: "En progreso" | "Finalizado" | "Programado";
+  status: "En progreso" | "Finalizado" | "Programado" | string;
   realtime?: boolean;
-  departure?: string; // ISO date or human text
-  severity?: "normal" | "warning" | "critical";
+  departure?: string;
+  severity?: "normal" | "warning" | "critical" | string;
 };
 
 const CAR_IMAGES = [car1, car2, car3];
 
 export default function AdminMonitor() {
-  const { metrics } = useAdminMetrics();
+  const { trips: apiTrips, metrics, loading } = useTrips();
 
-  // demo trips (replace with API)
-  const [trips] = useState<Trip[]>(() => [
-    {
-      id: "T-1001",
-      driverName: "Nestor Lopez Castañeda",
-      role: "Conductor",
-      route: "Universidad ECI",
-      status: "En progreso",
-      realtime: true,
-      departure: "2025-12-03T04:00:00",
-      severity: "normal",
-    },
-    {
-      id: "T-1002",
-      driverName: "Tulio Alejandro Riaño Perez",
-      role: "Conductor",
-      route: "Villapinzón",
-      status: "En progreso",
-      realtime: true,
-      departure: "2025-12-03T04:10:00",
-      severity: "normal",
-    },
-    {
-      id: "T-1003",
-      driverName: "Marcela Ortiz",
-      role: "Acompañante",
-      route: "Parque Central",
-      status: "Finalizado",
-      realtime: false,
-      departure: "2025-12-02T18:30:00",
-      severity: "warning",
-    },
-  ]);
+  // Si no hay trips, mostramos vacío; pero permitimos fallback a demo si quieres (ahora usamos API).
+  const trips = apiTrips.length > 0 ? apiTrips : [
+    // fallback pequeño (opcional)
+  ] as Trip[];
 
   const [tab, setTab] = useState<"realtime" | "finished">("realtime");
 
@@ -98,7 +70,7 @@ export default function AdminMonitor() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-lg font-bold text-blue-600">{metrics.usersActive}</div>
+            <div className="text-lg font-bold text-blue-600">{metrics?.usersActive ?? "—"}</div>
           </div>
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">A</div>
         </div>
@@ -109,19 +81,19 @@ export default function AdminMonitor() {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <article className="bg-white rounded-2xl shadow p-6 border border-gray-100">
             <div className="text-sm text-slate-600">Viajes hoy</div>
-            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.tripsCompleted ?? "—"}</div>
+            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.tripsToday ?? "—"}</div>
             <div className="text-xs text-slate-400 mt-1">Actualizado</div>
           </article>
 
           <article className="bg-white rounded-2xl shadow p-6 border border-gray-100">
             <div className="text-sm text-slate-600">En progreso</div>
-            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.openReports ?? "—"}</div>
+            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.tripsInProgress ?? "—"}</div>
             <div className="text-xs text-slate-400 mt-1">Monitor en vivo</div>
           </article>
 
           <article className="bg-white rounded-2xl shadow p-6 border border-gray-100">
             <div className="text-sm text-slate-600">CO₂ reducido</div>
-            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.co2 ?? "—"}</div>
+            <div className="text-2xl md:text-3xl font-bold text-sky-700">{metrics?.co2Reduced ?? "—"}</div>
             <div className="text-xs text-slate-400 mt-1">Est. ahorro</div>
           </article>
         </section>
@@ -145,7 +117,9 @@ export default function AdminMonitor() {
 
         {/* Trip list */}
         <section>
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="bg-white p-6 rounded-2xl border border-gray-100 text-center text-slate-500">Cargando viajes...</div>
+          ) : filtered.length === 0 ? (
             <div className="bg-white p-6 rounded-2xl border border-gray-100 text-center text-slate-500">No hay viajes para mostrar.</div>
           ) : (
             <div className="space-y-6">
@@ -183,7 +157,7 @@ export default function AdminMonitor() {
                     <div className="flex-1">
                       <div className="text-sm text-slate-500">{t.role ?? "Conductor"}</div>
                       <div className="text-lg md:text-2xl font-semibold text-slate-900 mt-1">{t.driverName}</div>
-                      <div className="text-xs text-slate-500 mt-1">→ {t.route}</div>
+                      <div className="text-xs text-slate-500 mt-1">→ {t.route ?? "-"}</div>
                     </div>
 
                     {/* right: status + time */}

@@ -1,45 +1,236 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Star } from "lucide-react";
-import avatar1 from "../assets/avatar-1.png";
-import avatar2 from "../assets/avatar-2.png";
-import avatar3 from "../assets/avatar-3.png";
-import logo from "../assets/RIDECI.png";
+import React, { useCallback, useEffect, useState } from "react";
+import { Star, CheckCircle } from "lucide-react";
+
+// Avatars con imágenes reales de Unsplash
+const avatar1 = "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop";
+const avatar2 = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop";
+const avatar3 = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop";
+const avatar4 = "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop";
+const avatar5 = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop";
+const avatar6 = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop";
+const avatar7 = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop";
+const avatar8 = "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop";
+const avatar9 = "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop";
+const avatar10 = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop";
+const avatar11 = "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop";
+const avatar12 = "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop";
 
 /**
- * AdminUsers.tsx - Versión actualizada
- * Cambios realizados:
- * - Añadido estado "Bloqueado".
- * - Eliminado botón "Archivar" en modal de usuario.
- * - Header muestra 2547 usuarios activos (valor fijo).
+ * AdminUsers.tsx - Sistema de Gestión de Perfiles
+ * Gestiona perfiles de usuario (Conductor, Pasajero, Acompañante)
+ * Cada usuario puede tener múltiples perfiles con ratings independientes
  */
+
+type IdentificationType = "CC" | "TI" | "CE" | "PP";
+
+type Profile = {
+  role: "Acompañante" | "Conductor" | "Pasajero";
+  rating: number;
+  plate?: string | null;
+  vehicle?: string | null;
+};
 
 type UserCard = {
   id: string;
   name: string;
   email?: string;
-  role?: "Acompañante" | "Conductor" | "Pasajero" | "Estudiante" | "Profesor" | string;
-  plate?: string;
-  avatar?: string | null;
-  status?: "Pendiente" | "Verificado" | "Suspendido" | "Bloqueado" | string;
-  vehicle?: string | null;
-  rating?: number; // Rating de 0-5
+  profilePictureUrl?: string | null;
   phone?: string;
+  identificationNumber?: string;
+  identificationType?: IdentificationType;
+  birthDate?: string;
+  status?: "Pendiente" | "Verificado" | "Suspendido" | "Bloqueado" | string;
+  profiles: Profile[];
+  activeProfile?: Profile;
 };
 
 type ErrorKind = "file" | "report" | "user";
 type PendingAction = null | "suspend_account" | "suspend_profile" | "activate_account" | "approve" | "reject";
 
-const mockUsers = (): UserCard[] => [
-  { id: "U001", name: "Carlos Ruiz", email: "carlos.ruiz@mail.escuelaing.edu.co", role: "Conductor", plate: "ABC-123", avatar: avatar1, status: "Pendiente", vehicle: "Toyota Prius 2022", rating: 0, phone: "+57 320 7654321" },
-  { id: "U002", name: "María Gómez", email: "maria.gomez@mail.escuelaing.edu.co", role: "Acompañante", plate: "XYZ-789", avatar: avatar2, status: "Verificado", vehicle: "Hyundai Accent 2023", rating: 4.5, phone: "+57 310 1234567" },
-  // Ejemplo con Bloqueado para demostrar el nuevo estado
-  { id: "U003", name: "Juan Sánchez", email: "juan.sanchez@mail.escuelaing.edu.co", role: "Conductor", plate: "LMN-456", avatar: avatar3, status: "Bloqueado", vehicle: "Renault Logan 2021", rating: 4.8, phone: "+57 300 9876543" },
-  { id: "U004", name: "Natalia Perez", email: "natalia.p@mail.escuelaing.edu.co", role: "Profesor", plate: "DEF-222", avatar: avatar1, status: "Verificado", vehicle: null, rating: 3.2, phone: "+57 315 5555555" },
-  { id: "U005", name: "Andrés Velas", email: "andres.v@mail.escuelaing.edu.co", role: "Pasajero", plate: "GHI-333", avatar: avatar2, status: "Verificado", vehicle: null, rating: 5.0, phone: "+57 321 4444444" },
-  { id: "U006", name: "Paola Rojas", email: "paola.r@mail.escuelaing.edu.co", role: "Conductor", plate: "JKL-444", avatar: avatar3, status: "Pendiente", vehicle: "Chevrolet Spark 2020", rating: 0, phone: "+57 318 7777777" },
-];
+const mockUsers = (): UserCard[] => {
+  const users: UserCard[] = [
+    {
+      id: "U001",
+      name: "David Palacios",
+      email: "david.palacios-p@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar1,
+      phone: "+57 320 7654321",
+      identificationNumber: "1000100282",
+      identificationType: "CC",
+      birthDate: "1998-05-15",
+      status: "Pendiente",
+      profiles: [
+        { role: "Conductor", rating: 5.0, plate: "ABC-123", vehicle: "Toyota Prius 2022" },
+        { role: "Pasajero", rating: 4.8, plate: null, vehicle: null },
+      ],
+    },
+    {
+      id: "U002",
+      name: "Raquel Iveth Selma Ayala",
+      email: "raquel.selma-a@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar2,
+      phone: "+57 310 1234567",
+      identificationNumber: "1000093654",
+      identificationType: "CC",
+      birthDate: "1999-08-22",
+      status: "Verificado",
+      profiles: [
+        { role: "Acompañante", rating: 4.5, plate: "XYZ-789", vehicle: "Hyundai Accent 2023" },
+        { role: "Pasajero", rating: 4.8, plate: null, vehicle: null },
+      ],
+    },
+    {
+      id: "U003",
+      name: "Néstor David Lopez Castellañeda",
+      email: "nestor.lopez-c@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar3,
+      phone: "+57 300 9876543",
+      identificationNumber: "1000100422",
+      identificationType: "CC",
+      birthDate: "1997-11-03",
+      status: "Bloqueado",
+      profiles: [
+        { role: "Conductor", rating: 1.8, plate: "LMN-456", vehicle: "Renault Logan 2021" },
+        { role: "Pasajero", rating: 4.2, plate: null, vehicle: null },
+      ],
+    },
+    {
+      id: "U004",
+      name: "Deisy Lorena Guzmán Cabrales",
+      email: "deisy.guzman-c@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar4,
+      phone: "+57 315 5555555",
+      identificationNumber: "1000093799",
+      identificationType: "CE",
+      birthDate: "1995-03-10",
+      status: "Verificado",
+      profiles: [
+        { role: "Pasajero", rating: 3.2, plate: null, vehicle: null },
+      ],
+    },
+    {
+      id: "U005",
+      name: "Tulio Riaño Sanchez",
+      email: "tulio.riano-s@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar5,
+      phone: "+57 321 4444444",
+      identificationNumber: "1000099099",
+      identificationType: "CC",
+      birthDate: "2000-01-18",
+      status: "Verificado",
+      profiles: [
+        { role: "Pasajero", rating: 5.0, plate: null, vehicle: null },
+        { role: "Conductor", rating: 4.6, plate: "GHI-333", vehicle: "Mazda 3 2023" },
+      ],
+    },
+    {
+      id: "U006",
+      name: "Daniel Patiño Mejia",
+      email: "daniel.patino-m@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar6,
+      phone: "+57 318 7777777",
+      identificationNumber: "1000099097",
+      identificationType: "TI",
+      birthDate: "2002-07-25",
+      status: "Pendiente",
+      profiles: [
+        { role: "Conductor", rating: 5.0, plate: "JKL-444", vehicle: "Chevrolet Spark 2020" },
+      ],
+    },
+    {
+      id: "U007",
+      name: "Robinson Steven Nuñez Portela",
+      email: "robinson.nunez-p@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar7,
+      phone: "+57 312 8888888",
+      identificationNumber: "1000100575",
+      identificationType: "CC",
+      birthDate: "1999-03-12",
+      status: "Pendiente",
+      profiles: [
+        { role: "Conductor", rating: 5.0, plate: "MNO-555", vehicle: "Kia Picanto 2021" },
+        { role: "Acompañante", rating: 4.9, plate: "MNO-555", vehicle: "Kia Picanto 2021" },
+      ],
+    },
+    {
+      id: "U008",
+      name: "Juan Pablo Caballero Castellanos",
+      email: "juan.ccastellanos@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar8,
+      phone: "+57 314 9999999",
+      identificationNumber: "1000100516",
+      identificationType: "CC",
+      birthDate: "1998-09-20",
+      status: "Verificado",
+      profiles: [
+        { role: "Conductor", rating: 4.2, plate: "PQR-666", vehicle: "Nissan March 2022" },
+        { role: "Pasajero", rating: 4.7, plate: null, vehicle: null },
+      ],
+    },
+    {
+      id: "U009",
+      name: "Andrés Martin Cantor Urrego",
+      email: "andres.cantor-u@escuelaing.edu.co",
+      profilePictureUrl: avatar9,
+      phone: "+57 316 1111111",
+      identificationNumber: "1000004955",
+      identificationType: "CC",
+      birthDate: "1996-06-08",
+      status: "Verificado",
+      profiles: [
+        { role: "Conductor", rating: 4.9, plate: "STU-777", vehicle: "Honda City 2023" },
+      ],
+    },
+    {
+      id: "U010",
+      name: "Juan Carlos Leal Cruz",
+      email: "juan.lcruz@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar10,
+      phone: "+57 317 2222222",
+      identificationNumber: "1000100326",
+      identificationType: "CC",
+      birthDate: "1997-04-14",
+      status: "Verificado",
+      profiles: [
+        { role: "Conductor", rating: 4.4, plate: "VWX-888", vehicle: "Ford Fiesta 2021" },
+        { role: "Pasajero", rating: 4.6, plate: null, vehicle: null },
+        { role: "Acompañante", rating: 4.3, plate: "VWX-888", vehicle: "Ford Fiesta 2021" },
+      ],
+    },
+    {
+      id: "U011",
+      name: "Valeria Bermudez Aguilar",
+      email: "valeria.bermudez-a@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar11,
+      phone: "+57 319 3333333",
+      identificationNumber: "1000100774",
+      identificationType: "CC",
+      birthDate: "2000-11-28",
+      status: "Verificado",
+      profiles: [
+        { role: "Pasajero", rating: 4.8, plate: null, vehicle: null },
+        { role: "Conductor", rating: 4.5, plate: "YZA-999", vehicle: "Volkswagen Gol 2022" },
+      ],
+    },
+    {
+      id: "U012",
+      name: "Juan Sebastian Puentes Julio",
+      email: "juan.puentes@mail.escuelaing.edu.co",
+      profilePictureUrl: avatar12,
+      phone: "+57 320 4444444",
+      identificationNumber: "1000100444",
+      identificationType: "CC",
+      birthDate: "1999-07-19",
+      status: "Verificado",
+      profiles: [
+        { role: "Acompañante", rating: 4.7, plate: "BCD-101", vehicle: "Suzuki Swift 2021" },
+      ],
+    },
+  ];
 
-// Rating Stars Component
+  return users.map(u => ({ ...u, activeProfile: u.profiles[0] }));
+};
+
 const StarRating: React.FC<{ rating: number; size?: number }> = ({ rating, size = 20 }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
@@ -64,7 +255,6 @@ const StarRating: React.FC<{ rating: number; size?: number }> = ({ rating, size 
   );
 };
 
-// Error Modal
 const ErrorModal: React.FC<{ 
   open: boolean; 
   kind?: ErrorKind; 
@@ -75,23 +265,29 @@ const ErrorModal: React.FC<{
 }> = ({ open, kind, title, message, onRetry, onClose }) => {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-70 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 border-2 border-red-50">
+    <div className="fixed inset-0 z-70 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full border border-red-200 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <div className="w-20 h-20 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center">
+            <svg className="w-10 h-10 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-slate-800">{title ?? "Error"}</h3>
-          <p className="text-sm text-slate-600 text-center">{message ?? "Ha ocurrido un error."}</p>
-          <div className="mt-3 w-full flex justify-center gap-3">
-            <button onClick={onRetry} className="px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50">
+          <h3 className="text-xl font-bold text-slate-800">{title ?? "Error"}</h3>
+          <p className="text-sm text-slate-600 text-center leading-relaxed">{message ?? "Ha ocurrido un error."}</p>
+          <div className="mt-4 w-full flex justify-center gap-3">
+            <button 
+              onClick={onRetry} 
+              className="px-6 py-2.5 rounded-lg bg-white border-2 border-gray-300 hover:bg-gray-50 font-semibold transition-all shadow-sm hover:shadow-md"
+            >
               Reintentar
             </button>
-            <button onClick={onClose} className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+            <button 
+              onClick={onClose} 
+              className="px-6 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold transition-all shadow-sm hover:shadow-md"
+            >
               Cerrar
             </button>
           </div>
@@ -101,64 +297,70 @@ const ErrorModal: React.FC<{
   );
 };
 
-// Confirm Modal
 const ConfirmModal: React.FC<{
   open: boolean;
   title?: string;
   description?: string;
   pendingAction: PendingAction;
-  selectedRole: string;
-  onRoleChange: (r: string) => void;
+  selectedRoles: string[];
+  availableProfiles: Profile[];
+  onRoleToggle: (r: string) => void;
   loading?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
-}> = ({ open, title, description, pendingAction, selectedRole, onRoleChange, loading, onCancel, onConfirm }) => {
+}> = ({ open, title, description, pendingAction, selectedRoles, availableProfiles, onRoleToggle, loading, onCancel, onConfirm }) => {
   if (!open) return null;
   
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="mt-2 text-sm text-slate-600">{description}</p>
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+        <p className="mt-3 text-sm text-slate-600 leading-relaxed">{description}</p>
 
         {pendingAction === "suspend_profile" && (
-          <fieldset className="mt-4">
-            <legend className="text-sm font-medium text-slate-700">Tipo de perfil</legend>
-            <div className="mt-2 flex gap-2">
-              {["Acompañante", "Conductor", "Pasajero"].map((r) => (
+          <fieldset className="mt-6">
+            <legend className="text-sm font-semibold text-slate-700 mb-3">Selecciona perfiles a suspender:</legend>
+            <div className="space-y-2">
+              {availableProfiles.map((profile) => (
                 <label
-                  key={r}
-                  className={`flex-1 border rounded-lg p-2 cursor-pointer text-center ${
-                    selectedRole === r ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                  key={profile.role}
+                  className={`flex items-center gap-3 border-2 rounded-xl p-4 cursor-pointer transition-all ${
+                    selectedRoles.includes(profile.role)
+                      ? "border-orange-500 bg-orange-50 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
                   <input
-                    type="radio"
-                    name="profile"
-                    value={r}
-                    className="sr-only"
-                    checked={selectedRole === r}
-                    onChange={() => onRoleChange(r)}
+                    type="checkbox"
+                    checked={selectedRoles.includes(profile.role)}
+                    onChange={() => onRoleToggle(profile.role)}
+                    className="w-5 h-5 text-orange-600 rounded focus:ring-orange-500 cursor-pointer"
                   />
-                  <div className="text-sm font-medium">{r}</div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold text-gray-900">{profile.role}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">Rating: {profile.rating.toFixed(1)} ⭐</div>
+                  </div>
                 </label>
               ))}
             </div>
+            {selectedRoles.length === 0 && (
+              <p className="mt-3 text-xs text-red-600 font-medium">⚠️ Debes seleccionar al menos un perfil</p>
+            )}
           </fieldset>
         )}
 
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-slate-700 hover:bg-gray-50"
+            className="px-6 py-2.5 rounded-lg border-2 border-gray-300 bg-white text-slate-700 hover:bg-gray-50 font-semibold transition-all shadow-sm hover:shadow-md"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
-            disabled={loading}
-            className={`px-4 py-2 rounded-lg font-medium ${
+            disabled={loading || (pendingAction === "suspend_profile" && selectedRoles.length === 0)}
+            className={`px-6 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md ${
               pendingAction === "suspend_account" || pendingAction === "reject"
                 ? "bg-red-600 text-white hover:bg-red-700"
                 : pendingAction === "suspend_profile"
@@ -166,7 +368,7 @@ const ConfirmModal: React.FC<{
                 : pendingAction === "activate_account" || pendingAction === "approve"
                 ? "bg-green-600 text-white hover:bg-green-700"
                 : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {loading ? "Procesando..." : "Confirmar"}
           </button>
@@ -177,12 +379,11 @@ const ConfirmModal: React.FC<{
 };
 
 const AdminUsers: React.FC = () => {
-  const [users] = useState<UserCard[]>(() => mockUsers());
+  const [users, setUsers] = useState<UserCard[]>(() => mockUsers());
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("Todos");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
-  // Responsive items per page
   const [itemsPerPage, setItemsPerPage] = useState<number>(3);
   useEffect(() => {
     const calc = () => {
@@ -196,44 +397,54 @@ const AdminUsers: React.FC = () => {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Filter logic
   const filteredUsers = users.filter((u) => {
     const q = search.trim().toLowerCase();
-    if (q && !(u.name.toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q) || (u.plate ?? "").toLowerCase().includes(q))) {
+    const ap = u.activeProfile;
+    if (q && !(
+      u.name.toLowerCase().includes(q) || 
+      (u.email ?? "").toLowerCase().includes(q) || 
+      (ap?.plate ?? "").toLowerCase().includes(q) ||
+      (u.identificationNumber ?? "").toLowerCase().includes(q) ||
+      (u.phone ?? "").toLowerCase().includes(q)
+    )) {
       return false;
     }
-    if (roleFilter !== "Todos" && u.role !== roleFilter) return false;
+    if (roleFilter !== "Todos" && !u.profiles.some(p => p.role === roleFilter)) return false;
     if (statusFilter !== "Todos" && u.status !== statusFilter) return false;
     return true;
   });
 
-  // --- LÓGICA DEL CARRUSEL NUEVA (Track suave) ---
-  const userChunks: UserCard[][] = [];
-  for (let i = 0; i < filteredUsers.length; i += itemsPerPage) {
-    userChunks.push(filteredUsers.slice(i, i + itemsPerPage));
-  }
+  const [userStartIndex, setUserStartIndex] = useState(0);
+  
+  useEffect(() => setUserStartIndex(0), [filteredUsers.length, itemsPerPage]);
 
-  const [userPage, setUserPage] = useState(0);
+  const userPrev = useCallback(() => {
+    setUserStartIndex(prev => Math.max(0, prev - itemsPerPage));
+  }, [itemsPerPage]);
 
-  // Reseteamos página al filtrar
-  useEffect(() => setUserPage(0), [filteredUsers.length, itemsPerPage]);
+  const userNext = useCallback(() => {
+    setUserStartIndex(prev => Math.min(filteredUsers.length - itemsPerPage, prev + itemsPerPage));
+  }, [filteredUsers.length, itemsPerPage]);
 
-  const userPrev = useCallback(() => setUserPage((p) => Math.max(0, p - 1)), []);
-  const userNext = useCallback(() => setUserPage((p) => Math.min(userChunks.length - 1, p + 1)), [userChunks.length]);
+  const visibleUsers = filteredUsers.slice(userStartIndex, userStartIndex + itemsPerPage);
+  const canGoPrev = userStartIndex > 0;
+  const canGoNext = userStartIndex + itemsPerPage < filteredUsers.length;
 
-  // Modal states
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null);
+  const [selectedProfileRole, setSelectedProfileRole] = useState<string>("Conductor");
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const [selectedRole, setSelectedRole] = useState<string>("Conductor");
+  const [selectedRolesToSuspend, setSelectedRolesToSuspend] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [errorState, setErrorState] = useState<{ open: boolean; kind?: ErrorKind; title?: string; message?: string }>({ 
     open: false 
   });
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   const openUser = (u: UserCard) => {
     setSelectedUser(u);
+    setSelectedProfileRole(u.activeProfile?.role || u.profiles[0]?.role || "Conductor");
     setIsUserModalOpen(true);
   };
 
@@ -242,11 +453,21 @@ const AdminUsers: React.FC = () => {
     setSelectedUser(null);
     setPendingAction(null);
     setConfirmOpen(false);
+    setSelectedRolesToSuspend([]);
   };
 
   const startConfirm = (action: PendingAction) => {
     setPendingAction(action);
+    if (action === "suspend_profile" && selectedUser) {
+      setSelectedRolesToSuspend([]);
+    }
     setConfirmOpen(true);
+  };
+
+  const toggleRoleToSuspend = (role: string) => {
+    setSelectedRolesToSuspend(prev => 
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
   };
 
   const closeError = () => setErrorState({ open: false });
@@ -258,7 +479,29 @@ const AdminUsers: React.FC = () => {
 
     await new Promise((res) => setTimeout(res, 700));
 
-    console.log(`Acción ${pendingAction} ejecutada para usuario ${selectedUser.id}`);
+    const userName = selectedUser.name;
+
+    if (pendingAction === "activate_account") {
+      setUsers(prev => prev.map(u => 
+        u.id === selectedUser.id ? { ...u, status: "Verificado" } : u
+      ));
+      console.log(`Cuenta activada para usuario ${selectedUser.id}`);
+      setSuccessMessage(`Has activado la cuenta de ${userName}`);
+    } else if (pendingAction === "suspend_profile") {
+      console.log(`Perfiles suspendidos: ${selectedRolesToSuspend.join(", ")} para usuario ${selectedUser.id}`);
+      setSuccessMessage(`Has suspendido ${selectedRolesToSuspend.length > 1 ? 'los perfiles' : 'el perfil'} de ${userName}`);
+    } else if (pendingAction === "suspend_account") {
+      console.log(`Cuenta suspendida para usuario ${selectedUser.id}`);
+      setSuccessMessage(`Has suspendido la cuenta de ${userName}`);
+    } else if (pendingAction === "approve") {
+      console.log(`Conductor ${selectedUser.id} aprobado`);
+      setSuccessMessage(`Has aprobado a ${userName} como conductor`);
+    } else if (pendingAction === "reject") {
+      console.log(`Conductor ${selectedUser.id} rechazado`);
+      setSuccessMessage(`Has rechazado la solicitud de ${userName}`);
+    } else {
+      console.log(`Acción ${pendingAction} ejecutada para usuario ${selectedUser.id}`);
+    }
     
     setActionLoading(false);
     setConfirmOpen(false);
@@ -266,7 +509,17 @@ const AdminUsers: React.FC = () => {
     closeUserModal();
   };
 
-  // ESC handling
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(""), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  const handleProfileChange = (role: string) => {
+    setSelectedProfileRole(role);
+  };
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -280,228 +533,208 @@ const AdminUsers: React.FC = () => {
   }, [confirmOpen, errorState.open, isUserModalOpen]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative">
+    <div className="min-h-screen bg-white relative">
       <div className="absolute inset-0 opacity-6 pointer-events-none" />
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-        <div className="flex items-center gap-4">
-         <img src={logo} alt="RIDECI" className="h-10 object-contain" />
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-800">Gestión de usuarios</h1>
-            <div className="text-sm text-slate-500">Filtra, valida y administra cuentas</div>
-          </div>
+      <header className="relative z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-800">Gestión de usuarios</h1>
+          <div className="text-sm text-slate-500">Gestiona perfiles, valida conductores y supervisa la comunidad</div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            {/* Valor fijo solicitado */}
-            <div className="text-lg font-bold text-blue-600">2547</div>
+            <div className="text-2xl font-bold text-blue-600">{users.length}</div>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold text-lg">
             A
           </div>
         </div>
       </header>
 
       <main className="relative z-10 p-6 max-w-7xl mx-auto">
-        {/* Search & Filters */}
         <section className="mb-6">
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-center flex-wrap bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar usuario, email o placa..."
-              className="flex-1 rounded-lg p-3 border border-gray-200 bg-white shadow-sm"
+              placeholder="Buscar usuario, email, placa o ID..."
+              className="flex-1 min-w-[250px] rounded-lg px-4 py-2.5 border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
-            <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="rounded-lg p-3 border border-gray-200 bg-white">
+            <select 
+              value={roleFilter} 
+              onChange={(e) => setRoleFilter(e.target.value)} 
+              className="rounded-lg px-4 py-2.5 border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+            >
               <option>Todos</option>
-              <option>Estudiante</option>
-              <option>Profesor</option>
               <option>Acompañante</option>
               <option>Conductor</option>
               <option>Pasajero</option>
             </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-lg p-3 border border-gray-200 bg-white">
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)} 
+              className="rounded-lg px-4 py-2.5 border border-gray-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+            >
               <option>Todos</option>
               <option>Pendiente</option>
               <option>Verificado</option>
               <option>Suspendido</option>
               <option>Bloqueado</option>
             </select>
-            <div className="text-sm text-slate-500">{filteredUsers.length} resultados</div>
+            <div className="px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-sm font-semibold text-blue-700">{filteredUsers.length} resultados</span>
+            </div>
           </div>
         </section>
 
-        {/* === USERS CAROUSEL (CORREGIDO CON FLEXBOX Y SLIDER) === */}
-        <section className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
-            
-            {/* Contenedor FLEX: Flecha - Track - Flecha */}
-            <div className="flex items-center gap-4">
-                
-                {/* Botón Izquierda */}
-                <button
-                    onClick={userPrev}
-                    disabled={userPage === 0}
-                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                        userPage === 0 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-                    }`}
-                >
-                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                        <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+        <section className="relative">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={userPrev}
+              disabled={!canGoPrev}
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                !canGoPrev ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
+            >
+              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
 
-                {/* Contenedor con overflow hidden */}
-                <div className="flex-1 overflow-hidden">
-                    {/* Track Deslizante */}
-                    <div 
-                        className="flex transition-transform duration-500 ease-out"
-                        style={{ transform: `translateX(-${userPage * 100}%)` }}
+            <div className="flex-1 grid gap-4 transition-all duration-500 ease-in-out" style={{ gridTemplateColumns: `repeat(${itemsPerPage}, 1fr)` }}>
+              {visibleUsers.length > 0 ? (
+                visibleUsers.map((u) => (
+                  <div 
+                    key={u.id} 
+                    className="rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 relative h-[200px] flex flex-col"
+                    style={{ backgroundColor: '#CAE8FF' }}
+                  >
+                    <button 
+                      onClick={() => openUser(u)} 
+                      className="absolute top-4 right-4 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm z-10"
                     >
-                        {userChunks.length > 0 ? (
-                            userChunks.map((chunk, i) => (
-                                <div key={i} className="min-w-full flex gap-4 px-1">
-                                    {chunk.map((u) => (
-                                        <div 
-                                            key={u.id} 
-                                            className="flex-1 bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-                                        >
-                                            <div className="flex items-start gap-4">
-                                                <div className="flex-shrink-0">
-                                                    <img 
-                                                        src={u.avatar || avatar1} 
-                                                        alt={u.name} 
-                                                        className="w-20 h-20 rounded-full object-cover border-2 border-blue-100"
-                                                    />
-                                                </div>
+                      Ver
+                    </button>
 
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-start justify-between gap-3">
-                                                        <div className="flex-1 min-w-0">
-                                                            <h3 className="font-semibold text-gray-800 truncate">{u.name}</h3>
-                                                            <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                                                        </div>
-                                                        <div className="flex-shrink-0 text-right">
-                                                            <div className="text-xs text-slate-500 mb-0.5">Placa</div>
-                                                            <div className="font-semibold text-sm whitespace-nowrap">{u.plate ?? "-"}</div>
-                                                        </div>
-                                                    </div>
+                    <div className="flex items-start gap-4 mb-auto">
+                      <div className="flex-shrink-0">
+                        <img 
+                          src={u.profilePictureUrl || avatar1} 
+                          alt={u.name} 
+                          className="w-20 h-20 rounded-full object-cover border-2 border-blue-50"
+                        />
+                      </div>
 
-                                                    <div className="mt-2 space-y-1">
-                                                        <div className="text-xs text-slate-600">
-                                                            <span className="font-medium">{u.role}</span>
-                                                        </div>
-                                                        {u.vehicle && (
-                                                            <div className="text-xs text-slate-500 truncate">{u.vehicle}</div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-4 flex items-center justify-between gap-3">
-                                                <span
-                                                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                                                        u.status === "Pendiente"
-                                                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                                                        : u.status === "Verificado"
-                                                        ? "bg-green-50 text-green-700 border border-green-200"
-                                                        : u.status === "Suspendido"
-                                                        ? "bg-purple-50 text-purple-700 border border-purple-200"
-                                                        : u.status === "Bloqueado"
-                                                        ? "bg-red-50 text-red-700 border border-red-200"
-                                                        : "bg-gray-50 text-slate-700"
-                                                    }`}
-                                                >
-                                                    {u.status}
-                                                </span>
-                                                
-                                                <div className="flex gap-2 flex-shrink-0">
-                                                    <button 
-                                                        onClick={() => openUser(u)} 
-                                                        className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors text-sm font-medium"
-                                                    >
-                                                        Ver
-                                                    </button>
-                                                    {(u.status === "Suspendido" || u.status === "Bloqueado") && (
-                                                        <button 
-                                                            onClick={() => {
-                                                                setSelectedUser(u);
-                                                                startConfirm("activate_account");
-                                                            }}
-                                                            className="px-4 py-1.5 bg-green-50 text-green-700 rounded-lg border border-green-200 hover:bg-green-100 transition-colors text-sm font-medium whitespace-nowrap"
-                                                        >
-                                                            Activar
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {/* Rellenos vacíos */}
-                                    {chunk.length < itemsPerPage && Array.from({ length: itemsPerPage - chunk.length }).map((_, idx) => (
-                                        <div key={`empty-${idx}`} className="flex-1 opacity-0 pointer-events-none" />
-                                    ))}
-                                </div>
-                            ))
-                        ) : (
-                            <div className="min-w-full text-center py-10 text-slate-500">No se encontraron usuarios.</div>
-                        )}
+                      <div className="flex-1 min-w-0 pr-16">
+                        <h4 className="font-bold text-gray-900 truncate text-base leading-tight">{u.name}</h4>
+                        <div className="text-sm text-slate-500 font-medium mt-1">{u.activeProfile?.role}</div>
+                        <div className="text-xs text-slate-400 truncate mt-1">{u.email}</div>
+                        <div className="text-xs text-slate-400 truncate mt-0.5">{u.activeProfile?.vehicle || u.phone}</div>
+                      </div>
                     </div>
-                </div>
 
-                {/* Botón Derecha */}
-                <button
-                    onClick={userNext}
-                    disabled={userPage >= userChunks.length - 1}
-                    className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                        userPage >= userChunks.length - 1 ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-                    }`}
-                >
-                    <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                        <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-
+                    <div className="flex items-center justify-between gap-3 mt-4">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                          u.status === "Pendiente"
+                            ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                            : u.status === "Verificado"
+                            ? "bg-green-50 text-green-700 border border-green-200"
+                            : u.status === "Suspendido"
+                            ? "bg-purple-50 text-purple-700 border border-purple-200"
+                            : u.status === "Bloqueado"
+                            ? "bg-red-50 text-red-700 border border-red-200"
+                            : "bg-gray-50 text-slate-700"
+                        }`}
+                      >
+                        {u.status}
+                      </span>
+                      
+                      {(u.status === "Suspendido" || u.status === "Bloqueado") && (
+                        <button 
+                          onClick={() => {
+                            setSelectedUser(u);
+                            startConfirm("activate_account");
+                          }}
+                          className="px-3 py-1 border border-green-300 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-xs font-medium whitespace-nowrap"
+                        >
+                          Activar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-10 text-slate-500">No se encontraron usuarios.</div>
+              )}
             </div>
+
+            <button
+              onClick={userNext}
+              disabled={!canGoNext}
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
+                !canGoNext ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              }`}
+            >
+              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
+                <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
         </section>
 
+        {/* Separador visual */}
+        <div className="my-8 flex items-center gap-4">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-full border border-blue-200">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span className="text-sm font-semibold text-blue-700">Listado completo de usuarios</span>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+        </div>
+
         {/* Listado Completo */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Listado completo</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.slice(0, 6).map((u) => (
-              <div key={u.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-start gap-4">
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredUsers.slice(0, 9).map((u) => (
+              <div 
+                key={u.id} 
+                className="rounded-xl p-5 border border-blue-100 shadow-sm hover:shadow-lg transition-all duration-300 h-[180px] flex flex-col" 
+                style={{ backgroundColor: '#CAE8FF' }}
+              >
+                <div className="flex items-start gap-4 mb-auto">
                   <img 
-                    src={u.avatar || avatar1} 
+                    src={u.profilePictureUrl || avatar1} 
                     alt={u.name} 
                     className="w-16 h-16 rounded-full object-cover border-2 border-blue-100 flex-shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-800 truncate">{u.name}</h4>
-                    <p className="text-xs text-slate-500 truncate">{u.role}</p>
-                    <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                    {u.vehicle && (
-                      <p className="text-xs text-slate-400 truncate mt-1">{u.vehicle}</p>
-                    )}
+                    <h4 className="font-bold text-gray-900 truncate text-base leading-tight">{u.name}</h4>
+                    <p className="text-xs text-slate-500 truncate mt-1">{u.activeProfile?.role}</p>
+                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
+                    <p className="text-xs text-slate-400 truncate mt-0.5">
+                      {u.activeProfile?.vehicle || u.phone || "-"}
+                    </p>
                   </div>
                   <button 
                     onClick={() => openUser(u)} 
-                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors text-sm font-medium flex-shrink-0"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-shrink-0 shadow-sm"
                   >
                     Ver
                   </button>
                 </div>
                 
-                {u.role === "Conductor" && u.status === "Pendiente" && (
+                {u.activeProfile?.role === "Conductor" && u.status === "Pendiente" && (
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => {
                         setSelectedUser(u);
                         startConfirm("approve");
                       }}
-                      className="flex-1 py-2 rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-medium"
+                      className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-medium"
                     >
                       Aprobar
                     </button>
@@ -510,7 +743,7 @@ const AdminUsers: React.FC = () => {
                         setSelectedUser(u);
                         startConfirm("reject");
                       }}
-                      className="flex-1 py-2 rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium"
+                      className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium"
                     >
                       Rechazar
                     </button>
@@ -522,88 +755,178 @@ const AdminUsers: React.FC = () => {
         </div>
       </main>
 
-      {/* User Detail Modal */}
+      {successMessage && (
+        <div className="fixed top-6 right-6 z-80 animate-in slide-in-from-top">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl px-6 py-4 shadow-xl flex items-center gap-3 backdrop-blur-sm">
+            <div className="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-green-900 font-semibold">{successMessage}</p>
+          </div>
+        </div>
+      )}
+
       {isUserModalOpen && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={closeUserModal} />
-          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeUserModal} />
+          <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto border border-gray-100">
             <div className="flex items-start gap-6">
-              {/* Avatar y Rating (estrellas debajo del avatar) */}
-              <div className="flex flex-col items-center">
-                <img 
-                  src={selectedUser.avatar || avatar1} 
-                  alt={selectedUser.name}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-blue-100 mb-3"
-                />
-                <StarRating rating={selectedUser.rating ?? 0} size={18} />
+              <div className="flex flex-col items-center flex-shrink-0">
+                <div className="relative">
+                  <img 
+                    src={selectedUser.profilePictureUrl || avatar1} 
+                    alt={selectedUser.name}
+                    className="w-28 h-28 rounded-full object-cover border-4 border-blue-100 shadow-lg"
+                  />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                {(() => {
+                  const currentProfile = selectedUser.profiles.find(p => p.role === selectedProfileRole);
+                  const rating = currentProfile?.rating ?? 0;
+                  return (
+                    <div className="flex flex-col items-center gap-2 mt-4">
+                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 py-2 rounded-lg border border-blue-200">
+                        <StarRating rating={rating} size={18} />
+                      </div>
+                      {rating < 2 && (
+                        <div className="mt-1 px-3 py-1.5 bg-red-50 border border-red-300 rounded-lg shadow-sm">
+                          <p className="text-xs text-red-700 font-semibold">⚠️ Reputación baja</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
-              {/* Info */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold">{selectedUser.name}</h2>
-                    <div className="text-sm text-slate-500 mt-1">{selectedUser.email}</div>
-                    <div className="text-sm text-slate-500">{selectedUser.phone}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedUser.name}</h2>
+                    <div className="text-sm text-slate-500 mt-1.5 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      {selectedUser.email}
+                    </div>
+                    <div className="text-sm text-slate-500 mt-1 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                      </svg>
+                      {selectedUser.phone}
+                    </div>
                   </div>
-                  <button onClick={closeUserModal} className="text-slate-500 hover:text-slate-700 text-xl">
-                    ✕
+                  <button 
+                    onClick={closeUserModal} 
+                    className="text-slate-400 hover:text-slate-600 transition-colors ml-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
 
-                <div className="mt-4 space-y-2 text-sm">
-                  <div className="flex gap-2">
-                    <span className="font-medium text-slate-700">Rol:</span>
-                    <span className="text-slate-600">{selectedUser.role}</span>
+                <div className="space-y-3 text-sm bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <div className="grid grid-cols-[140px_1fr] gap-3 items-center py-2 border-b border-gray-200">
+                    <span className="font-semibold text-slate-700">Perfil activo:</span>
+                    <select
+                      value={selectedProfileRole}
+                      onChange={(e) => handleProfileChange(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-slate-700 hover:border-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                    >
+                      {selectedUser.profiles.map(profile => (
+                        <option key={profile.role} value={profile.role}>
+                          {profile.role} (★ {profile.rating.toFixed(1)})
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="flex gap-2">
-                    <span className="font-medium text-slate-700">Estado:</span>
+
+                  <div className="grid grid-cols-[140px_1fr] gap-3 items-center py-2 border-b border-gray-200">
+                    <span className="font-semibold text-slate-700">Estado:</span>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs ${
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium w-fit ${
                         selectedUser.status === "Pendiente"
-                          ? "bg-yellow-50 text-yellow-700"
+                          ? "bg-yellow-50 text-yellow-700 border border-yellow-300"
                           : selectedUser.status === "Verificado"
-                          ? "bg-green-50 text-green-700"
+                          ? "bg-green-50 text-green-700 border border-green-300"
                           : selectedUser.status === "Suspendido"
-                          ? "bg-purple-50 text-purple-700"
+                          ? "bg-purple-50 text-purple-700 border border-purple-300"
                           : selectedUser.status === "Bloqueado"
-                          ? "bg-red-50 text-red-700"
+                          ? "bg-red-50 text-red-700 border border-red-300"
                           : "bg-gray-50 text-slate-700"
                       }`}
                     >
                       {selectedUser.status}
                     </span>
                   </div>
-                  {selectedUser.plate && (
-                    <div className="flex gap-2">
-                      <span className="font-medium text-slate-700">Placa:</span>
-                      <span className="text-slate-600">{selectedUser.plate}</span>
+
+                  {selectedUser.identificationType && (
+                    <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
+                      <span className="font-semibold text-slate-700">Tipo ID:</span>
+                      <span className="text-slate-600">{selectedUser.identificationType}</span>
                     </div>
                   )}
-                  {selectedUser.vehicle && (
-                    <div className="flex gap-2">
-                      <span className="font-medium text-slate-700">Vehículo:</span>
-                      <span className="text-slate-600">{selectedUser.vehicle}</span>
+
+                  {selectedUser.identificationNumber && (
+                    <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
+                      <span className="font-semibold text-slate-700">Número ID:</span>
+                      <span className="text-slate-600 font-mono">{selectedUser.identificationNumber}</span>
                     </div>
                   )}
+
+                  {selectedUser.birthDate && (
+                    <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
+                      <span className="font-semibold text-slate-700">Fecha de nac.:</span>
+                      <span className="text-slate-600">
+                        {new Date(selectedUser.birthDate).toLocaleDateString('es-CO', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  )}
+
+                  {(() => {
+                    const currentProfile = selectedUser.profiles.find(p => p.role === selectedProfileRole);
+                    return (
+                      <>
+                        <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
+                          <span className="font-semibold text-slate-700">Placa:</span>
+                          <span className={`font-mono ${currentProfile?.plate ? "text-slate-600" : "text-slate-400"}`}>
+                            {currentProfile?.plate || "—"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-[140px_1fr] gap-3 py-2">
+                          <span className="font-semibold text-slate-700">Vehículo:</span>
+                          <span className={currentProfile?.vehicle ? "text-slate-600" : "text-slate-400"}>
+                            {currentProfile?.vehicle || "—"}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
 
-            {/* Acciones */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Si está Suspendido o Bloqueado mostrar Activar, si no mostrar Suspender */}
               {(selectedUser.status === "Suspendido" || selectedUser.status === "Bloqueado") ? (
                 <button
                   onClick={() => startConfirm("activate_account")}
-                  className="w-full py-2 rounded-lg border border-green-400 bg-green-50 text-green-700 font-medium hover:bg-green-100"
+                  className="w-full py-3 rounded-lg border-2 border-green-400 bg-green-50 text-green-700 font-semibold hover:bg-green-100 transition-all shadow-sm hover:shadow-md"
                 >
                   Activar cuenta
                 </button>
               ) : (
                 <button
                   onClick={() => startConfirm("suspend_account")}
-                  className="w-full py-2 rounded-lg border border-red-400 bg-red-50 text-red-700 font-medium hover:bg-red-100"
+                  className="w-full py-3 rounded-lg border-2 border-red-400 bg-red-50 text-red-700 font-semibold hover:bg-red-100 transition-all shadow-sm hover:shadow-md"
                 >
                   Suspender cuenta
                 </button>
@@ -611,25 +934,22 @@ const AdminUsers: React.FC = () => {
 
               <button
                 onClick={() => startConfirm("suspend_profile")}
-                className="w-full py-2 rounded-lg border border-orange-400 bg-orange-50 text-orange-700 font-medium hover:bg-orange-100"
+                className="w-full py-3 rounded-lg border-2 border-orange-400 bg-orange-50 text-orange-700 font-semibold hover:bg-orange-100 transition-all shadow-sm hover:shadow-md"
               >
-                Suspender perfil
+                Suspender perfil(es)
               </button>
-
-              {/* NOTE: botón "Archivar" eliminado por petición */}
             </div>
           </div>
         </div>
       )}
 
-      {/* Confirm Modal */}
       <ConfirmModal
         open={confirmOpen}
         title={
           pendingAction === "suspend_account"
             ? "Confirmar suspensión de cuenta"
             : pendingAction === "suspend_profile"
-            ? "Suspender perfil"
+            ? "Suspender perfil(es)"
             : pendingAction === "activate_account"
             ? "Activar cuenta"
             : pendingAction === "approve"
@@ -643,17 +963,19 @@ const AdminUsers: React.FC = () => {
             ? `Vas a aprobar a ${selectedUser?.name} como conductor.`
             : pendingAction === "reject"
             ? `Vas a rechazar la solicitud de ${selectedUser?.name}.`
+            : pendingAction === "suspend_profile"
+            ? `Selecciona los perfiles que deseas suspender para ${selectedUser?.name}.`
             : `Confirma esta acción para ${selectedUser?.name}.`
         }
         pendingAction={pendingAction}
-        selectedRole={selectedRole}
-        onRoleChange={setSelectedRole}
+        selectedRoles={selectedRolesToSuspend}
+        availableProfiles={selectedUser?.profiles || []}
+        onRoleToggle={toggleRoleToSuspend}
         loading={actionLoading}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={performAction}
       />
 
-      {/* Error Modal */}
       <ErrorModal
         open={errorState.open}
         kind={errorState.kind}
