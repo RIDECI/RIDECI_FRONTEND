@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export const HomeCompanion: React.FC = () => {
+    const [selectedDate, setSelectedDate] = useState('');
+    const [selectedTime, setSelectedTime] = useState('');
     const [meetingPoint, setMeetingPoint] = useState('');
     const [destination, setDestination] = useState('');
 
@@ -68,7 +70,7 @@ export const HomeCompanion: React.FC = () => {
         {
             id: 2,
             icon: AlertTriangle,
-            iconColor: 'text-red-600',
+            iconColor: 'text-orange-400',
             message: 'Tienes un nuevo reporte.',
             time: 'Hace 9 hrs'
         },
@@ -83,6 +85,8 @@ export const HomeCompanion: React.FC = () => {
 
     const handleCreateGroup = () => {
         console.log('Creando grupo:', {
+            selectedDate,
+            selectedTime,
             meetingPoint,
             destination
         });
@@ -114,6 +118,17 @@ export const HomeCompanion: React.FC = () => {
         }
     };
 
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'dd/mm/aaaa';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const formatTime = (timeString: string) => {
+        if (!timeString) return '--:-- --';
+        return timeString;
+    };
+
     return (
         <div className="flex-1 min-h-screen bg-white">
             <div className="p-6 md:p-8">
@@ -134,20 +149,24 @@ export const HomeCompanion: React.FC = () => {
                                 {/* Fecha */}
                                 <div className="relative">
                                     <div
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                         style={{backgroundColor: '#E8F4FF'}}
+                                        onClick={() => document.getElementById('date-input-companion')?.showPicker()}
                                     >
                                         <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
                                         <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Escoge la fecha
                                             </div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {selectedDate ? formatDate(selectedDate) : 'dd/mm/aaaa'}
+                                            </div>
                                             <input
+                                                id="date-input-companion"
                                                 type="date"
-                                                className="w-full bg-transparent border-0 p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-                                                style={{
-                                                    colorScheme: 'light'
-                                                }}
+                                                value={selectedDate}
+                                                onChange={(e) => setSelectedDate(e.target.value)}
+                                                className="absolute opacity-0 pointer-events-none"
                                             />
                                         </div>
                                     </div>
@@ -156,20 +175,24 @@ export const HomeCompanion: React.FC = () => {
                                 {/* Hora */}
                                 <div className="relative">
                                     <div
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                         style={{backgroundColor: '#E8F4FF'}}
+                                        onClick={() => document.getElementById('time-input-companion')?.showPicker()}
                                     >
                                         <Clock className="w-5 h-5 text-gray-700 shrink-0"/>
                                         <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Hora del encuentro
                                             </div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {selectedTime ? formatTime(selectedTime) : '--:-- --'}
+                                            </div>
                                             <input
+                                                id="time-input-companion"
                                                 type="time"
-                                                className="w-full bg-transparent border-0 p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-                                                style={{
-                                                    colorScheme: 'light'
-                                                }}
+                                                value={selectedTime}
+                                                onChange={(e) => setSelectedTime(e.target.value)}
+                                                className="absolute opacity-0 pointer-events-none"
                                             />
                                         </div>
                                     </div>
@@ -262,7 +285,7 @@ export const HomeCompanion: React.FC = () => {
                             <div
                                 key={group.id}
                                 className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                                style={{backgroundColor: '#CAE8FF'}}
+                                style={{backgroundColor: '#E8F4FF'}}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">

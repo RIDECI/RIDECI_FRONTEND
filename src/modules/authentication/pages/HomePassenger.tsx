@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export const HomePassenger: React.FC = () => {
+    const [selectedDate, setSelectedDate] = useState('');
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
 
     // Ofertas de viaje disponibles
-    const mockOffers = [
+    const allMockOffers = [
         {
             id: 1,
             driver: 'Carlos Santana',
@@ -50,6 +51,9 @@ export const HomePassenger: React.FC = () => {
         }
     ];
 
+    // Ordenar ofertas por cupos disponibles (menor a mayor = más urgente primero)
+    const sortedOffers = [...allMockOffers].sort((a, b) => a.availableSeats - b.availableSeats);
+
     // Notificaciones
     const notifications = [
         {
@@ -62,7 +66,7 @@ export const HomePassenger: React.FC = () => {
         {
             id: 2,
             icon: AlertTriangle,
-            iconColor: 'text-red-600',
+            iconColor: 'text-orange-400',
             message: 'Te han generado un nuevo reporte.',
             time: 'Hace 9 hrs'
         },
@@ -77,9 +81,16 @@ export const HomePassenger: React.FC = () => {
 
     const handleReserve = () => {
         console.log('Reservando viaje:', {
+            selectedDate,
             origin,
             destination
         });
+    };
+
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'dd/mm/aaaa';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
     return (
@@ -100,20 +111,24 @@ export const HomePassenger: React.FC = () => {
                             {/* Fecha de partida */}
                             <div className="relative">
                                 <div
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                     style={{backgroundColor: '#E8F4FF'}}
+                                    onClick={() => document.getElementById('date-input-passenger')?.showPicker()}
                                 >
                                     <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
                                     <div className="flex-1">
                                         <div className="text-xs text-gray-600 mb-1 font-medium">
                                             Fecha de partida
                                         </div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                            {selectedDate ? formatDate(selectedDate) : 'dd/mm/aaaa'}
+                                        </div>
                                         <input
+                                            id="date-input-passenger"
                                             type="date"
-                                            className="w-full bg-transparent border-0 p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-                                            style={{
-                                                colorScheme: 'light'
-                                            }}
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="absolute opacity-0 pointer-events-none"
                                         />
                                     </div>
                                 </div>
@@ -201,11 +216,11 @@ export const HomePassenger: React.FC = () => {
 
                     {/* Offer Cards Grid */}
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {mockOffers.map((offer) => (
+                        {sortedOffers.map((offer) => (
                             <div
                                 key={offer.id}
                                 className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                                style={{backgroundColor: '#CAE8FF'}}
+                                style={{backgroundColor: '#E8F4FF'}}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">

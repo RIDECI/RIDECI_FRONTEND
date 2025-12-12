@@ -18,8 +18,8 @@ export const HomeDriver: React.FC = () => {
         {id: 'mazda-cx5', name: 'Mazda CX-5', type: 'SUV'}
     ];
 
-    // Datos de ejemplo de viajes c
-    const mockTrips = [
+    // Datos de ejemplo de viajes - ordenados y filtrados
+    const allMockTrips = [
         {
             id: 1,
             passenger: 'Carlos Santana',
@@ -29,10 +29,10 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Universidad',
             endPoint: 'Portal 80',
             time: '18:30',
-            date: 'Nov 25',
+            date: '2024-12-12',
             price: '6.000 COP',
             status: 'Hoy',
-            statusColor: 'bg-red-100 text-red-700'
+            statusColor: 'bg-yellow-200 text-yellow-800'
         },
         {
             id: 2,
@@ -43,7 +43,7 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Centro',
             endPoint: 'Aeropuerto',
             time: '15:45',
-            date: 'Nov 22',
+            date: '2024-11-22',
             price: '8.500 COP',
             status: 'Pasado',
             statusColor: 'bg-yellow-100 text-yellow-700'
@@ -57,7 +57,7 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Portal Norte',
             endPoint: 'Universidad',
             time: '07:00',
-            date: 'Nov 19',
+            date: '2024-12-19',
             price: '5.500 COP',
             status: 'Programado',
             statusColor: 'bg-green-100 text-green-700'
@@ -71,7 +71,7 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Suba',
             endPoint: 'Chapinero',
             time: '09:15',
-            date: 'Nov 18',
+            date: '2024-12-18',
             price: '7.000 COP',
             status: 'Programado',
             statusColor: 'bg-green-100 text-green-700'
@@ -85,7 +85,7 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Fontibón',
             endPoint: 'Soacha',
             time: '14:30',
-            date: 'Nov 17',
+            date: '2024-11-17',
             price: '6.500 COP',
             status: 'Pasado',
             statusColor: 'bg-yellow-100 text-yellow-700'
@@ -99,12 +99,19 @@ export const HomeDriver: React.FC = () => {
             startPoint: 'Usaquén',
             endPoint: 'La Calera',
             time: '16:00',
-            date: 'Nov 16',
+            date: '2024-12-16',
             price: '9.000 COP',
             status: 'Programado',
             statusColor: 'bg-green-100 text-green-700'
         }
     ];
+
+    // Filtrar solo viajes de Hoy y Programado, ordenados por fecha
+    const sortedTrips = allMockTrips
+        .filter(trip => trip.status === 'Hoy' || trip.status === 'Programado')
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const displayedTrips = sortedTrips.slice(0, 3);
 
     // Notificaciones
     const notifications = [
@@ -118,7 +125,7 @@ export const HomeDriver: React.FC = () => {
         {
             id: 2,
             icon: AlertTriangle,
-            iconColor: 'text-red-600',
+            iconColor: 'text-orange-400',
             message: 'Te han generado un nuevo reporte.',
             time: 'Hace 8 min'
         },
@@ -147,17 +154,20 @@ export const HomeDriver: React.FC = () => {
     };
 
     const formatDate = (dateString: string) => {
-        if (!dateString) return 'Seleccionar fecha';
+        if (!dateString) return 'dd/mm/aaaa';
         const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
     const formatTime = (timeString: string) => {
-        if (!timeString) return 'Seleccionar hora';
+        if (!timeString) return '--:-- --';
         return timeString;
     };
 
-    const displayedTrips = mockTrips.slice(0, 3);
+    const formatDisplayDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    };
 
     return (
         <div className="flex-1 min-h-screen bg-white">
@@ -179,22 +189,24 @@ export const HomeDriver: React.FC = () => {
                                 {/* Fecha */}
                                 <div className="relative">
                                     <div
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                         style={{backgroundColor: '#E8F4FF'}}
+                                        onClick={() => document.getElementById('date-input')?.showPicker()}
                                     >
                                         <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
-                                        <div className="flex-1 relative">
+                                        <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Fecha del viaje
                                             </div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {selectedDate ? formatDate(selectedDate) : 'dd/mm/aaaa'}
+                                            </div>
                                             <input
+                                                id="date-input"
                                                 type="date"
                                                 value={selectedDate}
                                                 onChange={(e) => setSelectedDate(e.target.value)}
-                                                className="w-full bg-transparent border-0 p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-                                                style={{
-                                                    colorScheme: 'light'
-                                                }}
+                                                className="absolute opacity-0 pointer-events-none"
                                             />
                                         </div>
                                     </div>
@@ -203,22 +215,24 @@ export const HomeDriver: React.FC = () => {
                                 {/* Hora */}
                                 <div className="relative">
                                     <div
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                         style={{backgroundColor: '#E8F4FF'}}
+                                        onClick={() => document.getElementById('time-input')?.showPicker()}
                                     >
                                         <Clock className="w-5 h-5 text-gray-700 shrink-0"/>
-                                        <div className="flex-1 relative">
+                                        <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Hora del viaje
                                             </div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {selectedTime ? formatTime(selectedTime) : '--:-- --'}
+                                            </div>
                                             <input
+                                                id="time-input"
                                                 type="time"
                                                 value={selectedTime}
                                                 onChange={(e) => setSelectedTime(e.target.value)}
-                                                className="w-full bg-transparent border-0 p-0 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 cursor-pointer"
-                                                style={{
-                                                    colorScheme: 'light'
-                                                }}
+                                                className="absolute opacity-0 pointer-events-none"
                                             />
                                         </div>
                                     </div>
@@ -341,7 +355,7 @@ export const HomeDriver: React.FC = () => {
                             <div
                                 key={trip.id}
                                 className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                                style={{backgroundColor: '#CAE8FF'}}
+                                style={{backgroundColor: '#E8F4FF'}}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
@@ -358,7 +372,7 @@ export const HomeDriver: React.FC = () => {
                                             </h3>
                                             <div className="flex items-center gap-1 shrink-0">
                                                 <span className="text-xs text-gray-600">{trip.rating}</span>
-                                                <Star className="w-3.5 h-3.5 fill-gray-400 text-gray-400"/>
+                                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"/>
                                             </div>
                                         </div>
                                         <p className="text-xs text-gray-500">{trip.carType}</p>
@@ -387,7 +401,7 @@ export const HomeDriver: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <Calendar className="w-3.5 h-3.5"/>
-                                        <span>{trip.date}</span>
+                                        <span>{formatDisplayDate(trip.date)}</span>
                                     </div>
                                 </div>
 
