@@ -84,7 +84,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           accuracy: accuracy
         };
 
-        axios.put(`http://localhost:8080/geolocations/${travelId}/traveltracking/location`, locationData)
+        axios.put(`http://nemesisroutesandtrackingbackend-production.up.railway.app/geolocations/${travelId}/traveltracking/location`, locationData)
               .then(() => console.log("Location Sent"))
               .catch(e => console.error("Error sending location", e))
       },
@@ -98,7 +98,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
   useEffect(() => {
     if (role !== 'PASSENGER' || !travelId) return;
 
-    const socket = new SockJS('http://localhost:8080/ws/live-tracking');
+    const socket = new SockJS('http://nemesisroutesandtrackingbackend-production.up.railway.app/ws/live-tracking');
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, (frame: any) => {
@@ -107,12 +107,12 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       stompClient.subscribe(`/topic/route/${travelId}/location`, (message) => {
         if(message.body){
           try {
-            const locationData = JSON.parse(message.body);
-            console.log("📡 Nueva ubicación recibida:", locationData);
+            const LocationDocument = JSON.parse(message.body);
+            console.log("📡 Nueva ubicación recibida:", LocationDocument);
         
             setDriverPosition({
-              lat: locationData.latitude,
-              lng: locationData.longitude
+              lat: LocationDocument.latitude,
+              lng: LocationDocument.longitude
             }); 
           } catch (e){
             console.error("Error parsing JSON", e);
