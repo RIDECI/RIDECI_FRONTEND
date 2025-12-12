@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useGetProfile } from "../../hooks/GetProfile/getProfileHook";
 import { useUpdateProfile } from "../../hooks/UpdateProfile/updateProfileHook";
-import type { Profile, UpdateProfileRequest } from "../../hooks/UpdateProfile/updateProfileHook";
 import type { Reputation } from "../../types/reputation";
 
 import ProfileInfo from "./ProfileInfo";
@@ -12,12 +11,11 @@ import SaveChangesButton from "./SaveChangesButton";
 
 export default function UpdateProfileForm() {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>(); // Profile ID from URL
 
   const { getProfile, profile, loading: loadingProfile } = useGetProfile();
   const { updateProfile, loading: updating, error } = useUpdateProfile();
 
-  const [formData, setFormData] = useState<UpdateProfileRequest>({
+  const [formData, setFormData] = useState<any>({
     id: 0,
     name: "",
     email: "",
@@ -25,28 +23,39 @@ export default function UpdateProfileForm() {
     phoneNumber: "",
     ratings: [] as string[],
     badges: [] as string[],
-    profileType: "NOT_DEFINED" as const,
+    profileType: profile.profileType,
     reputation: { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
     identificationType: "CC" as const,
     identificationNumber: "",
     address: "",
     profilePictureUrl: "",
-    birthDate: new Date(),
+    birthDate: "",
+    semester: "",
+    program: "",
   });
 
   const [photo, setPhoto] = useState<string | null>(null);
 
-  // Load the current profile data
+  // Load the current profile data on mount
   useEffect(() => {
-    if (id) {
-      getProfile(id);
-    }
-  }, [id]);
+    // Use a default ID or get from localStorage
+    const profileId = localStorage.getItem('currentProfileId') || '1';
+    getProfile(profileId);
+  }, []);
 
   // Update form data when profile is loaded
   useEffect(() => {
     if (profile) {
-      setFormData({
+      console.log('Perfil cargado:', profile);
+      
+      // Convertir birthDate a formato YYYY-MM-DD para el input date
+      let birthDateStr = "";
+      if (profile.birthDate) {
+        const date = new Date(profile.birthDate);
+        birthDateStr = date.toISOString().split('T')[0];
+      }
+
+      const newFormData = {
         id: profile.id,
         name: profile.name || "",
         email: profile.email || "",
@@ -54,22 +63,34 @@ export default function UpdateProfileForm() {
         phoneNumber: profile.phoneNumber || "",
         ratings: profile.ratings || [],
         badges: profile.badges || [],
-        profileType: profile.profileType || "NOT_DEFINED",
+        profileType: profile.profileType,
         reputation: profile.reputation || { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
         identificationType: profile.identificationType || "CC",
         identificationNumber: profile.identificationNumber || "",
         address: profile.address || "",
         profilePictureUrl: profile.profilePictureUrl || "",
-        birthDate: profile.birthDate || new Date(),
-      });
+        birthDate: birthDateStr,
+        semester: "",
+        program: "",
+      };
+      
+      console.log('Formulario actualizado con:', newFormData);
+      setFormData(newFormData);
       setPhoto(profile.profilePictureUrl || null);
     }
   }, [profile]);
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const handleConfirm = async () => {
     const profileData = {
       ...formData,
-      birthDate: formData.birthDate instanceof Date ? formData.birthDate.toISOString() : formData.birthDate,
+      birthDate: formData.birthDate ? new Date(formData.birthDate) : new Date(),
       profilePictureUrl: photo || formData.profilePictureUrl,
     };
 
@@ -78,6 +99,20 @@ export default function UpdateProfileForm() {
     if (response.success) {
       navigate("/app/profile");
     }
+  };
+
+  // Convertir profileType a formato legible
+  const getRoleName = (profileType: string) => {
+    const roleMap: Record<string, string> = {
+      'DRIVER': 'Conductor',
+      'driver': 'Conductor',
+      'PASSENGER': 'Pasajero',
+      'passenger': 'Pasajero',
+      'COMPANIANT': 'Acompañante',
+      'companiant': 'Acompañante',
+      'NOT_DEFINED': 'No asignado'
+    };
+    return roleMap[profileType] || profileType || 'No asignado';
   };
 
   if (loadingProfile) {
@@ -100,13 +135,11 @@ export default function UpdateProfileForm() {
         <div className="flex-1 space-y-10">
           <ProfileInfo
             photo={photo}
-            onPhotoChange={(file) =>
-              setPhoto(file ? URL.createObjectURL(file) : null)
-            }
+            onPhotoChange={(file) => setPhoto(file ? URL.createObjectURL(file) : null)}
+            role={getRoleName(formData.profileType)}
             formData={formData}
-            onFormDataChange={setFormData}
+            onInputChange={handleInputChange}
           />
-
 
           <div className="pt-4 flex justify-end">
             <SaveChangesButton

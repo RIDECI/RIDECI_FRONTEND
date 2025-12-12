@@ -44,7 +44,7 @@ export function AppSidebar() {
     },
     {
       title: "Perfil",
-      url: "/app/selectProfile",
+      url: "/app/profile",
       icon: User,
     },
     {
