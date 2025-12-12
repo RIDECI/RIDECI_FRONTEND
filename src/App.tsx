@@ -8,6 +8,7 @@ import Register from './modules/authentication/pages/register'
 import ForgotPasswordForm from './modules/authentication/pages/ForgotPasswordPage'
 import EmailSentPage from './modules/authentication/pages/EmailSentPage'
 import ResetPasswordPage from './modules/authentication/pages/ResetPasswordPage'
+import VehicleDocumentsPage from './modules/authentication/pages/VehicleDocumentsPage'
 
 function App() {
     return (
@@ -22,6 +23,9 @@ function App() {
                 <Route path="/forgot-password" element={<ForgotPasswordForm />} /> 
                 <Route path="/email-sent" element={<EmailSentPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                
+                {/* Nueva ruta para documentos del vehículo */}
+                <Route path="/vehicle-documents" element={<VehicleDocumentsPage />} />
 
                 {/* Rutas protegidas bajo /app */}
                 <Route path="/app" element={<Layout />}>
