@@ -1,20 +1,27 @@
 import { GoogleMap, useJsApiLoader, Polyline, Marker } from '@react-google-maps/api';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navigation, Clock, Users, MapPin, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
 import type { LocationDocument } from '../types/location';
-import axios from "axios"
+import axios from "axios";
+
+import SockJS from "sockjs-client";
+import { Stomp, CompatClient } from '@stomp/stompjs';
 
 const containerStyle = {
   width: '100%',
   height: '600px'
 };
 
+interface GeolocalizationComponentProps {
+  role?: 'DRIVER' | 'PASSENGER'; 
+}
+
 const libraries: ("geometry")[] = ["geometry"];
 
-function GeolocalizationComponent() {
+function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponentProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const travelId = searchParams.get('travelId');
@@ -25,6 +32,8 @@ function GeolocalizationComponent() {
   const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 4.7827109, lng: -74.0426038 });
 
   const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null> (null);
+  
+  const stompClientRef = useRef<CompatClient | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -51,7 +60,7 @@ function GeolocalizationComponent() {
   }, [route, isLoaded]);
 
   useEffect(() => {
-    if(!travelId) return;
+    if( role !== "DRIVER" || !travelId) return;
 
     const options = {
       enableHighAccuracy: true,
@@ -59,7 +68,7 @@ function GeolocalizationComponent() {
       maximumAge: 0
     };
 
-    const watchId = navigator.geolocation.watchPosition(
+  const watchId = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude, speed, accuracy} = pos.coords;
 
@@ -85,6 +94,43 @@ function GeolocalizationComponent() {
 
     return () => navigator.geolocation.clearWatch(watchId);
   },[travelId]); 
+
+  useEffect(() => {
+    if (role !== 'PASSENGER' || !travelId) return;
+
+    const socket = new SockJS('http://localhost:8080/ws/live-tracking');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, (frame: any) => {
+      console.log("Connected to websocket: " + frame);
+
+      stompClient.subscribe(`/topic/route/${travelId}/location`, (message) => {
+        if(message.body){
+          try {
+            const locationData = JSON.parse(message.body);
+            console.log("📡 Nueva ubicación recibida:", locationData);
+        
+            setDriverPosition({
+              lat: locationData.latitude,
+              lng: locationData.longitude
+            }); 
+          } catch (e){
+            console.error("Error parsing JSON", e);
+          }
+        }
+      });
+    }, (error: unknown) => {
+      console.error('Error connecting with websocket:', error);
+    });
+
+    stompClientRef.current = stompClient;
+
+    return () => {
+      if (stompClientRef.current && stompClientRef.current.connected) {
+         stompClientRef.current.disconnect();
+      }
+    };
+  }, [travelId, role]);
 
   const formatDistance = (meters: number): string => {
     if (meters < 1000) {
@@ -179,7 +225,9 @@ function GeolocalizationComponent() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <MapPin className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Geolocalización en Tiempo Real</h1>
+          <h1 className="text-3xl font-bold">
+            {role === 'DRIVER' ? 'Modo Conductor' : 'Sigue tu Viaje'}
+          </h1>
         </div>
         <Button 
           variant="outline" 
