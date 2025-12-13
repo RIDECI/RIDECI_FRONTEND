@@ -9,6 +9,8 @@ import type { LocationDocument } from '../types/location';
 import axios from "axios";
 import SockJS from "sockjs-client";
 import { Stomp, CompatClient } from '@stomp/stompjs';
+import EmergencyModal from '@/modules/security/components/EmergencyModal';
+
 
 const containerStyle = {
   width: "100%",
@@ -45,6 +47,10 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
     googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU",
     libraries: libraries,
   });
+
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
+
 
   useEffect(() => {
     if (route && isLoaded && globalThis.google) {
@@ -243,6 +249,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
         <Button
           variant="outline"
           size="icon"
+          onClick={() => setShowEmergencyModal(true)}
           className="rounded-full w-12 h-12 border-red-500 text-red-500 hover:bg-red-50"
         >
           <ShoppingBag className="w-6 h-6" />
@@ -377,6 +384,12 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           Ir al chat con el conductor
         </Button>
       </div>
+    <EmergencyModal
+      isVisible={showEmergencyModal}
+      onClose={() => setShowEmergencyModal(false)}
+    />
+
+
     </div>
   );
 }
