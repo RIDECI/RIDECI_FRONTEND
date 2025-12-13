@@ -30,7 +30,14 @@ export function Conversations(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(true);
   const [newMessage, setNewMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [currentUserId, setCurrentUserId] = useState<number>(55);
+  
+  const getCurrentUserId = (): number => {
+    const userId = localStorage.getItem("userId");
+    return userId ? parseInt(userId, 10) : 0;
+  };
+  
+  const [currentUserId, setCurrentUserId] = useState<number>(getCurrentUserId());
+  
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
   const STORAGE_KEY = `chat_messages_${currentUserId}`;
@@ -135,12 +142,29 @@ export function Conversations(): JSX.Element {
     onError: (err) => console.error("Error WebSocket:", err),
   });
 
+  const getCurrentProfile = (): string => {
+    const selectedProfile = localStorage.getItem('selectedProfile');
+    if (selectedProfile === 'conductor') return 'Conductor';
+    if (selectedProfile === 'pasajero') return 'Pasajero';
+    if (selectedProfile === 'acompanante') return 'Acompañante';
+    return 'Usuario';
+  };
+
   const toggleUser = () => {
-    setCurrentUserId(prev => (prev === 2002 ? 2001 : 2002));
+    const realUserId = getCurrentUserId();
+    setCurrentUserId(prev => {
+      if (prev === realUserId) {
+        return realUserId === 55 ? 2001 : 55;
+      }
+      return realUserId;
+    });
     setSelectedChat(null);
   };
 
   useEffect(() => {
+    const realUserId = getCurrentUserId();
+    setCurrentUserId(realUserId);
+    
     loadConversations();
     
     const savedMessages = loadMessagesFromStorage();
@@ -150,7 +174,7 @@ export function Conversations(): JSX.Element {
     
     const savedUnreadCounts = loadUnreadCountsFromStorage();
     setUnreadCounts(savedUnreadCounts);
-  }, [currentUserId]);
+  }, []);
 
   useEffect(() => {
     if (selectedChat) {
@@ -184,6 +208,8 @@ export function Conversations(): JSX.Element {
   const generateIndividualChats = (convs: ConversationResponse[]): IndividualChat[] => {
     const chats: IndividualChat[] = [];
     
+    const currentProfile = getCurrentProfile();
+    
     convs.forEach(conv => {
       if (!conv.active) return;
       
@@ -197,7 +223,15 @@ export function Conversations(): JSX.Element {
         if (isDriverForThisConv) {
           participantName = "Conductor";
         } else {
-          participantName = `Pasajero #${participantId}`;
+          if (currentProfile === 'Conductor') {
+            participantName = `Pasajero #${participantId}`;
+          } else if (currentProfile === 'Pasajero') {
+            participantName = `Conductor #${participantId}`;
+          } else if (currentProfile === 'Acompañante') {
+            participantName = `Conductor #${participantId}`;
+          } else {
+            participantName = `Usuario #${participantId}`;
+          }
         }
         
         chats.push({
@@ -340,11 +374,10 @@ export function Conversations(): JSX.Element {
           size="sm"
           className="text-sm border-gray-300 shadow-sm"
         >
-          Cambiar usuario (actual: {currentUserId})
+          {getCurrentProfile()} (ID: {currentUserId})
         </Button>
       </div>
 
-      {/* Sidebar con borde derecho */}
       <div className="border-r-2 border-gray-200">
         <ChatSidebar
           chats={individualChats}
@@ -357,7 +390,6 @@ export function Conversations(): JSX.Element {
         />
       </div>
 
-      {/* Área de conversación con borde izquierdo */}
       <div className="flex-1 flex flex-col border-l-2 border-gray-200">
         {selectedChat ? (
           <>
