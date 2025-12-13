@@ -51,24 +51,28 @@ export function useUpdateProfile() {
         setError(null);
 
         try {
-            const response = await fetch(`https://troyareputationbackend-production-2.up.railway.app/profiles/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(profileRequest),
-            });
+            // Simular delay de red
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error: ${response.status}`);
+            const updatedProfile: UpdateProfileBackendResponse = {
+                ...profileRequest,
+            };
+
+            const existingProfiles = JSON.parse(localStorage.getItem('profiles') || '[]');
+            const profileIndex = existingProfiles.findIndex((p: any) => p.id === parseInt(id));
+            
+            if (profileIndex !== -1) {
+                existingProfiles[profileIndex] = updatedProfile;
+                localStorage.setItem('profiles', JSON.stringify(existingProfiles));
             }
+            
+            localStorage.setItem('currentProfile', JSON.stringify(updatedProfile));
 
-            const result: UpdateProfileBackendResponse = await response.json();
+            console.log('Perfil actualizado (simulado):', updatedProfile);
 
             return {
                 success: true,
-                data: result,
+                data: updatedProfile,
             };
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error updating profile';

@@ -66,7 +66,7 @@ export default function CreateProfile() {
 
     const response = await createProfile(profileType, profileData as any);
 
-    if (response.success) navigate("/profile");
+    if (response.success) navigate("/app/profile");
   };
 
   

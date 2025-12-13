@@ -40,33 +40,35 @@ export function useCreateProfile() {
         setLoading(true);
         setError(null);
 
+        // SIMULACIÓN SIN BACKEND - Solo datos locales
         try {
-            const response = await fetch(
-                `https://troyareputationbackend-production-2.up.railway.app/profiles/${type}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(profileRequest),
-                }
-            );
+            // Simular delay de red
+            await new Promise(resolve => setTimeout(resolve, 500));
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error: ${response.status}`);
-            }
-
-            const result: ProfileBackendResponse = await response.json();
+            // Crear perfil simulado con ID aleatorio
+            const simulatedProfile: ProfileBackendResponse = {
+                ...profileRequest,
+                id: Math.floor(Math.random() * 10000),
+                ratings: [],
+                badges: ['Nuevo Usuario'],
+            };
 
             setProfile({
-                ...result,
-                birthDate: new Date(result.birthDate),
+                ...simulatedProfile,
+                birthDate: new Date(simulatedProfile.birthDate),
             });
+
+            // Guardar en localStorage
+            const existingProfiles = JSON.parse(localStorage.getItem('profiles') || '[]');
+            existingProfiles.push(simulatedProfile);
+            localStorage.setItem('profiles', JSON.stringify(existingProfiles));
+            localStorage.setItem('currentProfile', JSON.stringify(simulatedProfile));
+
+            console.log('Perfil creado (simulado):', simulatedProfile);
 
             return {
                 success: true,
-                data: result,
+                data: simulatedProfile,
             };
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error creating profile';
