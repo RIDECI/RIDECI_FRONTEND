@@ -27,6 +27,9 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
   const toRegister = () => {
     navigate("/register")
   }
+  const toForgotPassword = () => {
+    navigate("/forgot-password")
+  }
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -128,7 +131,7 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
             </CardAction>
 
             <CardAction>
-              <Button variant="link" className="text-white">
+              <Button variant="link" className="text-white" onClick={toForgotPassword}>
                 ¿Olvidaste la contraseña?
               </Button>
             </CardAction>
