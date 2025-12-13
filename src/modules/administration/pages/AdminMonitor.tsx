@@ -4,7 +4,6 @@ import car1 from "../assets/car-1.png";
 import car2 from "../assets/car-2.png";
 import car3 from "../assets/car-3.png";
 import car4 from "../assets/car-4.png";
-import logo from "../assets/RIDECI.png";
 
 import { useTrips } from "../hooks/useTrips";
 
@@ -53,30 +52,24 @@ export default function AdminMonitor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative">
-      <div className="absolute inset-0 opacity-6 pointer-events-none" />
-
-      <header className="relative z-10 flex items-center justify-between p-6 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="RIDECI" className="h-10 object-contain" />
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-800">Gestión de Viajes</h1>
-              <div className="text-sm text-slate-500">Filtra, monitorea y administra viajes en tiempo real</div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-white">
+      <header className="flex items-center justify-between p-6 bg-white border-b border-gray-200">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-800">Gestión de Viajes</h1>
+          <div className="text-sm text-slate-500">Filtra, monitorea y administra viajes en tiempo real</div>
         </div>
-
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-lg font-bold text-blue-600">{metrics?.usersActive ?? "—"}</div>
+            <div className="text-2xl font-bold text-blue-600">13</div>
           </div>
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">A</div>
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
+            A
+          </div>
         </div>
       </header>
 
-      <main className="relative z-10 p-6 max-w-7xl mx-auto">
+      <main className="p-6 max-w-7xl mx-auto">
         {/* KPI cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <article className="bg-white rounded-2xl shadow p-6 border border-gray-100">

@@ -1,23 +1,29 @@
-import {
-  GoogleMap,
-  useJsApiLoader,
-  Polyline,
-  Marker,
-} from "@react-google-maps/api";
-import { useState, useEffect } from "react";
-import { Navigation, Clock, Users, MapPin, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useGetRouteInformation } from "../hooks/getRouteInformationHook";
+import { GoogleMap, useJsApiLoader, Polyline, Marker } from '@react-google-maps/api';
+import { useState, useEffect, useRef } from 'react';
+import { Navigation, Clock, Users, MapPin, ShoppingBag } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import carIcon from '../../../../public/car-icon.png';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
+import type { LocationDocument } from '../types/location';
+import axios from "axios";
+import SockJS from "sockjs-client";
+import { Stomp, CompatClient } from '@stomp/stompjs';
+import EmergencyModal from '@/modules/security/components/EmergencyModal';
+
 
 const containerStyle = {
   width: "100%",
   height: "600px",
 };
 
-const libraries: "geometry"[] = ["geometry"];
+interface GeolocalizationComponentProps {
+  role?: 'DRIVER' | 'PASSENGER'; 
+}
 
-function GeolocalizationComponent() {
+const libraries: ("geometry")[] = ["geometry"];
+
+function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponentProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const travelId = searchParams.get("travelId");
@@ -32,11 +38,19 @@ function GeolocalizationComponent() {
     lng: -74.0426038,
   });
 
+  const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null> (null);
+  
+  const stompClientRef = useRef<CompatClient | null>(null);
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU",
     libraries: libraries,
   });
+
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+
+
 
   useEffect(() => {
     if (route && isLoaded && globalThis.google) {
@@ -55,6 +69,79 @@ function GeolocalizationComponent() {
       });
     }
   }, [route, isLoaded]);
+
+  useEffect(() => {
+    if( role !== "DRIVER" || !travelId) return;
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    };
+
+  const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, speed, accuracy} = pos.coords;
+
+        setDriverPosition({lat: latitude, lng: longitude});
+
+        const locationData: LocationDocument = {
+          latitude: latitude,
+          longitude: longitude,
+          timeStamp: new Date().toISOString(),
+          speed: speed || 0,
+          placeId: "driver-live",
+          direction: "",
+          accuracy: accuracy
+        };
+
+        axios.put(`http://nemesisroutesandtrackingbackend-production.up.railway.app/geolocations/${travelId}/traveltracking/location`, locationData)
+              .then(() => console.log("Location Sent"))
+              .catch(e => console.error("Error sending location", e))
+      },
+      (err) => console.error("Error with GPS", err),
+      options
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  },[travelId]); 
+
+  useEffect(() => {
+    if (role !== 'PASSENGER' || !travelId) return;
+
+    const socket = new SockJS('http://nemesisroutesandtrackingbackend-production.up.railway.app/ws/live-tracking');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, (frame: any) => {
+      console.log("Connected to websocket: " + frame);
+
+      stompClient.subscribe(`/topic/route/${travelId}/location`, (message) => {
+        if(message.body){
+          try {
+            const LocationDocument = JSON.parse(message.body);
+            console.log("Nueva ubicación recibida:", LocationDocument);
+        
+            setDriverPosition({
+              lat: LocationDocument.latitude,
+              lng: LocationDocument.longitude
+            }); 
+          } catch (e){
+            console.error("Error parsing JSON", e);
+          }
+        }
+      });
+    }, (error: unknown) => {
+      console.error('Error connecting with websocket:', error);
+    });
+
+    stompClientRef.current = stompClient;
+
+    return () => {
+      if (stompClientRef.current && stompClientRef.current.connected) {
+         stompClientRef.current.disconnect();
+      }
+    };
+  }, [travelId, role]);
 
   const formatDistance = (meters: number): string => {
     if (meters < 1000) {
@@ -155,11 +242,14 @@ function GeolocalizationComponent() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <MapPin className="w-8 h-8" />
-          <h1 className="text-3xl font-bold">Geolocalización en Tiempo Real</h1>
+          <h1 className="text-3xl font-bold">
+            {role === 'DRIVER' ? 'Modo Conductor' : 'Sigue tu Viaje'}
+          </h1>
         </div>
         <Button
           variant="outline"
           size="icon"
+          onClick={() => setShowEmergencyModal(true)}
           className="rounded-full w-12 h-12 border-red-500 text-red-500 hover:bg-red-50"
         >
           <ShoppingBag className="w-6 h-6" />
@@ -225,6 +315,18 @@ function GeolocalizationComponent() {
             />
           )}
 
+          {driverPosition && (
+            <Marker
+              position={driverPosition}
+              title='Mi Ubicacion'
+              icon={{
+                url: carIcon,
+                scaledSize: new window.google.maps.Size(30,30)
+              }}
+              zIndex={1000}
+            />
+          )}
+          
           {/* Polyline de la ruta */}
           {decodedPath.length > 0 && (
             <Polyline
@@ -282,6 +384,12 @@ function GeolocalizationComponent() {
           Ir al chat con el conductor
         </Button>
       </div>
+    <EmergencyModal
+      isVisible={showEmergencyModal}
+      onClose={() => setShowEmergencyModal(false)}
+    />
+
+
     </div>
   );
 }

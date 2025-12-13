@@ -70,7 +70,10 @@ export function Travel(){
                 departureDateAndTime: departureDateAndTime,
                 conditions: '',
                 origin: originResult.location,
-                destiny: destinyResult.location
+                destiny: destinyResult.location,
+                id: "",
+                organizerId: 0,
+                driverId: 0
             };
 
             const result = await updateTravel(travelToEdit.id, updateData);
@@ -84,7 +87,7 @@ export function Travel(){
             }
         } else {
             const travelData: TravelRequest = {
-                driverId: "1", 
+                driverId: 1, 
                 availableSlots: 4, 
                 status: 'ACTIVE',
                 travelType: 'TRIP',

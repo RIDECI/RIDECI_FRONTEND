@@ -1,24 +1,28 @@
-import { MapPin, LocateFixed, Clock, CircleDollarSign} from "lucide-react"
+import { MapPin, LocateFixed, Clock, CircleDollarSign, Calendar} from "lucide-react"
 
 interface CardMapComponentProps {
   origin: string;
   destination: string;
-  departureDateAndTime: string;
+  departureDate: string;
+  departureTime: string;
   estimatedCost: string;
   onOriginChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onDateChange: (value: string) => void;
+  onTimeChange: (value: string) => void;
   onCostChange: (value: string) => void;
 }
 
 const CardMapComponent = ({
   origin,
   destination,
-  departureDateAndTime,
+  departureDate,
+  departureTime,
   estimatedCost,
   onOriginChange,
   onDestinationChange,
   onDateChange,
+  onTimeChange,
   onCostChange
 }: CardMapComponentProps) => {
   
@@ -47,11 +51,19 @@ const CardMapComponent = ({
     },
     {
       id: 'date',
-      placeholder: 'Fecha y Hora de Salida',
-      type: 'datetime-local',
-      icon: Clock,
-      value: departureDateAndTime,
+      placeholder: 'Fecha de Salida',
+      type: 'date',
+      icon: Calendar,
+      value: departureDate,
       onChange: onDateChange
+    },
+    {
+      id: 'time',
+      placeholder: 'Hora de Salida',
+      type: 'time',
+      icon: Clock,
+      value: departureTime,
+      onChange: onTimeChange
     },
     {
       id: 'cost',

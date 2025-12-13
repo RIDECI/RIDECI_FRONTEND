@@ -45,7 +45,7 @@ export type DashboardResponsePayload = {
   [key: string]: any;
 };
 
-const DEFAULT_LOCAL = "http://localhost:8080";
+const DEFAULT_LOCAL = "https://ateneaadministrationbackend-production-cb10.up.railway.app";
 const RAW_BASE = (import.meta.env?.VITE_API_URL as string | undefined) ?? DEFAULT_LOCAL;
 const BASE = String(RAW_BASE).replace(/\/+$/, "");
 
