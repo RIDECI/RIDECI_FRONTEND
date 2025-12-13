@@ -6,7 +6,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
 import type { LocationDocument } from '../types/location';
 import axios from "axios";
-
 import SockJS from "sockjs-client";
 import { Stomp, CompatClient } from '@stomp/stompjs';
 
