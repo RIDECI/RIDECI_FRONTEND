@@ -1,5 +1,5 @@
 import { useState } from "react";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface LoginRequest {
   email: string;
@@ -11,21 +11,24 @@ interface AuthResponse {
   refreshToken: string;
   tokenType: string;
   expiresIn: number;
-  userId: number;
+  institutionalId: number;
 }
 
 export const useLogin = () => {
   const [authData, setAuthData] = useState<AuthResponse | null>(null);
-  //const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (data: LoginRequest) => {
+    setError(null);
     if (!data.email || !data.password) {
+      setError("Debes ingresar un email y una contraseña.");
       console.log("Email o contraseña vacíos");
       return;
     }
 
     try {
-      const response = await fetch("https://kratosauthenticationbackend-develop.up.railway.app/auth/login",
+      const response = await fetch("https://kratosauthenticationbackend-production.up.railway.app/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -38,6 +41,7 @@ export const useLogin = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
+        setError(errorData?.message || "Credenciales incorrectas.");
         console.log("Error al iniciar sesión:", errorData || "Unknown error");
         console.log("Error al iniciar sesión:");
         return;
@@ -51,13 +55,15 @@ export const useLogin = () => {
 
       localStorage.setItem("accessToken", result.accessToken);
       localStorage.setItem("refreshToken", result.refreshToken);
-      localStorage.setItem("userId", result.userId.toString());
+      localStorage.setItem("userId", result.institutionalId.toString());
 
-      //navigate("/dashboard");
+      navigate("/pickRole");
+      
     } catch (err: any) {
+      setError("Error de conexión con el servidor.");
       console.log("Error en la solicitud:", err.message);
     }
   };
 
-  return { authData, handleLogin };
+  return { authData, handleLogin , error};
 };

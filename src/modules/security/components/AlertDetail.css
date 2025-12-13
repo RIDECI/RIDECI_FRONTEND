@@ -1,0 +1,184 @@
+/* Contenedor principal - Pantalla normal dentro del layout */
+.detalle-screen-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 80px);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card principal azul clarito */
+.detalle-screen-card {
+  background: #dce9f5;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+.detalle-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 24px;
+}
+
+/* Grid: 2 columnas */
+.detalle-content-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* === COLUMNA IZQUIERDA === */
+.detalle-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Card azul con información */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.info-item {
+  font-size: 0.85rem;
+  color: #1a202c;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-item strong {
+  font-weight: 600;
+}
+
+/* Comentario - ABAJO de la card azul */
+.comentario-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.comentario-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.comentario-text {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #4a5568;
+  min-height: 100px;
+}
+
+.comentario-hint {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 6px;
+}
+
+/* === COLUMNA DERECHA === */
+.detalle-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Badge de estado - ANCHO COMPLETO DE LA COLUMNA */
+.estado-badge {
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.estado-pendiente {
+  background: #fff4d6;
+  color: #b8860b;
+}
+
+.estado-aprobado {
+  background: #d4f4dd;
+  color: #0d7a3a;
+}
+
+.estado-rechazado {
+  background: #fdd;
+  color: #c41e3a;
+}
+
+/* Contenedor de imagen */
+.imagen-placeholder {
+  background: #e8e8e8;
+  border-radius: 12px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.imagen-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.no-imagen-text {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+/* Botón cerrar - MÁS PEQUEÑO Y CENTRADO */
+.btn-cerrar-detalles {
+  max-width: 400px;
+  max-height: 40px;
+  margin: 0 auto;
+  padding: 6px 60px;
+  background: #0b8ef5;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  display: block;
+}
+
+.btn-cerrar-detalles:hover {
+  background: #0a7fd8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .detalle-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .estado-badge {
+    align-self: center;
+  }
+}

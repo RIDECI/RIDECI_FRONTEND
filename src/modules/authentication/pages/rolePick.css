@@ -1,0 +1,157 @@
+/* --- Página general --- */
+.carousel-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: center;   /* Centro vertical */
+  align-items: center;       /* Centro horizontal */
+}
+
+/* --- Logo arriba derecha --- */
+.logo-container {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+}
+
+.logo-image {
+  width: 130px;
+  height: auto;
+  opacity: 0.9;
+}
+
+/* --- Selector central --- */
+.selector {
+  margin-top: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 70px;
+}
+
+.selector-title {
+  font-size: 2rem; /* GRANDE y dominante */
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Carousel wrapper --- */
+.carousel-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.carousel-root {
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+}
+
+.carousel-content {
+  display: flex;
+  gap: 24px;
+}
+
+/* --- Items --- */
+.carousel-card-wrapper {
+  padding: 0; /* Eliminamos borde blanco */
+  cursor: pointer;
+}
+
+.carousel-card {
+  width: 220px;
+  height: 220px;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+.carousel-card img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-card--active {
+  transform: scale(1.1);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  opacity: 1;
+}
+
+.carousel-card--inactive {
+  transform: scale(0.9);
+  opacity: 0.6;
+}
+
+.carousel-card-content {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; /* evita recortes raros */
+  display: block; 
+}
+
+/* --- Flechas personalizadas --- */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 54px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+
+/* Hover */
+.carousel-arrow:hover {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Flecha izquierda */
+.carousel-arrow[data-previous] {
+  left: -30px;
+}
+
+/* Flecha derecha */
+.carousel-arrow[data-next] {
+  right: -30px;
+}
+
+.carousel-arrow svg path {
+  stroke: #1e293b;
+  transition: stroke 0.2s ease;
+}
+
+.carousel-arrow:hover svg path {
+  stroke: #2563eb;
+}
+
+/* Texto rol debajo */
+.carousel-role-label {
+  margin-top: 8px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+}
