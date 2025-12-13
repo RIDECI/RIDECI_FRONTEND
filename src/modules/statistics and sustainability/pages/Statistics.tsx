@@ -1,7 +1,7 @@
 // src/modules/statistics and sustainability/pages/Statistics.tsx
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // O el router que uses
+import { useNavigate } from 'react-router-dom';
 import { KpiCard, DestinationRanking, ImpactSection } from '../components';
 import { kpiData, destinationData, scheduleData, impactMetrics, tripDistribution } from '../utils/mockData';
 
@@ -13,11 +13,11 @@ export function Statistics() {
   };
 
   const handleGeneralStatistics = () => {
-    navigate('/statistics/general'); // NUEVA NAVEGACIÓN
+    navigate('/statistics/general');
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-8 flex justify-center items-start font-sans">
+    <div className="p-4 sm:p-8 flex justify-center items-start font-sans">
       <div className="w-full max-w-7xl bg-white rounded-2xl shadow-2xl border-t-8 border-blue-600">
         
         <h1 className="text-2xl font-extrabold text-gray-900 p-4 md:p-8 pb-2 border-b border-gray-100">
@@ -25,17 +25,20 @@ export function Statistics() {
         </h1>
         
         <div className="p-4 md:p-8 pt-0">
+          {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             {kpiData.map((data, index) => (
               <KpiCard key={index} data={data} />
             ))}
           </div>
 
+          {/* Ranking Section */}
           <DestinationRanking 
             destinationData={destinationData}
             scheduleData={scheduleData}
           />
 
+          {/* Impact Section */}
           <ImpactSection 
             impactMetrics={impactMetrics}
             tripDistribution={tripDistribution}

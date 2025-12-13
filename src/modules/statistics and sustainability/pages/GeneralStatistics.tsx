@@ -22,7 +22,8 @@ export function GeneralStatistics() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-screen bg-gray-50 font-sans">
+    // CAMBIO AQUÍ: Removemos flex-1, overflow-y-auto, min-h-screen y bg-gray-50
+    <div className="p-4 md:p-6 font-sans">
       <main className="mx-auto max-w-full">
         {/* Título y Navegación */}
         <div className="flex items-center mb-6">

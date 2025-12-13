@@ -19,8 +19,9 @@ export const TravelTrendsChart: React.FC<TravelTrendsChartProps> = ({
   const formatYAxis = (tick: number) => (tick > 0 ? `${tick}` : '');
 
   return (
-    <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-gray-100 h-96">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+
+<div className="bg-white p-4 md:p-6 h-96">
+<h2 className="text-lg font-semibold text-gray-800 mb-4">
         Tendencias de Viajes y Usuarios
       </h2>
       <div className="flex flex-col md:flex-row h-[calc(100%-40px)]">

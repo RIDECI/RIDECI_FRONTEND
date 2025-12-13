@@ -47,8 +47,8 @@ export const CO2ReductionChart: React.FC<CO2ReductionChartProps> = ({ data }) =>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-            <XAxis dataKey="name" fontSize={12} stroke="#a0a0a0" />
-            <YAxis tickFormatter={formatYAxis} fontSize={12} stroke="#a0a0a0" />
+            <XAxis dataKey="name" fontSize={12} stroke="#ffffffff" />
+            <YAxis tickFormatter={formatYAxis} fontSize={12} stroke="#ffffffff" />
             <Tooltip content={<CustomTooltip unit="T" />} />
             <Area 
               type="monotone" 
