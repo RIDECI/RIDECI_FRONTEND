@@ -303,7 +303,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
               title='Mi Ubicacion'
               icon={{
                 url: carIcon,
-                scaledSize: new window.google.maps.Size(40,40)
+                scaledSize: new window.google.maps.Size(30,30)
               }}
               zIndex={1000}
             />
