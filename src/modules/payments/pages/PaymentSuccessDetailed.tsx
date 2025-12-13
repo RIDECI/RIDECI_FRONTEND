@@ -8,26 +8,43 @@ import { useTransactionDetails } from '../hooks/useTransactionDetails';
 export const PaymentSuccessDetailed: React.FC = () => {
   const navigate = useNavigate();
   const { paymentId } = useParams<{ paymentId: string }>();
-  
-  const transaction = useTransactionDetails(paymentId || 'UNKNOWN');
 
-  const handleGoToHistory = () => {
-    navigate('/payment/history');
-  };
+  const { tx, loading } = useTransactionDetails(paymentId!);
 
-  const handleGoToHome = () => {
-    navigate('/home');
-  };
+  if (loading) {
+    return (
+      <div className="text-center py-10 text-gray-600">
+        Cargando detalles de la transacción...
+      </div>
+    );
+  }
+
+  if (!tx) {
+    return (
+      <div className="text-center py-10 text-red-600">
+        No se pudo cargar la transacción.
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-8xl mx-auto">
       <PaymentSuccessIcon />
-      
-      <TransactionDetailsCard transaction={transaction} />
+
+      <TransactionDetailsCard
+        transaction={{
+          paymentMethod: tx.paymentMethod,
+          amount: tx.amount,
+          currency: "COP",
+          referenceId: tx.id,
+          date: tx.createdAt?.substring(0, 10),
+          time: tx.createdAt?.substring(11, 16)
+        }}
+      />
 
       <PaymentSuccessActions
-        onGoToHistory={handleGoToHistory}
-        onGoToHome={handleGoToHome}
+        onGoToHistory={() => navigate("/payment/history")}
+        onGoToHome={() => navigate("/home")}
       />
     </div>
   );

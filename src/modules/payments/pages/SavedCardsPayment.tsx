@@ -6,33 +6,58 @@ import { SavedCardsList } from '../components/SavedCardsList';
 import { AddCardButton } from '../components/AddCardButton';
 import { PaymentConfirmButton } from '../components/PaymentConfirmButton';
 import { useSavedCards } from '../hooks/useSavedCards';
-import { Button } from "@/components/ui/button"
+import { api } from "../utils/api";
+import { Button } from "@/components/ui/button";
 
 export const SavedCardsPayment: React.FC = () => {
   const navigate = useNavigate();
   const { bookingId } = useParams();
-  const { 
-    savedCards, 
-    selectedCardId, 
+
+  const {
+    savedCards,
+    selectedCardId,
     handleSelectCard,
-    handleAddNewCard 
+    handleAddNewCard
   } = useSavedCards();
 
-  const handleConfirmPayment = () => {
+  /* -------------------------------------------------
+     🔵 Confirmar pago con tarjeta (conectado al backend)
+  ---------------------------------------------------*/
+  const handleConfirmPayment = async () => {
     if (!selectedCardId) return;
-    
-    console.log('Processing payment with card:', {
-      bookingId,
-      cardId: selectedCardId,
-    });
-    
-    const mockPaymentId = `PAY-CARD-${Date.now()}`;
-    navigate(`/payment/success/${mockPaymentId}`);
+
+    try {
+      console.log("Procesando pago REAL con tarjeta:", {
+        bookingId,
+        cardId: selectedCardId
+      });
+
+      const body = {
+        bookingId: bookingId || "BKG-TEST-001",   // <--- VALOR POR DEFECTO
+        passengerId: "USR-200",
+        amount: 20000,
+        paymentMethod: "CREDIT_CARD_PAYU",
+        extra: selectedCardId,
+        receiptCode: `RCPT-${Date.now()}`
+      };
+
+      const res = await api.post("/payments/create", body);
+
+      const txId = res.data.id; // Backend retorna TransactionResponse
+
+      // 🔹 Mantener tu flujo EXACTO (ir a success)
+      navigate(`/payment/success/${txId}`);
+
+    } catch (err) {
+      console.error("❌ Error creando pago:", err);
+      alert("Error procesando el pago. Intenta de nuevo.");
+    }
   };
 
   return (
     <div className="max-w-8xl mx-auto">
-      {/* Back Button */}
+
+      {/* Botón Volver */}
       <Button
         variant="ghost"
         size="sm"
@@ -44,7 +69,7 @@ export const SavedCardsPayment: React.FC = () => {
       </Button>
 
       <SavedCardsHeader />
-      
+
       <SavedCardsList
         cards={savedCards}
         selectedCardId={selectedCardId}
@@ -61,6 +86,7 @@ export const SavedCardsPayment: React.FC = () => {
           onConfirm={handleConfirmPayment}
         />
       </div>
+
     </div>
   );
 };

@@ -1,53 +1,54 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import type { SavedCard } from '../types/card.types';
+import { useEffect, useState } from "react";
+import { api } from "../utils/api";
+import type { SavedCard } from "../types/card.types";
 
 export const useSavedCards = () => {
-  const navigate = useNavigate();
-  const { bookingId } = useParams();
+  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
+  // TODO: reemplazar con usuario real de sesión
+  const userId = "USR-200";
 
-  // cambiar por datos de la api
-  const savedCards: SavedCard[] = [
-    {
-      id: '1',
-      lastFourDigits: '1234',
-      expiryDate: '12/25',
-      brand: 'mastercard',
-      holderName: 'Juan Pérez',
-      isDefault: false,
-    },
-    {
-      id: '2',
-      lastFourDigits: '5678',
-      expiryDate: '08/26',
-      brand: 'visa',
-      holderName: 'Juan Pérez',
-      isDefault: true,
-    },
-    {
-      id: '3',
-      lastFourDigits: '9012',
-      expiryDate: '01/27',
-      brand: 'mastercard',
-      holderName: 'Juan Pérez',
-      isDefault: false,
-    },
-  ];
+  const loadCards = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/credit-cards/user/${userId}`);
+
+      const mapped = res.data.map((c: any) => ({
+        id: c.id,
+        lastFourDigits: c.cardNumber.slice(-4),
+        expiryDate: c.expiration,
+        brand: c.alias || "generic",
+        holderName: c.cardHolder,
+        isDefault: c.isDefault
+      }));
+
+      setSavedCards(mapped);
+    } catch (err) {
+      console.error("Error loading cards", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectCard = (cardId: string) => {
     setSelectedCardId(cardId);
   };
 
   const handleAddNewCard = () => {
-    navigate(`/payment/cards/add/${bookingId}`);
+    window.location.href = "/payment/cards/add";
   };
+
+  useEffect(() => {
+    loadCards();
+  }, []);
 
   return {
     savedCards,
     selectedCardId,
     handleSelectCard,
     handleAddNewCard,
+    loading
   };
 };
