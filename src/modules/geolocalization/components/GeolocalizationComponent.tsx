@@ -11,8 +11,8 @@ import SockJS from "sockjs-client";
 import { Stomp, CompatClient } from '@stomp/stompjs';
 
 const containerStyle = {
-  width: '100%',
-  height: '600px'
+  width: "100%",
+  height: "600px",
 };
 
 interface GeolocalizationComponentProps {
@@ -24,37 +24,42 @@ const libraries: ("geometry")[] = ["geometry"];
 function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponentProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const travelId = searchParams.get('travelId');
-  
+  const travelId = searchParams.get("travelId");
+
   const { route, loading, error } = useGetRouteInformation(travelId);
-  
-  const [decodedPath, setDecodedPath] = useState<google.maps.LatLngLiteral[]>([]);
-  const [center, setCenter] = useState<google.maps.LatLngLiteral>({ lat: 4.7827109, lng: -74.0426038 });
+
+  const [decodedPath, setDecodedPath] = useState<google.maps.LatLngLiteral[]>(
+    []
+  );
+  const [center, setCenter] = useState<google.maps.LatLngLiteral>({
+    lat: 4.7827109,
+    lng: -74.0426038,
+  });
 
   const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null> (null);
   
   const stompClientRef = useRef<CompatClient | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
+    id: "google-map-script",
     googleMapsApiKey: "AIzaSyDnaSQL9XWXEVLt4BnIb5TWvWKG3Lg8gLU",
-    libraries: libraries
+    libraries: libraries,
   });
 
   useEffect(() => {
     if (route && isLoaded && globalThis.google) {
       // Decodificar la polyline del backend
       const path = google.maps.geometry.encoding.decodePath(route.polyline);
-      const pathArray = path.map(latLng => ({
+      const pathArray = path.map((latLng) => ({
         lat: latLng.lat(),
-        lng: latLng.lng()
+        lng: latLng.lng(),
       }));
       setDecodedPath(pathArray);
-      
+
       // Centrar el mapa en el origen
       setCenter({
         lat: route.origin.latitude,
-        lng: route.origin.longitude
+        lng: route.origin.longitude,
       });
     }
   }, [route, isLoaded]);
@@ -142,7 +147,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}min`;
     }
@@ -159,7 +164,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
@@ -170,7 +175,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-[600px] p-6">
@@ -178,17 +183,19 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-8 h-8 text-red-500" />
           </div>
-          <h3 className="text-xl font-bold text-red-900 mb-2">Error al cargar la ruta</h3>
+          <h3 className="text-xl font-bold text-red-900 mb-2">
+            Error al cargar la ruta
+          </h3>
           <p className="text-red-700 mb-6">{error}</p>
           <div className="flex gap-3 justify-center">
-            <Button 
-              onClick={() => window.location.reload()}
+            <Button
+              onClick={() => globalThis.location.reload()}
               className="bg-red-500 hover:bg-red-600 text-white"
             >
               Reintentar
             </Button>
-            <Button 
-              onClick={() => navigate('/sectionTravel')}
+            <Button
+              onClick={() => navigate("/app/sectionTravel")}
               variant="outline"
               className="border-red-300 text-red-700 hover:bg-red-50"
             >
@@ -199,7 +206,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       </div>
     );
   }
-  
+
   if (!route) {
     return (
       <div className="flex items-center justify-center h-[600px] p-6">
@@ -207,10 +214,14 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           <div className="bg-yellow-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-8 h-8 text-yellow-600" />
           </div>
-          <h3 className="text-xl font-bold text-yellow-900 mb-2">Ruta no disponible</h3>
-          <p className="text-yellow-700 mb-6">No se encontró información de ruta para este viaje.</p>
-          <Button 
-            onClick={() => navigate('/sectionTravel')}
+          <h3 className="text-xl font-bold text-yellow-900 mb-2">
+            Ruta no disponible
+          </h3>
+          <p className="text-yellow-700 mb-6">
+            No se encontró información de ruta para este viaje.
+          </p>
+          <Button
+            onClick={() => navigate("/app/sectionTravel")}
             className="bg-yellow-500 hover:bg-yellow-600 text-white"
           >
             Volver a viajes
@@ -229,8 +240,8 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             {role === 'DRIVER' ? 'Modo Conductor' : 'Sigue tu Viaje'}
           </h1>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="icon"
           className="rounded-full w-12 h-12 border-red-500 text-red-500 hover:bg-red-50"
         >
@@ -246,7 +257,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
-            zoomControl: true
+            zoomControl: true,
           }}
         >
           {/* Marcador de origen */}
@@ -254,45 +265,45 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             <Marker
               position={{
                 lat: route.origin.latitude,
-                lng: route.origin.longitude
+                lng: route.origin.longitude,
               }}
               label={{
-                text: 'O',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 'bold'
+                text: "O",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "bold",
               }}
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 10,
-                fillColor: '#4CAF50',
+                fillColor: "#4CAF50",
                 fillOpacity: 1,
-                strokeColor: 'white',
-                strokeWeight: 2
+                strokeColor: "white",
+                strokeWeight: 2,
               }}
             />
           )}
-          
+
           {/* Marcador de destino */}
           {route.destiny && (
             <Marker
               position={{
                 lat: route.destiny.latitude,
-                lng: route.destiny.longitude
+                lng: route.destiny.longitude,
               }}
               label={{
-                text: 'D',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 'bold'
+                text: "D",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: "bold",
               }}
               icon={{
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 10,
-                fillColor: '#F44336',
+                fillColor: "#F44336",
                 fillOpacity: 1,
-                strokeColor: 'white',
-                strokeWeight: 2
+                strokeColor: "white",
+                strokeWeight: 2,
               }}
             />
           )}
@@ -314,9 +325,9 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             <Polyline
               path={decodedPath}
               options={{
-                strokeColor: '#0B8EF5',
+                strokeColor: "#0B8EF5",
                 strokeWeight: 5,
-                strokeOpacity: 0.8
+                strokeOpacity: 0.8,
               }}
             />
           )}
@@ -329,9 +340,9 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
               <p className="font-bold">{formatDistance(route.totalDistance)}</p>
             </div>
           </div>
-          
+
           <div className="h-8 w-px bg-gray-300"></div>
-          
+
           <div className="flex items-center gap-3">
             <Clock className="w-5 h-5 text-gray-700" />
             <div>
@@ -339,11 +350,13 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
               <p className="font-bold">{formatTime(route.estimatedTime)}</p>
             </div>
           </div>
-          
+
           <div className="h-8 w-px bg-gray-300"></div>
-          <button 
+          <button
             className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
-            onClick={() => {/* Add navigation or modal logic here */}}
+            onClick={() => {
+              /* Add navigation or modal logic here */
+            }}
           >
             <Users className="w-5 h-5 text-gray-700" />
             <p className="font-medium text-gray-700">Contactos de Emergencia</p>
@@ -351,13 +364,14 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
         </div>
       </div>
       <div className="flex justify-between mt-6">
-        <Button 
-          onClick={() => navigate(`/detailsOfTravel?travelId=${travelId}`)}
+        <Button
+          onClick={() => navigate(`/app/detailsOfTravel?travelId=${travelId}`)}
           className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
         >
           Detalles de Viaje
         </Button>
-        <Button 
+        <Button
+          onClick={() => navigate("/app/conversations")}
           className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
         >
           Ir al chat con el conductor
