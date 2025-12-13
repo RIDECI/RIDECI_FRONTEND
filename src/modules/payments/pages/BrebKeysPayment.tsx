@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { BrebKeysHeader } from '../components/BrebKeysHeader';
@@ -7,11 +7,13 @@ import { AddBrebKeyButton } from '../components/AddBrebKeyButton';
 import { AddBrebKeyForm } from '../components/AddBrebKeyForm';
 import { PaymentConfirmButton } from '../components/PaymentConfirmButton';
 import { useBrebKeys } from '../hooks/useBrebKeys';
+import { api } from "../utils/api";
 import { Button } from "@/components/ui/button"
 
 export const BrebKeysPayment: React.FC = () => {
   const navigate = useNavigate();
   const { bookingId } = useParams();
+
   const { 
     brebKeys, 
     selectedKeyId, 
@@ -22,20 +24,50 @@ export const BrebKeysPayment: React.FC = () => {
     handleShowAddForm 
   } = useBrebKeys();
 
-  const handleConfirmPayment = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  /* -------------------------------------------------
+        🔵 Confirmar pago con BreB (crea transacción)
+  ---------------------------------------------------*/
+  const handleConfirmPayment = async () => {
     if (!selectedKeyId) return;
-    
-    console.log('Processing Bre-B payment with key:', {
-      bookingId,
-      keyId: selectedKeyId,
-    });
-    
-    const mockPaymentId = `PAY-BREB-${Date.now()}`;
-    navigate(`/payment/success/${mockPaymentId}`);
+
+    try {
+      setIsProcessing(true);
+
+      console.log("Creando pago BREB con:", {
+        bookingId,
+        keyId: selectedKeyId
+      });
+
+      // 🔹 cuerpo EXACTO que pide tu backend
+      const body = {
+        bookingId: bookingId || "BKG-001",
+        passengerId: "USR-200",
+        amount: 20000,
+        paymentMethod: "BRE_B_key",
+        extra: selectedKeyId,
+        receiptCode: `RCPT-${Date.now()}`
+      };
+
+      const res = await api.post("/payments/create", body);
+
+      // backend retorna TransactionResponse
+      const txId = res.data.id;
+
+      navigate(`/payment/success/${txId}`);
+
+    } catch (err) {
+      console.error("❌ Error en pago BREB:", err);
+      alert("Error procesando pago. Intenta nuevamente.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <div className="max-w-8xl mx-auto ">
+
       {/* Back Button */}
       <Button
         variant="ghost"
@@ -48,21 +80,18 @@ export const BrebKeysPayment: React.FC = () => {
       </Button>
 
       <BrebKeysHeader />
-      
-      {/* Lista de llaves existentes */}
+
       <BrebKeysList
         keys={brebKeys}
         selectedKeyId={selectedKeyId}
         onSelectKey={handleSelectKey}
       />
 
-      {/* Botón para añadir nueva llave */}
       <AddBrebKeyButton 
         onClick={handleShowAddForm}
         isFormVisible={showAddForm}
       />
 
-      {/* Formulario para añadir nueva llave */}
       {showAddForm && (
         <AddBrebKeyForm
           onSave={handleAddKey}
@@ -70,10 +99,10 @@ export const BrebKeysPayment: React.FC = () => {
         />
       )}
 
-      {/* Botón de confirmación de pago */}
       <div className="mt-8">
         <PaymentConfirmButton
           disabled={!selectedKeyId}
+          isLoading={isProcessing}
           onConfirm={handleConfirmPayment}
         />
       </div>

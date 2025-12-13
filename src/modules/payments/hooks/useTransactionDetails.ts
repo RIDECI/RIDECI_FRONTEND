@@ -1,42 +1,25 @@
-import { useMemo } from 'react';
-import type { TransactionDetails } from '../types/transaction.types';
+import { useEffect, useState } from "react";
+import { api } from "../utils/api";
 
-export const useTransactionDetails = (
-  paymentId: string,
-  paymentMethod?: string
-): TransactionDetails => {
-  return useMemo(() => {
-    // TODO: Estos datos deberían venir de una API
-    // Por ahora generamos datos mock basados en el paymentId
-    
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('es-CO', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-    const timeStr = now.toLocaleTimeString('es-CO', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+export const useTransactionDetails = (paymentId: string) => {
+  const [tx, setTx] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    let method = 'Nequi';
-    if (paymentId.includes('BREB')) {
-      method = 'Bre-B';
-    } else if (paymentId.includes('CARD')) {
-      method = 'Tarjeta';
-    } else if (paymentMethod) {
-      method = paymentMethod;
-    }
-
-    return {
-      paymentMethod: method,
-      amount: 8000,
-      currency: 'COP',
-      referenceId: paymentId.replace('PAY-', 'RTX'),
-      date: dateStr,
-      time: timeStr,
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get(`/payments/${paymentId}`);
+        setTx(res.data);
+      } catch (err) {
+        console.error("❌ Error cargando transacción:", err);
+        setTx(null); // evita romper UI
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [paymentId, paymentMethod]);
+
+    load();
+  }, [paymentId]);
+
+  return { tx, loading };
 };
