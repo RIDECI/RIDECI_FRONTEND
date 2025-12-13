@@ -26,6 +26,7 @@ import { ProfileSelectionPage } from "./modules/authentication/pages/ProfileLogi
 import { HomeDriver } from "./modules/authentication/pages/HomeDriver";
 import { HomePassenger } from "./modules/authentication/pages/HomePassenger";
 import { HomeCompanion } from "./modules/authentication/pages/HomeCompanion";
+import ForgotPasswordPage from "./modules/authentication/pages/ForgotPasswordPage";
 import NotificationsPage from './modules/Notifications/pages/NotificationsPage'
 /* ------------------ Admin ------------------ */
 import AdminLayout from "./modules/administration/AdminLayout";
@@ -51,6 +52,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="selectProfile" element={<SelectProfile />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />}/>
 
         {/* ADMIN — ruta específica para admin dentro de /app/admin (NO anidada dentro de Layout) */}
         <Route path="/app/admin/*" element={<AdminLayout />}>
