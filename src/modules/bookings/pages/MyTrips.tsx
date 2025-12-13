@@ -1,58 +1,45 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Trip, TabType } from '../types/Trip';
+import type { TabType } from '../types/Trip';
 import { TripCard } from '../components/pasajero/TripCard';
+import { useTrips } from '../hooks/useTrips';
 
 export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
+  const { scheduledTrips, historyTrips, isLoading, error } = useTrips();
 
-  const scheduledTrips: Trip[] = [
-    {
-      id: '1',
-      route: 'Universidad Escuela colombiana de Ing → Portal 80',
-      date: 'Hoy',
-      time: '18:30',
-      driverName: 'Carlos Ruiz',
-      driverImage: 'https://i.pravatar.cc/40?img=1',
-      status: 'Confirmado',
-      statusColor: 'green',
-    },
-    {
-      id: '2',
-      route: 'Universidad Escuela colombiana de Ing → Portal 80',
-      date: 'Mañana',
-      time: '18:30',
-      driverName: 'Carlos Ruiz',
-      driverImage: 'https://i.pravatar.cc/40?img=1',
-      status: 'Confirmado',
-      statusColor: 'yellow',
-    },
-  ];
+  console.log('MyTrips render:', { scheduledTrips, historyTrips, isLoading, error });
 
-  const historyTrips: Trip[] = [
-    {
-      id: '3',
-      route: 'Centro Comercial → Casa',
-      date: '25 Nov',
-      time: '19:45',
-      driverName: 'María García',
-      driverImage: 'https://i.pravatar.cc/40?img=2',
-      status: 'Confirmado',
-      statusColor: 'green',
-    },
-    {
-      id: '4',
-      route: 'Parque Arvi → Universidad',
-      date: '24 Nov',
-      time: '07:20',
-      driverName: 'Juan López',
-      driverImage: 'https://i.pravatar.cc/40?img=3',
-      status: 'Confirmado',
-      statusColor: 'green',
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600 text-lg">Cargando tus viajes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <p className="text-red-600 font-medium mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const tabs: TabType[] = [
     { id: 'scheduled', label: 'Programados' },

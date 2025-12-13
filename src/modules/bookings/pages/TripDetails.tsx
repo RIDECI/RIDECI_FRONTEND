@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TripDetailsHeader } from '../components/pasajero/TripDetailsHeader';
 import { DriverInfoCard } from '../components/pasajero/DriverInfoCard';
@@ -10,26 +10,96 @@ import { TripMapPreview } from '../components/pasajero/TripMapPreview';
 import { PaymentMethodSelector } from '../components/pasajero/PaymentMethodSelector';
 import { TripPricingCard } from '../components/pasajero/TripPricingCard';
 import { useTripDetails } from '../hooks/useTripDetails';
+import { createBooking } from '../services/tripsApi';
 
 export function TripDetails() {
   const navigate = useNavigate();
-  const { tripId } = useParams<{ tripId: string }>();
-  const tripDetails = useTripDetails(tripId || '1');
+  const { bookingId } = useParams<{ bookingId: string }>();
+  console.log('TripDetails - bookingId from params:', bookingId);
+  console.log('TripDetails - all params:', useParams());
+  const { tripDetails, isLoading, error } = useTripDetails(bookingId || '');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('nequi');
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
-  const handleReserve = () => {
-    // TODO: Crear reserva y navegar a confirmación o pago
-    console.log('Reservando viaje con método:', selectedPaymentMethod);
+  const handleReserve = async () => {
+    if (!tripDetails) return;
     
-    const bookingId = `BOOK-${Date.now()}`;
+    setIsCreatingBooking(true);
     
-  
-    navigate(`/booking/confirmed/${bookingId}`);
+    try {
+      const bookingData = {
+        travelId: tripDetails.id,
+        passengerId: 123, // TODO: Obtener del usuario logueado
+        origin: tripDetails.trip.origin,
+        destination: tripDetails.trip.destination,
+        reservedSeats: 1,
+        totalAmount: tripDetails.pricing.total,
+        status: 'PENDING',
+        notes: selectedPaymentMethod, // Solo el nombre del método: "nequi", "card", etc.
+        bookingDate: new Date().toISOString()
+      };
+      
+      console.log('Creando reserva con:', bookingData);
+      
+      const booking = await createBooking(bookingData);
+      
+      console.log('✅ Reserva creada exitosamente:', booking);
+      console.log('📋 ID de la reserva:', booking.id);
+      
+      // Mostrar mensaje de éxito
+      alert(`✅ ¡Reserva creada exitosamente!\n\nID: ${booking.id}\n\nSerás redirigido a la página de confirmación.`);
+      
+      // Navegar a la página de confirmación con el ID real del backend
+      navigate(`/booking/confirmed/${booking.id}`, { 
+        state: { 
+          booking,
+          tripDetails,
+          paymentMethod: selectedPaymentMethod 
+        } 
+      });
+    } catch (err) {
+      console.error('❌ Error al crear la reserva:', err);
+      alert('❌ Error al crear la reserva. Por favor, intenta nuevamente.');
+    } finally {
+      setIsCreatingBooking(false);
+    }
   };
 
   const handlePaymentMethodChange = (methodId: string) => {
     setSelectedPaymentMethod(methodId);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600 text-lg">Cargando detalles del viaje...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !tripDetails) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <p className="text-red-600 font-medium mb-4">
+              {error || 'No se pudo cargar el viaje'}
+            </p>
+            <Button
+              onClick={() => navigate(-1)}
+              variant="outline"
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              Volver
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -64,6 +134,7 @@ export function TripDetails() {
             total={tripDetails.pricing.total}
             currency={tripDetails.pricing.currency}
             onReserve={handleReserve}
+            isLoading={isCreatingBooking}
           />
           
           <div className="mt-6">

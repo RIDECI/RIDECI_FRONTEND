@@ -1,35 +1,32 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import type { TripDetails } from '../types/Trip';
+import { getTripDetails } from '../services/tripsApi';
 
-export const useTripDetails = (tripId: string): TripDetails => {
-  return useMemo(() => {
-    // mock para cambiarlo por api
-    return {
-      id: tripId,
-      driver: {
-        name: 'Raquel Selma',
-        rating: '4.5',
-        totalTrips: 120,
-        avatar: 'https://i.pravatar.cc/150?img=5',
-      },
-      vehicle: {
-        brand: 'Toyota',
-        model: 'Camry',
-        color: 'Gris Plata',
-        plate: '1234 ABC',
-      },
-      trip: {
-        origin: 'Universidad Escuela Colombiana de ing',
-        destination: 'Portal 80',
-        date: '18 de Noviembre, 2025',
-        departureTime: '18:30',
-        arrivalTime: '20:00',
-      },
-      pricing: {
-        total: 8000,
-        currency: 'COP',
-      },
-      mapImageUrl: 'https://via.placeholder.com/500x300?text=Mapa+de+Ruta',
+export const useTripDetails = (tripId: string) => {
+  const [tripDetails, setTripDetails] = useState<TripDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTripDetails = async () => {
+      if (!tripId) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const data = await getTripDetails(tripId);
+        setTripDetails(data);
+      } catch (err) {
+        setError('Error al cargar los detalles del viaje');
+        console.error('Error fetching trip details:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
+    fetchTripDetails();
   }, [tripId]);
+
+  return { tripDetails, isLoading, error };
 };

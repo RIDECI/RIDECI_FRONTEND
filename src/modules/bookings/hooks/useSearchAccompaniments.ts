@@ -1,67 +1,48 @@
 import { useState } from 'react';
+import { searchAccompaniments } from '../services/accompanimentsApi';
 
 export const useSearchAccompaniments = () => {
   const [destination, setDestination] = useState('Portal 80');
   const [departureTime, setDepartureTime] = useState('18:30');
   const [searchByProximity, setSearchByProximity] = useState(true);
+  const [availableAccompaniments, setAvailableAccompaniments] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data: conectar con los datos de la API
-  const availableAccompaniments = [
-    {
-      id: '1',
-      driverName: 'Carlos Santana',
-      driverImage: 'https://i.pravatar.cc/40?img=1',
-      rating: '3.5',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-    {
-      id: '2',
-      driverName: 'Carlos Gomez',
-      driverImage: 'https://i.pravatar.cc/40?img=2',
-      rating: '4.5',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-    {
-      id: '3',
-      driverName: 'Alex Ramirez',
-      driverImage: 'https://i.pravatar.cc/40?img=3',
-      rating: '4.0',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-    {
-      id: '4',
-      driverName: 'José Torres',
-      driverImage: 'https://i.pravatar.cc/40?img=4',
-      rating: '3.5',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-    {
-      id: '5',
-      driverName: 'Fernando Lopez',
-      driverImage: 'https://i.pravatar.cc/40?img=5',
-      rating: '4.5',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-    {
-      id: '6',
-      driverName: 'Camilo Saenz',
-      driverImage: 'https://i.pravatar.cc/40?img=6',
-      rating: '4.5',
-      origin: 'Universidad',
-      destination: 'Portal 80',
-      time: '18:30',
-    },
-  ];
+  const handleSearch = async () => {
+    if (!destination || !departureTime) return;
+
+    setIsLoading(true);
+    setError(null);
+    setShowResults(false);
+
+    try {
+      const results = await searchAccompaniments({
+        destination,
+        departureTime,
+      });
+
+      // Adaptar la respuesta del backend al formato que espera el frontend
+      const adapted = results.map((acc: any) => ({
+        id: acc.id,
+        driverName: acc.passengerName,
+        driverImage: `https://i.pravatar.cc/40?u=${acc.id}`,
+        rating: acc.rating,
+        origin: acc.route.split(' • ')[0] || 'Universidad',
+        destination: acc.route.split(' • ')[1] || destination,
+        time: acc.departureTime,
+      }));
+
+      setAvailableAccompaniments(adapted);
+      setShowResults(true);
+    } catch (err) {
+      setError('Error al buscar acompañamientos');
+      console.error('Error fetching accompaniments:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     destination,
@@ -72,5 +53,9 @@ export const useSearchAccompaniments = () => {
     setSearchByProximity,
     availableAccompaniments,
     totalCount: availableAccompaniments.length,
+    showResults,
+    isLoading,
+    error,
+    handleSearch,
   };
 };

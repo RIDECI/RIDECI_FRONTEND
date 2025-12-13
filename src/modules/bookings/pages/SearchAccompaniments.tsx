@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useSearchAccompaniments } from '../hooks/useSearchAccompaniments';
 import { SearchAccompanimentHeader } from '../components/accompaniments/SearchAccompanimentHeader';
 import { SearchAccompanimentFilters } from '../components/accompaniments/SearchAccompanimentFilters';
@@ -15,6 +16,10 @@ export function SearchAccompaniments() {
     setSearchByProximity,
     availableAccompaniments,
     totalCount,
+    showResults,
+    isLoading,
+    error,
+    handleSearch,
   } = useSearchAccompaniments();
 
   const handleViewDetails = (id: string) => {
@@ -31,12 +36,29 @@ export function SearchAccompaniments() {
         onDestinationChange={setDestination}
         onDepartureTimeChange={setDepartureTime}
         onProximityToggle={setSearchByProximity}
+        onSearch={handleSearch}
+        isLoading={isLoading}
       />
-      <AvailableAccompanimentsList
-        accompaniments={availableAccompaniments}
-        totalCount={totalCount}
-        onViewDetails={handleViewDetails}
-      />
+      
+      {error ? (
+        <div className="flex items-center justify-center flex-1">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <p className="text-red-600 font-medium mb-4">{error}</p>
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      ) : showResults ? (
+        <AvailableAccompanimentsList
+          accompaniments={availableAccompaniments}
+          totalCount={totalCount}
+          onViewDetails={handleViewDetails}
+        />
+      ) : null}
     </div>
   );
 }

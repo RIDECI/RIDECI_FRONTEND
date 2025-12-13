@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trip } from "../types/Trip";
+import type { Trip } from "../types/Trip";
 import { getMyBookings, getTripDetails } from '../services/tripsApi';
 
 export function useTrips() {

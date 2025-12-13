@@ -27,9 +27,9 @@ function App(){
                     <Route path="payment/history" element={<PaymentHistory/>} />
                     {/*Rutas del modulo bookings (Poseidon) */}
                     <Route path="booking/confirmed/:bookinId" element={<BookingConfirmed/>} />
-                    <Route path="bookings/:bookingId" element={<TripDetails/>} />
                     <Route path="bookings" element={<MyTrips />} />
                     <Route path="bookings/search" element={<SearchTrips />} />
+                    <Route path="bookings/:bookingId" element={<TripDetails/>} />
                     <Route path="bookings/:bookingId/completed" element={<TripCompleted />} />
                     <Route path="accompaniments" element={<MyAccompaniments />} />
                     <Route path="accompaniments/search" element={<SearchAccompaniments />} />

@@ -1,4 +1,4 @@
-import { MapPin, Clock, Star } from 'lucide-react';
+import { MapPin, Clock, Star, User } from 'lucide-react';
 
 interface AvailableAccompanimentCardProps {
   driverName: string;
@@ -24,11 +24,9 @@ export function AvailableAccompanimentCard({
       {/* Driver Info */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <img
-            src={driverImage}
-            alt={driverName}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+            <User className="w-5 h-5 text-gray-600" />
+          </div>
           <span className="font-medium text-gray-900">{driverName}</span>
         </div>
         <div className="flex items-center gap-1">

@@ -1,26 +1,53 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import { getAccompanimentDetails } from '../services/accompanimentsApi';
 
 export const useRouteDetails = (routeId: string) => {
-  // Mock data Reemplazar con los datos de la API
-  const routeDetails = useMemo(() => ({
-    id: routeId,
-    driver: {
-      name: 'Alex Ramírez',
-      rating: '4.9',
-      badge: 'Estudiante Verificado',
-      image: 'https://i.pravatar.cc/100?img=3',
-    },
-    transport: {
-      method: 'Transmilenio',
-    },
-    route: {
-      meetingPoint: 'Entrada Universidad',
-      destination: 'Portal 80',
-      departureTime: '18:30',
-      estimatedArrival: '19:50',
-    },
-    mapImageUrl: 'https://maps.googleapis.com/maps/api/staticmap?center=Madrid&zoom=12&size=400x200&maptype=roadmap',
-  }), [routeId]);
+  const [routeDetails, setRouteDetails] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  return { routeDetails };
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!routeId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await getAccompanimentDetails(routeId);
+        
+        // Adaptar datos del backend al formato del frontend
+        const adapted = {
+          id: data.id,
+          driver: {
+            name: data.passenger.name,
+            rating: data.passenger.rating,
+            badge: data.passenger.verificationStatus,
+            image: data.passenger.avatar || `https://i.pravatar.cc/100?u=${data.id}`,
+          },
+          transport: {
+            method: data.route.transportMethod,
+          },
+          route: {
+            meetingPoint: data.route.meetingPoint,
+            destination: data.route.destination,
+            departureTime: data.route.departureTime,
+            estimatedArrival: data.route.estimatedArrival,
+          },
+          mapImageUrl: 'https://maps.googleapis.com/maps/api/staticmap?center=Madrid&zoom=12&size=400x200&maptype=roadmap',
+        };
+
+        setRouteDetails(adapted);
+      } catch (err) {
+        setError('Error al cargar detalles del acompañamiento');
+        console.error('Error fetching accompaniment details:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [routeId]);
+
+  return { routeDetails, isLoading, error };
 };

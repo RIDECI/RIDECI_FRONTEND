@@ -1,86 +1,45 @@
 import { useState } from 'react';
-import { Search, Zap, ArrowLeft } from 'lucide-react';
+import { Search, Zap, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { AvailableTrip } from '../types/Trip';
 import { AvailableTripCard } from '../components/pasajero/AvailableTripCard';
+import { searchTrips } from '../services/tripsApi';
 
 export function SearchTrips() {
   const navigate = useNavigate();
   const [destination, setDestination] = useState('Portal 80');
   const [departureTime, setDepartureTime] = useState('18:30');
   const [nearbySearch, setNearbySearch] = useState(true);
-  const [showResults, setShowResults] = useState(true);
+  const [showResults, setShowResults] = useState(false);
+  const [availableTrips, setAvailableTrips] = useState<AvailableTrip[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const availableTrips: AvailableTrip[] = [
-    {
-      id: '1',
-      driverName: 'Carlos Santana',
-      vehicleType: 'Minivan',
-      rating: '4.9',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 6000,
-      availableSeats: 4,
-    },
-    {
-      id: '2',
-      driverName: 'Raquel Selma',
-      vehicleType: 'Minivan',
-      rating: '4.8',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 8000,
-      availableSeats: 6,
-    },
-    {
-      id: '3',
-      driverName: 'Sebastian Garcia',
-      vehicleType: 'Sedan',
-      rating: '4.9',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 5000,
-      availableSeats: 1,
-    },
-    {
-      id: '4',
-      driverName: 'Alex Forero',
-      vehicleType: 'SUV',
-      rating: '4.9',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 12000,
-      availableSeats: 2,
-    },
-    {
-      id: '5',
-      driverName: 'Carlos Santana',
-      vehicleType: 'Minivan',
-      rating: '4.8',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 9000,
-      availableSeats: 3,
-    },
-    {
-      id: '6',
-      driverName: 'Carlos Santana',
-      vehicleType: 'Sedan',
-      rating: '4.7',
-      route: 'Universidad @ Portal 80',
-      departureTime: '18:30',
-      price: 7000,
-      availableSeats: 3,
-    },
-  ];
-
-  const handleSearch = () => {
-    setShowResults(true);
+  const handleSearch = async () => {
+    setIsLoading(true);
+    setError(null);
+    setShowResults(false);
+    
+    try {
+      const trips = await searchTrips({
+        destination,
+        departureTime,
+        nearbySearch,
+      });
+      
+      setAvailableTrips(trips);
+      setShowResults(true);
+    } catch (err) {
+      setError('Error al buscar viajes. Por favor, intenta nuevamente.');
+      console.error('Error buscando viajes:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleViewDetails = (trip: AvailableTrip) => {
-    navigate('/bookings/:bookingId', { state: { trip } });
+    navigate(`/bookings/${trip.id}`, { state: { trip } });
   };
 
   return (
@@ -153,15 +112,30 @@ export function SearchTrips() {
 
           <Button
             onClick={handleSearch}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold text-base transition-colors"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Buscar
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Buscando...
+              </>
+            ) : (
+              'Buscar'
+            )}
           </Button>
         </div>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600 text-sm font-medium">{error}</p>
+        </div>
+      )}
+
       {/* Results Count */}
-      {showResults && (
+      {showResults && !isLoading && (
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">
             {availableTrips.length} viajes encontrados
@@ -171,7 +145,14 @@ export function SearchTrips() {
 
       {/* Available Trips Grid */}
       <div className="flex-1 overflow-y-auto -mx-8 -mb-8 px-8 pb-8">
-        {showResults && availableTrips.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600 text-lg">Buscando viajes disponibles...</p>
+            </div>
+          </div>
+        ) : showResults && availableTrips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {availableTrips.map((trip) => (
               <AvailableTripCard 
