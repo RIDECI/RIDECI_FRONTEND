@@ -26,7 +26,7 @@ import { ProfileSelectionPage } from "./modules/authentication/pages/ProfileLogi
 import { HomeDriver } from "./modules/authentication/pages/HomeDriver";
 import { HomePassenger } from "./modules/authentication/pages/HomePassenger";
 import { HomeCompanion } from "./modules/authentication/pages/HomeCompanion";
-
+import NotificationsPage from './modules/Notifications/pages/NotificationsPage'
 /* ------------------ Admin ------------------ */
 import AdminLayout from "./modules/administration/AdminLayout";
 import AdminHome from "./modules/administration/pages/AdminHome";
