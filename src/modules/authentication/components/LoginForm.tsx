@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLogin } from "../hooks/useLogin";
+import { Link } from "react-router-dom"; // IMPORTANTE: Agregar este import
 
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +96,16 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
                 />
               </div>
 
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <label htmlFor="password">Password</label>
+                {/* ENLACE CORREGIDO: */}
+                <Link
+                  to="/forgot-password"
+                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-blue-600 font-medium"
+                >
+                  Forgot your password?
+                </Link>
               <div className="flex justify-center">
                 <Button type="submit" className="submit-button">
                   Entrar
