@@ -199,3 +199,32 @@ export const getMyBookings = async (passengerId: number): Promise<CreateBookingR
     throw error;
   }
 };
+
+export const cancelBooking = async (bookingId: string): Promise<void> => {
+  try {
+    console.log('Cancelling booking with ID:', bookingId);
+    
+    const response = await fetch(
+      `${BOOKINGS_BASE_URL}/bookings/${bookingId}/cancel`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+    console.log('Cancel booking response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error cancelling booking:', errorText);
+      throw new Error(`Error al cancelar la reserva: ${response.status} ${response.statusText}`);
+    }
+
+    console.log('Booking cancelled successfully');
+  } catch (error) {
+    console.error('Error en cancelBooking:', error);
+    throw error;
+  }
+};

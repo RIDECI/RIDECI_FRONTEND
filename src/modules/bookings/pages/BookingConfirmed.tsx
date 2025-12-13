@@ -8,6 +8,7 @@ import { DriverCard } from '../components/pasajero/DriverCard';
 import { PaymentSummaryCard } from '../components/pasajero/PaymentSummaryCard';
 import { BookingActions } from '../components/pasajero/BookingActions';
 import { useBookingConfirmation } from '../hooks/useBookingConfirmation';
+import { cancelBooking } from '../services/tripsApi';
 
 export function BookingConfirmed() {
   const navigate = useNavigate();
@@ -26,12 +27,23 @@ export function BookingConfirmed() {
     // navigate(`/chat/${bookinId}`);
   };
 
-  const handleCancelBooking = () => {
-    // TODO: Mostrar modal de confirmación y cancelar reserva
-    console.log('Cancelar reserva');
+  const handleCancelBooking = async () => {
+    if (!bookinId) {
+      alert('Error: ID de reserva no válido');
+      return;
+    }
+
     if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-      // API call to cancel booking
-      navigate('/bookings');
+      try {
+        console.log('Cancelling booking:', bookinId);
+        await cancelBooking(bookinId);
+        
+        alert('Reserva cancelada exitosamente');
+        navigate('/bookings');
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('Error al cancelar la reserva');
+      }
     }
   };
 
