@@ -63,7 +63,6 @@ export function RegisterForm({ handleRegister }: RegisterFormProps) {
 
 return (
     <Card className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6">
-      {/* HEADER */}
       <CardHeader className="pb-4 text-center">
         <CardTitle className="text-2xl font-bold text-gray-900">
           Crear cuenta
@@ -73,10 +72,8 @@ return (
         </CardDescription>
       </CardHeader>
 
-      {/* CONTENT */}
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
-          {/* 1. Nombre - Correo */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               placeholder="Nombre completo"
@@ -91,7 +88,6 @@ return (
             />
           </div>
 
-          {/* 2. Número celular - ID institucional */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               placeholder="Número de celular"
@@ -105,14 +101,12 @@ return (
             />
           </div>
 
-          {/* 3. Dirección */}
           <Input
             placeholder="Dirección"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
 
-          {/* 4. Tipo de documento - Número */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
@@ -139,7 +133,6 @@ return (
             />
           </div>
 
-          {/* 5. Rol */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Rol</label>
             <select
@@ -153,7 +146,6 @@ return (
             </select>
           </div>
 
-          {/* 6. Contraseña */}
           <Input
             type="password"
             placeholder="Contraseña"
@@ -161,7 +153,6 @@ return (
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {/* BOTÓN */}
           <div className="flex justify-center pt-2">
             <Button
               type="submit"
@@ -173,7 +164,6 @@ return (
         </form>
       </CardContent>
 
-      {/* FOOTER */}
       <CardFooter className="flex justify-center pt-3">
         <CardAction>
           <Button

@@ -4,6 +4,7 @@ import { ProfileSelector } from '../components/ProfileSelector';
 import type {ProfileType} from '../types/user.d.ts';
 
 import RideciLogo from "../../../assets/RIDECI Logo (Blanco).png";
+import { Header } from '../components/header.tsx';
 
 export const ProfileRegisterSelectionPage: React.FC = () => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ export const ProfileRegisterSelectionPage: React.FC = () => {
 
     return (
         <div
-            className="min-h-screen flex items-center justify-center p-4 relative"
+            className="h-screen overflow-hidden flex flex-col relative"
             style={{
                 backgroundImage: 'url(/background-1920x1080.jpg)',
                 backgroundSize: 'cover',
@@ -26,19 +27,16 @@ export const ProfileRegisterSelectionPage: React.FC = () => {
                 backgroundRepeat: 'no-repeat'
             }}
         >
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-blue-600/40"></div>
 
-            {/* Logo */}
-            <div className="absolute top-2 right-2 z-20">
-                <img
-                    src={RideciLogo}
-                    alt="Rideci Logo"
-                    className="w-72 h-auto object-contain drop-shadow-2xl"
-                />
+            <Header />
+
+            <div className="flex flex-col items-center">
+                <h2 className="text-white text-5xl font-semibold text-center mt-22 mb-22">
+                      ¿Qué rol deseas para tu registro?
+                </h2>    
             </div>
 
-            <div className="relative w-full max-w-5xl z-10">
+            <div className="relative flex items-center justify-center">
                 <ProfileSelector onProfileSelect={handleProfileSelect} />
             </div>
         </div>

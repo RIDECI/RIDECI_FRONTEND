@@ -23,6 +23,7 @@ import TripHistory from "./modules/reputation&profiles/pages/TripHistory/TripHis
 import CreateProfile from "./modules/reputation&profiles/pages/CreateProfile/CreateProfile";
 import ViewAllComments from "./modules/reputation&profiles/pages/ViewAllComments/ViewAllComments";
 import { ProfileSelectionPage } from "./modules/authentication/pages/ProfileLoginSelection";
+import { ProfileRegisterSelectionPage } from "./modules/authentication/pages/rolePick";
 import { HomeDriver } from "./modules/authentication/pages/HomeDriver";
 import { HomePassenger } from "./modules/authentication/pages/HomePassenger";
 import { HomeCompanion } from "./modules/authentication/pages/HomeCompanion";
@@ -53,6 +54,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="selectProfile" element={<SelectProfile />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />}/>
+        <Route path="/roleRegisterPick" element={<ProfileRegisterSelectionPage />} />
 
         {/* ADMIN — ruta específica para admin dentro de /app/admin (NO anidada dentro de Layout) */}
         <Route path="/app/admin/*" element={<AdminLayout />}>

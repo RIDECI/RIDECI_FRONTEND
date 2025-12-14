@@ -59,10 +59,6 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
 
     return (
         <div className="w-full">
-            <h2 className="text-white text-5xl font-semibold text-center mb-16 drop-shadow-lg">
-                ¿Qué rol deseas hoy?
-            </h2>
-
             <div className="flex justify-center items-center gap-8 px-4">
                 {profiles.map((profile) => {
                     const Icon = profile.icon;
