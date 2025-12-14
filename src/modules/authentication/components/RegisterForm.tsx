@@ -61,55 +61,65 @@ export function RegisterForm({ handleRegister }: RegisterFormProps) {
     });
   };
 
-  return (
-    <Card className="register-card">
-      <CardHeader className="register-header">
-        <CardTitle className="register-title">Crear cuenta</CardTitle>
-        <CardDescription className="register-description">
+return (
+    <Card className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6">
+      {/* HEADER */}
+      <CardHeader className="pb-4 text-center">
+        <CardTitle className="text-2xl font-bold text-gray-900">
+          Crear cuenta
+        </CardTitle>
+        <CardDescription className="text-gray-500">
           Completa tus datos para registrarte
         </CardDescription>
       </CardHeader>
 
+      {/* CONTENT */}
       <CardContent>
-        <form onSubmit={onSubmit}>
-          <div className="main-bar">
-            <div className="left-bar">
-              <Input
-                placeholder="Nombre completo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                type="email"
-                placeholder="Correo institucional"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                placeholder="Número de celular"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-              <Input
-                placeholder="ID institucional"
-                value={institutionalId}
-                onChange={(e) => setInstitutionalId(e.target.value)}
-              />
-            </div>
+        <form onSubmit={onSubmit} className="space-y-4">
+          {/* 1. Nombre - Correo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              placeholder="Nombre completo"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Input
+              type="email"
+              placeholder="Correo institucional"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-            <div className="right-bar">
-              <Input
-                placeholder="Dirección"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
+          {/* 2. Número celular - ID institucional */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              placeholder="Número de celular"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+            <Input
+              placeholder="ID institucional"
+              value={institutionalId}
+              onChange={(e) => setInstitutionalId(e.target.value)}
+            />
+          </div>
 
-              <label htmlFor="identificationType" className="register-label">
+          {/* 3. Dirección */}
+          <Input
+            placeholder="Dirección"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+
+          {/* 4. Tipo de documento - Número */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-700">
                 Tipo de documento
               </label>
               <select
-                id="identificationType"
-                className="register-select"
+                className="h-10 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={identificationType}
                 onChange={(e) =>
                   setIdentificationType(e.target.value as IdentificationType)
@@ -120,47 +130,57 @@ export function RegisterForm({ handleRegister }: RegisterFormProps) {
                 <option value="TI">Tarjeta de identidad</option>
                 <option value="PASSPORT">Pasaporte</option>
               </select>
-
-              <Input
-                placeholder="Número de documento"
-                value={identificationNumber}
-                onChange={(e) => setIdentificationNumber(e.target.value)}
-              />
-
-              <label htmlFor="role" className="register-label">
-                Rol
-              </label>
-              <select
-                id="role"
-                className="register-select"
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-              >
-                <option value="STUDENT">Estudiante</option>
-                <option value="PROFESSOR">Profesor</option>
-                <option value="ADMIN">Admin</option>
-              </select>
             </div>
+
+            <Input
+              placeholder="Número de documento"
+              value={identificationNumber}
+              onChange={(e) => setIdentificationNumber(e.target.value)}
+            />
           </div>
 
-          <div className="second-bar">
-            <Input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          {/* 5. Rol */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Rol</label>
+            <select
+              className="h-10 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={role}
+              onChange={(e) => setRole(e.target.value as Role)}
+            >
+              <option value="STUDENT">Estudiante</option>
+              <option value="PROFESSOR">Profesor</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
 
-            <Button type="submit" className="register-submit">
+          {/* 6. Contraseña */}
+          <Input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          {/* BOTÓN */}
+          <div className="flex justify-center pt-2">
+            <Button
+              type="submit"
+              className="w-full max-w-sm bg-blue-600 hover:bg-blue-700"
+            >
               Registrarme
             </Button>
           </div>
         </form>
       </CardContent>
-      
-      <CardFooter className="footer">
+
+      {/* FOOTER */}
+      <CardFooter className="flex justify-center pt-3">
         <CardAction>
-          <Button variant="link" onClick={toLogin} className="register-login-link">
+          <Button
+            variant="link"
+            onClick={toLogin}
+            className="text-sm text-gray-600"
+          >
             ¿Ya tienes cuenta? Inicia sesión
           </Button>
         </CardAction>

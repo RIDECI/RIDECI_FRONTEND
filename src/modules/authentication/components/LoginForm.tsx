@@ -110,7 +110,7 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
 
         <CardFooter className="card-footer">
           <div className="flex flex-col justify-center items-center gap-1">
-            <CardAction>
+            <CardAction className="w-full flex justify-center">
               <Button
                 variant="link"
                 className="text-white"

@@ -24,6 +24,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-google-maps/api": "^2.20.7",
     "@stomp/stompjs": "^7.2.1",
+    "@tailwindcss/oxide": "^4.1.18",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
