@@ -3,7 +3,7 @@ import GeolocalizationComponent from "../components/GeolocalizationComponent";
 function Geolocalization(){
 
     return (
-        <GeolocalizationComponent />
+        <GeolocalizationComponent role = "DRIVER"/>
     )
 
 }
