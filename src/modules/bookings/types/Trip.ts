@@ -20,7 +20,7 @@ export interface AvailableTrip {
   id: string;
   driverName: string;
   vehicleType: string;
-  rating: string;
+  rating: number;
   route: string;
   departureTime: string;
   price: number;
@@ -30,24 +30,30 @@ export interface TripDetails {
   id: string;
   driver: {
     name: string;
-    rating: string;
+    rating: number;
     totalTrips: number;
-    avatar?: string;
+    phoneNumber: string;
+    profileImage?: string;
   };
   vehicle: {
     brand: string;
     model: string;
+    year: number;
     color: string;
     plate: string;
+    type: string;
   };
   trip: {
     origin: string;
     destination: string;
-    date: string;
     departureTime: string;
-    arrivalTime: string;
+    estimatedArrival: string;
+    availableSeats: number;
+    distance: string;
   };
   pricing: {
+    basePrice: number;
+    serviceFee: number;
     total: number;
     currency: string;
   };

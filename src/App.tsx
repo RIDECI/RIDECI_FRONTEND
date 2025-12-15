@@ -96,7 +96,7 @@ function App() {
 
           {/* Rutas de Bookings */}
           <Route path="searchTrips" element={<SearchTrips />} />
-          <Route path="tripDetails" element={<TripDetails />} />
+          <Route path="tripDetails/:bookingId" element={<TripDetails />} />
           <Route path="myTrips" element={<MyTrips />} />
           <Route path="bookingConfirmed" element={<BookingConfirmed />} />
           <Route path="tripCompleted" element={<TripCompleted />} />

@@ -8,9 +8,16 @@ import { useTrips } from '../hooks/useTrips';
 export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
+  const [refreshKey, setRefreshKey] = useState(0);
   const { scheduledTrips, historyTrips, isLoading, error } = useTrips();
 
   console.log('MyTrips render:', { scheduledTrips, historyTrips, isLoading, error });
+
+  const handleStatusChange = () => {
+    // Forzar recarga incrementando el refreshKey
+    setRefreshKey(prev => prev + 1);
+    window.location.reload(); // Recarga completa para actualizar desde localStorage
+  };
 
   if (isLoading) {
     return (
@@ -84,7 +91,7 @@ export function MyTrips() {
         {displayTrips.length > 0 ? (
           <div>
             {displayTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
+              <TripCard key={trip.id} trip={trip} onStatusChange={handleStatusChange} />
             ))}
           </div>
         ) : (

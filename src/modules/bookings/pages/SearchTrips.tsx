@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Zap, ArrowLeft, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { AvailableTrip } from '../types/Trip';
 import { AvailableTripCard } from '../components/pasajero/AvailableTripCard';
@@ -8,13 +8,37 @@ import { searchTrips } from '../services/tripsApi';
 
 export function SearchTrips() {
   const navigate = useNavigate();
-  const [destination, setDestination] = useState('Portal 80');
-  const [departureTime, setDepartureTime] = useState('18:30');
+  const location = useLocation();
+  const searchState = location.state as { date?: string; origin?: string; destination?: string };
+  
+  const [destination, setDestination] = useState(searchState?.destination || '');
+  const [departureTime, setDepartureTime] = useState(searchState?.date || '');
   const [nearbySearch, setNearbySearch] = useState(true);
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useState(true);
   const [availableTrips, setAvailableTrips] = useState<AvailableTrip[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Cargar todos los viajes disponibles al montar el componente
+  useEffect(() => {
+    loadAllTrips();
+  }, []);
+
+  const loadAllTrips = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const trips = await searchTrips(); // Sin parámetros obtiene todos los viajes
+      setAvailableTrips(trips);
+      setShowResults(true);
+    } catch (err) {
+      setError('Error al buscar viajes. Por favor, intenta nuevamente.');
+      console.error('Error buscando viajes:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -39,7 +63,7 @@ export function SearchTrips() {
   };
 
   const handleViewDetails = (trip: AvailableTrip) => {
-    navigate(`/bookings/${trip.id}`, { state: { trip } });
+    navigate(`/app/tripDetails/${trip.id}`, { state: { trip } });
   };
 
   return (

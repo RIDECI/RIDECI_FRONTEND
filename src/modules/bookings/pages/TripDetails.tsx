@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,13 @@ export function TripDetails() {
       const bookingData = {
         travelId: tripDetails.id,
         passengerId: 123, // TODO: Obtener del usuario logueado
-        origin: tripDetails.trip.origin,
-        destination: tripDetails.trip.destination,
         reservedSeats: 1,
         totalAmount: tripDetails.pricing.total,
         status: 'PENDING',
-        notes: selectedPaymentMethod, // Solo el nombre del método: "nequi", "card", etc.
-        bookingDate: new Date().toISOString()
+        notes: `Método de pago: ${selectedPaymentMethod}`,
+        bookingDate: new Date().toISOString(),
+        origin: tripDetails.trip.origin,
+        destination: tripDetails.trip.destination,
       };
       
       console.log('Creando reserva con:', bookingData);
@@ -44,13 +44,13 @@ export function TripDetails() {
       const booking = await createBooking(bookingData);
       
       console.log('✅ Reserva creada exitosamente:', booking);
-      console.log('📋 ID de la reserva:', booking.id);
+      console.log('📋 ID de la reserva:', booking._id);
       
       // Mostrar mensaje de éxito
-      alert(`✅ ¡Reserva creada exitosamente!\n\nID: ${booking.id}\n\nSerás redirigido a la página de confirmación.`);
+      alert(`✅ ¡Reserva creada exitosamente!\n\nID: ${booking._id}\n\nSerás redirigido a la página de confirmación.`);
       
       // Navegar a la página de confirmación con el ID real del backend
-      navigate(`/booking/confirmed/${booking.id}`, { 
+      navigate(`/app/bookingConfirmed`, { 
         state: { 
           booking,
           tripDetails,

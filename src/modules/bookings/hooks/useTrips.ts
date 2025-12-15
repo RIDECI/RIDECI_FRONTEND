@@ -54,14 +54,15 @@ export function useTrips() {
               if (booking.status === 'CANCELLED') statusColor = 'red';
               
               return {
-                id: booking.id,
+                id: booking._id,
                 route: `${booking.origin} → ${booking.destination}`,
                 date: dateStr,
                 time: timeStr,
                 driverName: tripDetails.driver.name,
-                driverImage: tripDetails.driver.avatar || `https://i.pravatar.cc/40?u=${booking.travelId}`,
+                driverImage: tripDetails.driver.profileImage || `https://i.pravatar.cc/40?u=${booking.travelId}`,
                 status: booking.status === 'CONFIRMED' ? 'Confirmado' : 
                         booking.status === 'PENDING' ? 'Pendiente' : 
+                        booking.status === 'COMPLETED' ? 'Completado' :
                         'Cancelado',
                 statusColor,
               };
@@ -69,7 +70,7 @@ export function useTrips() {
               console.error(`Error fetching details for booking ${booking.id}:`, err);
               // Retornar con datos básicos si falla
               return {
-                id: booking.id,
+                id: booking._id,
                 route: `${booking.origin} → ${booking.destination}`,
                 date: new Date(booking.bookingDate).toLocaleDateString('es-ES'),
                 time: new Date(booking.bookingDate).toLocaleTimeString('es-ES', { 
@@ -78,7 +79,10 @@ export function useTrips() {
                 }),
                 driverName: 'Conductor',
                 driverImage: 'https://i.pravatar.cc/40',
-                status: booking.status === 'CONFIRMED' ? 'Confirmado' : 'Pendiente',
+                status: booking.status === 'CONFIRMED' ? 'Confirmado' : 
+                        booking.status === 'PENDING' ? 'Pendiente' :
+                        booking.status === 'COMPLETED' ? 'Completado' :
+                        'Cancelado',
                 statusColor: 'yellow' as const,
               };
             }
@@ -86,17 +90,13 @@ export function useTrips() {
         );
         
         // Separar en programados e historial
-        const now = new Date();
-        const scheduled = tripsWithDetails.filter(trip => {
-          // Los viajes programados son los futuros o de hoy
-          return trip.date === 'Hoy' || trip.date === 'Mañana' || 
-                 new Date(trip.date).getTime() >= now.getTime();
-        });
+        const scheduled = tripsWithDetails.filter(booking => 
+          booking.status === 'Pendiente' || booking.status === 'Confirmado'
+        );
         
-        const history = tripsWithDetails.filter(trip => {
-          return trip.date !== 'Hoy' && trip.date !== 'Mañana' && 
-                 new Date(trip.date).getTime() < now.getTime();
-        });
+        const history = tripsWithDetails.filter(booking => 
+          booking.status === 'Cancelado' || booking.status === 'Completado'
+        );
         
         setScheduledTrips(scheduled);
         setHistoryTrips(history);

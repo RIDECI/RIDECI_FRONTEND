@@ -254,7 +254,7 @@ export const HomePassenger: React.FC = () => {
                                         <p className="text-xs text-gray-500">{offer.carType}</p>
                                     </div>
                                     <button
-                                        onClick={() => navigate(`/app/tripDetails`, { state: { tripId: offer.id } })}
+                                        onClick={() => navigate(`/app/tripDetails/${offer.id}`)}
                                         className="shrink-0 -mt-1 -mr-1 p-1 hover:bg-blue-200 rounded-lg transition-colors">
                                         <ArrowRight className="w-5 h-5 text-gray-900"/>
                                     </button>
