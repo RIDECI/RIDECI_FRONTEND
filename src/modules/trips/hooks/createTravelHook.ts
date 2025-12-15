@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import type { Travel, Location, Status, TravelType } from '../types';
 
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 export interface TravelRequest {
     id?: string;
     organizerId?: number;
@@ -47,7 +50,7 @@ export function useCreateTravel() {
         setError(null);
 
         try {
-            const response = await fetch(`https://nemesistravelmanagementbackend-production.up.railway.app/travels`, {
+            const response = await fetch(`${API_URL}/travels`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -29,6 +29,14 @@ import { HomePassenger } from "./modules/authentication/pages/HomePassenger";
 import { HomeCompanion } from "./modules/authentication/pages/HomeCompanion";
 import ForgotPasswordPage from "./modules/authentication/pages/ForgotPasswordPage";
 import NotificationsPage from './modules/Notifications/pages/NotificationsPage'
+
+/* ------------------ Bookings ------------------ */
+import { SearchTrips } from "./modules/bookings/pages/SearchTrips";
+import { TripDetails } from "./modules/bookings/pages/TripDetails";
+import { MyTrips } from "./modules/bookings/pages/MyTrips";
+import { BookingConfirmed } from "./modules/bookings/pages/BookingConfirmed";
+import { TripCompleted } from "./modules/bookings/pages/TripCompleted";
+
 /* ------------------ Admin ------------------ */
 import AdminLayout from "./modules/administration/AdminLayout";
 import AdminHome from "./modules/administration/pages/AdminHome";
@@ -82,9 +90,16 @@ function App() {
           <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
           <Route path="geolocalization" element={<Geolocalization />} />
           <Route path="homeDriver" element={<HomeDriver />} />
-          <Route path="homePassenger" element={<HomePassenger />} />
+          <Route path="homePassenger" element={<HomePassenger />} /> // RUTA PARA HOME PASAJERO
           <Route path="homeCompanion" element={<HomeCompanion />} />
           <Route path="calificationEndTrip" element={<EndTripRating />} />
+
+          {/* Rutas de Bookings */}
+          <Route path="searchTrips" element={<SearchTrips />} />
+          <Route path="tripDetails" element={<TripDetails />} />
+          <Route path="myTrips" element={<MyTrips />} />
+          <Route path="bookingConfirmed" element={<BookingConfirmed />} />
+          <Route path="tripCompleted" element={<TripCompleted />} />
 
           {/* Rutas de Alerts */}
           <Route path="alerts" element={<Alerts />} />

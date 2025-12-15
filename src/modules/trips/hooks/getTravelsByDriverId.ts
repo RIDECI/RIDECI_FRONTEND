@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { TravelBackendResponse } from './createTravelHook';
 
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 export function useGetTravelsByDriver(driverId: string) {
     const [travels, setTravels] = useState<TravelBackendResponse[]>([]);
     const [loading, setLoading] = useState(true);
@@ -11,7 +14,7 @@ export function useGetTravelsByDriver(driverId: string) {
         setError(null);
 
         try {
-            const response = await fetch(`https://nemesistravelmanagementbackend-production.up.railway.app/travels/driver/${driverId}`, {
+            const response = await fetch(`${API_URL}/travels/driver/${driverId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Calendar, MapPin, Navigation, Star, ArrowRight, CheckCircle, AlertTriangle, HandCoins, Clock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 export const HomePassenger: React.FC = () => {
+    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState('');
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
@@ -80,10 +82,18 @@ export const HomePassenger: React.FC = () => {
     ];
 
     const handleReserve = () => {
-        console.log('Reservando viaje:', {
-            selectedDate,
-            origin,
-            destination
+        if (!selectedDate || !origin || !destination) {
+            console.log('Por favor completa todos los campos');
+            return;
+        }
+        
+        // Navegar a la página de búsqueda con los parámetros
+        navigate('/app/searchTrips', {
+            state: {
+                date: selectedDate,
+                origin,
+                destination
+            }
         });
     };
 
@@ -204,6 +214,7 @@ export const HomePassenger: React.FC = () => {
                             </p>
                         </div>
                         <Button
+                            onClick={() => navigate('/app/searchTrips')}
                             className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
                             style={{
                                 backgroundColor: '#0B8EF5',
@@ -243,6 +254,7 @@ export const HomePassenger: React.FC = () => {
                                         <p className="text-xs text-gray-500">{offer.carType}</p>
                                     </div>
                                     <button
+                                        onClick={() => navigate(`/app/tripDetails`, { state: { tripId: offer.id } })}
                                         className="shrink-0 -mt-1 -mr-1 p-1 hover:bg-blue-200 rounded-lg transition-colors">
                                         <ArrowRight className="w-5 h-5 text-gray-900"/>
                                     </button>
@@ -290,13 +302,14 @@ export const HomePassenger: React.FC = () => {
                             </p>
                         </div>
                         <Button
+                            onClick={() => navigate('/app/myTrips')}
                             className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
                             style={{
                                 backgroundColor: '#0B8EF5',
                                 borderRadius: '8px'
                             }}
                         >
-                            Ver mis Notificaciones
+                            Ver mis Viajes
                         </Button>
                     </div>
 

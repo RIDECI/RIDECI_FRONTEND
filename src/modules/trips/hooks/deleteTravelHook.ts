@@ -1,7 +1,10 @@
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 export async function deleteTravelHook(travelId: string): Promise<void> {
     try {
         const response = await fetch(
-            `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
+            `${API_URL}/travels/${travelId}`,
             {
                 method: 'DELETE',
                 headers: {
