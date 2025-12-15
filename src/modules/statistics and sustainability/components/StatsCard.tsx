@@ -18,7 +18,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stat }) => {
       {/* Styling for the card */}
       <style >{`
         .stat-card {
-          border: 1px solid #ffffffff;
+          border: 1px solid #e0e0e0;
           border-radius: 10px;
           padding: 15px;
           text-align: center;
@@ -34,7 +34,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ stat }) => {
         }
         .stat-title {
           font-size: 12px;
-          color: #ffffffff;
+          color: #777;
           margin-top: 5px;
         }
       `}</style>

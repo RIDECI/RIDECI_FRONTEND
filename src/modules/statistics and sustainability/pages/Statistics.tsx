@@ -58,9 +58,6 @@ export function Statistics() {
             >
               Generar Reporte
             </button>
-            <button className="px-6 py-3 text-sm font-semibold text-blue-700 bg-white border border-blue-700 rounded-lg shadow-md hover:bg-gray-50 transition duration-150 transform hover:scale-[1.03]">
-              Filtrado de Estadísticas
-            </button>
           </div>
         </div>
       </div>
