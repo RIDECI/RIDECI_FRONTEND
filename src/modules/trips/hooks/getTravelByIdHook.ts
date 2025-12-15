@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { TravelBackendResponse } from './createTravelHook';
 
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 interface UseGetTravelByIdResult {
     travel: TravelBackendResponse | null;
     loading: boolean;
@@ -24,7 +27,7 @@ export function useGetTravelById(travelId: string | null): UseGetTravelByIdResul
 
         try {
             const response = await fetch(
-                `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
+                `${API_URL}/travels/${travelId}`,
                 {
                     method: 'GET',
                     headers: {
