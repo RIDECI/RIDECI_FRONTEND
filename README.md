@@ -182,6 +182,19 @@ The following technologies were used to build and deploy the project:
 ![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)
 
 
+### ✨ Feature Branches
+Used for new features or non-critical improvements.
+
+**Format:**
+`feature/[shortDescription]`
+
+**Examples:**
+- `feature/authenticationModule`
+- `feature/securityService`
+
+**Rules:**
+* 🧩 **Case:** strictly *camelCase* (lowercase with hyphens).
+* ✍️ **Descriptive:** Short and meaningful description.
 ---
 
 # 🌿 Branches Strategy & Structure
