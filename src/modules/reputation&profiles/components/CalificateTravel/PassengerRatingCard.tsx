@@ -26,7 +26,7 @@ export default function PassengerRatingCard({
   };
 
   const handleReport = () => {
-    navigate("/app/alerts/new", {
+    navigate("/app/security/reports/new", {
   state: {
     passengerId: id,
     passengerName: name

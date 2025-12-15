@@ -1,10 +1,10 @@
-export type StateAlert = "Aprobado" | "Pendiente" | "Rechazado";
+export type StateReport = "Aprobado" | "Pendiente" | "Rechazado";
 
-export interface Alert {
+export interface Report {
   id: string;
   type: string;
   date: string;
-  state: StateAlert;
+  state: StateReport;
   userReport: string;
   senderId?: string;
   evidence?: string;
