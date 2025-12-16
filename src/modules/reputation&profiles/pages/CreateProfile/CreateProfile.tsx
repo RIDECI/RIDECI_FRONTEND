@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCreateProfile } from "@/modules/reputation&profiles/hooks/CreateProfile/createProfileHook"; 
+import { useGetProfile } from "@/modules/reputation&profiles/hooks/GetProfile/getProfileHook";
 import ProfileInfo from "@/modules/reputation&profiles/components/FormProfile/ProfileInfo";
 import SaveChangesButton from "@/modules/reputation&profiles/components/FormProfile/SaveChangesButton";
 
@@ -17,17 +18,47 @@ export default function CreateProfile() {
   };
 
   const [photo, setPhoto] = useState<string | null>(null);
-  const [formData, setFormData] = useState(() => ({
-    name: localStorage.getItem("userName") || "",
-    identificationNumber: localStorage.getItem("identificationNumber") || "",
-    identificationType: (localStorage.getItem("identificationType") as string) || "CC",
-    phoneNumber: localStorage.getItem("phoneNumber") || "",
-    birthDate: localStorage.getItem("birthDate") || "",
-    email: localStorage.getItem("userEmail") || "",
-    address: localStorage.getItem("address") || "",
-    semester: localStorage.getItem("semester") || "",
-    program: localStorage.getItem("program") || "",
-  }));
+  const [formData, setFormData] = useState({
+    name: "",
+    identificationNumber: "",
+    identificationType: "CC",
+    phoneNumber: "",
+    birthDate: "",
+    email: "",
+    address: "",
+    semester: "",
+    program: "",
+  });
+
+  const { getProfile, loading: loadingProfile, profile } = useGetProfile();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      getProfile(userId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData((prev) => ({
+        ...prev,
+        name: profile.name || prev.name,
+        identificationNumber:
+          profile.identificationNumber ||
+          localStorage.getItem('identificationNumber') ||
+          localStorage.getItem('institutionalId') ||
+          prev.identificationNumber,
+        identificationType: (profile.identificationType as string) || prev.identificationType,
+        phoneNumber: profile.phoneNumber || localStorage.getItem('phoneNumber') || prev.phoneNumber,
+        birthDate: profile.birthDate ? new Date(profile.birthDate).toISOString().slice(0, 10) : prev.birthDate,
+        email: profile.email || localStorage.getItem('userEmail') || prev.email,
+        address: profile.address || localStorage.getItem('address') || prev.address,
+      }));
+
+      if (profile.profilePictureUrl) setPhoto(profile.profilePictureUrl);
+    }
+  }, [profile]);
 
   const { createProfile, loading } = useCreateProfile();
 
@@ -66,7 +97,17 @@ export default function CreateProfile() {
 
     const response = await createProfile(profileType, profileData as any);
 
-    if (response.success) navigate("/app/profile");
+    if (response.success) {
+      // Guardar el tipo de perfil creado para que solo ese rol aparezca en pickRole
+      try {
+        if (typeof roleReceived === 'string' && roleReceived.length > 0) {
+          localStorage.setItem('userProfileType', roleReceived);
+        }
+        localStorage.removeItem("selectedProfile");
+      } catch {}
+      // Navegar a la pantalla de selección de rol (mostrará solo el rol creado)
+      navigate('/roleRegisterPick');
+    }
   };
 
   

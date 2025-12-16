@@ -79,6 +79,13 @@ export const useRegister = () => {
                 if (data.address) {
                     localStorage.setItem("address", data.address);
                 }
+                // Guardar número de documento / institutionalId para usar como identificationNumber
+                if (data.identificationNumber) {
+                    localStorage.setItem("identificationNumber", data.identificationNumber);
+                }
+                if (data.institutionalId) {
+                    localStorage.setItem("institutionalId", data.institutionalId);
+                }
             } catch (e) {
                 console.warn('No se pudo guardar en localStorage:', e);
             }

@@ -29,7 +29,7 @@ export function useGetProfile() {
         setError(null);
 
         try {
-            // Intentar obtener el perfil desde el backend TROYA
+
             const TROYA_BASE_URL = 'https://troyareputationbackend-production.up.railway.app';
 
             console.log(`Obteniendo perfil con userId: ${id}`);
@@ -58,17 +58,19 @@ export function useGetProfile() {
             setError(errorMessage);
             console.error('Error obteniendo perfil:', errorMessage);
 
-            // Fallback: usar datos del localStorage o usuario actual
             const userId = localStorage.getItem('userId');
             const userName = localStorage.getItem('userName');
             const userEmail = localStorage.getItem('userEmail');
+            const userPhone = localStorage.getItem('phoneNumber');
+            const userAddress = localStorage.getItem('address');
+            const identificationNumberLS = localStorage.getItem('identificationNumber') || localStorage.getItem('institutionalId');
 
             const fallbackProfile: Profile = {
                 id: parseInt(userId || id) || 1,
                 name: userName || "Usuario",
                 email: userEmail || "usuario@rideci.com",
                 vehicles: [],
-                phoneNumber: "3001234567",
+                phoneNumber: userPhone || "3001234567",
                 ratings: [],
                 badges: [],
                 profileType: "NOT_DEFINED" as ProfileType,
@@ -77,10 +79,10 @@ export function useGetProfile() {
                     average: 0,
                     totalRatings: 0
                 },
-                identificationType: "CC" as IdentificationType,
-                identificationNumber: "1234567890",
-                address: "Dirección no especificada",
-                profilePictureUrl: "https://via.placeholder.com/150",
+                identificationType: (localStorage.getItem('identificationType') as IdentificationType) || "CC" as IdentificationType,
+                identificationNumber: identificationNumberLS || "1234567890",
+                address: userAddress || "Dirección no especificada",
+                profilePictureUrl: localStorage.getItem('profilePictureUrl') || "https://via.placeholder.com/150",
                 birthDate: new Date('2000-01-01')
             };
             setProfile(fallbackProfile);
