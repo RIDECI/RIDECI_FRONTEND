@@ -11,7 +11,7 @@ interface ResetPasswordRequest {
     confirmPassword?: string; // Solo para validación en frontend
 }
 
-const API_BASE_URL = "https://kratosauthenticationbackend-develop.up.railway.app";
+const API_BASE_URL = "https://kratosauthenticationbackend-production.up.railway.app";
 
 export const useForgotPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -30,10 +30,10 @@ export const useForgotPassword = () => {
 
         try {
             console.log("Solicitando enlace de recuperación para:", data.email);
-            
+
             const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 },
@@ -54,15 +54,15 @@ export const useForgotPassword = () => {
             }
 
             if (!response.ok) {
-                const errorMsg = responseData.message || 
-                                responseData.error || 
-                                `Error ${response.status}: ${response.statusText}`;
+                const errorMsg = responseData.message ||
+                    responseData.error ||
+                    `Error ${response.status}: ${response.statusText}`;
                 throw new Error(errorMsg);
             }
 
             // Guardar email para mostrar en la pantalla de confirmación
             localStorage.setItem("reset_email", data.email);
-            
+
             // Navegar a la pantalla "Correo Enviado"
             navigate(`/email-sent?email=${encodeURIComponent(data.email)}`);
 
@@ -91,7 +91,7 @@ export const useForgotPassword = () => {
 
         try {
             console.log("Restableciendo contraseña con token");
-            
+
             // Payload que espera el backend
             const payload = {
                 token: data.token,           // Token del enlace del correo
@@ -103,7 +103,7 @@ export const useForgotPassword = () => {
 
             const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 },
@@ -122,18 +122,18 @@ export const useForgotPassword = () => {
             }
 
             if (!response.ok) {
-                const errorMsg = responseData.message || 
-                                responseData.error || 
-                                `Error ${response.status}: ${response.statusText}`;
+                const errorMsg = responseData.message ||
+                    responseData.error ||
+                    `Error ${response.status}: ${response.statusText}`;
                 throw new Error(errorMsg);
             }
 
             // Éxito - contraseña cambiada
             setSuccess("¡Contraseña restablecida exitosamente!");
-            
+
             // Limpiar email guardado
             localStorage.removeItem("reset_email");
-            
+
             // Redirigir al login después de 2 segundos
             setTimeout(() => {
                 navigate("/login");

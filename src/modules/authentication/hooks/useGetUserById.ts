@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { User } from '@/modules/authentication/types/user';
 
 // Backend de User Management (KRATOS)
-const API_URL = 'https://kratosusermanagementbackend-production.up.railway.app';
+const API_URL = 'https://kratosuser-managementbackend-production.up.railway.app';
 
 export function useGetUserById(userId: number | undefined) {
     const [user, setUser] = useState<User | null>(null);

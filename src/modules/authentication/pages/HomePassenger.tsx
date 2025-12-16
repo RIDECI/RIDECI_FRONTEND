@@ -44,7 +44,7 @@ export const HomePassenger: React.FC = () => {
                 Array.from(driverIds).map(async (driverId) => {
                     try {
                         const response = await fetch(
-                            `https://kratosusermanagementbackend-production.up.railway.app/users/${driverId}`,
+                            `https://kratosuser-managementbackend-production.up.railway.app/users/${driverId}`,
                             {
                                 method: 'GET',
                                 headers: { 'Content-Type': 'application/json' },
