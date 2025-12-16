@@ -18,8 +18,8 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import type { TravelBackendResponse } from "../hooks/createTravelHook";
 import { deleteTravelHook } from "../hooks/deleteTravelHook";
 import { useGetTravelById } from "../hooks/getTravelByIdHook";
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 
-// Helper functions for status styling
 const getStatusCardClasses = (status?: string): string => {
   if (status === "ACTIVE")
     return "from-yellow-50 to-yellow-100 border-yellow-200/50";
@@ -102,36 +102,39 @@ function DetailsOfTravelComponent() {
   const [searchParams] = useSearchParams();
   const { addNotification } = useGlobalNotifications();
 
-  // Obtener travelId desde query params o desde location.state
   const travelIdFromParams = searchParams.get("travelId");
   const travelFromState = location.state?.travel as
     | TravelBackendResponse
     | undefined;
 
-  // Si viene de state, usar ese, si no, hacer fetch con el ID
   const {
     travel: travelFromApi,
     loading,
     error,
   } = useGetTravelById(travelFromState ? null : travelIdFromParams);
 
-  // Usar el travel que esté disponible
   const travel = travelFromState || travelFromApi;
 
   console.log("Travel data in details:", travel);
 
   const handleConfirmDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de que deseas cancelar este viaje?")) {
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este viaje?")) {
       return;
     }
 
     try {
       await deleteTravelHook(id);
-      alert("Viaje cancelado exitosamente");
+      addNotification({
+        title: 'Viaje cancelado exitosamente',
+        type: 'success',
+      });
       navigate("/app/sectionTravel");
     } catch (error) {
       console.error("Error al eliminar viaje:", error);
-      alert("Error al cancelar el viaje. Por favor intenta de nuevo.");
+      addNotification({
+        title: 'Error al cancelar el viaje. Por favor intenta de nuevo.',
+        type: 'info',
+      });
     }
   };
 
