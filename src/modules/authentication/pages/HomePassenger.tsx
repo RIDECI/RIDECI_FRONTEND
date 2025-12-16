@@ -15,7 +15,13 @@ export const HomePassenger: React.FC = () => {
     const fetchedDriverIds = useRef<Set<number>>(new Set());
     
     // Obtener todos los viajes desde el API
-    const { travels, loading: loadingTravels, error: errorTravels } = useGetAllTravels();
+    const { travels, loading: loadingTravels, error: errorTravels, refetch: refetchTravels } = useGetAllTravels();
+
+    // Refrescar viajes cuando el componente se monta o cuando se vuelve de otra página
+    useEffect(() => {
+        refetchTravels();
+        console.log('🔄 Refrescando lista de viajes...');
+    }, []);
 
     // Obtener información de conductores
     useEffect(() => {
@@ -70,11 +76,26 @@ export const HomePassenger: React.FC = () => {
         'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop'
     ];
 
-    const travelOffers = useMemo(() => {
+    // Filtrar viajes por destino
+    const filteredTravels = useMemo(() => {
         if (!travels || travels.length === 0) return [];
+        
+        const activeTravels = travels.filter(travel => travel.status === 'ACTIVE');
+        
+        // Si no hay destino escrito, devolver todos
+        if (!destination.trim()) return activeTravels;
+        
+        // Filtrar por destino
+        const searchTerm = destination.toLowerCase().trim();
+        return activeTravels.filter(travel => 
+            travel.destiny.direction.toLowerCase().includes(searchTerm)
+        );
+    }, [travels, destination]);
 
-        return travels
-            .filter(travel => travel.status === 'ACTIVE') // Solo viajes activos
+    const travelOffers = useMemo(() => {
+        if (!filteredTravels || filteredTravels.length === 0) return [];
+
+        return filteredTravels
             .map((travel, index) => {
                 // Formatear fecha y hora
                 const departureDate = new Date(travel.departureDateAndTime);
@@ -130,10 +151,45 @@ export const HomePassenger: React.FC = () => {
                 };
             })
             .sort((a, b) => a.availableSeats - b.availableSeats); // Ordenar por urgencia
-    }, [travels, driversInfo]);
+    }, [filteredTravels, driversInfo]);
 
     // Usar ofertas reales o mostrar mensaje de carga
     const sortedOffers = travelOffers.length > 0 ? travelOffers.slice(0, 6) : [];
+    
+    // Determinar si mostrar mensaje de recomendación
+    const showRecommendationMessage = destination.trim() && filteredTravels.length === 0 && travels.length > 0;
+    
+    // Si hay búsqueda pero no resultados, mostrar todos los viajes disponibles
+    const displayOffers = showRecommendationMessage 
+        ? travels
+            .filter(travel => travel.status === 'ACTIVE')
+            .slice(0, 6)
+            .map((travel, index) => {
+                const departureDate = new Date(travel.departureDateAndTime);
+                const time = departureDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                let statusColor = 'bg-green-100 text-green-700';
+                if (travel.availableSlots <= 1) statusColor = 'bg-red-100 text-red-700';
+                else if (travel.availableSlots <= 2) statusColor = 'bg-yellow-100 text-yellow-700';
+                const driverId = travel.driverId || travel.organizerId || 0;
+                const driverInfo = driversInfo[driverId];
+                let driverName = driverInfo?.name || `Conductor ${driverId}`;
+                return {
+                    id: travel.id,
+                    driverId: driverId,
+                    driver: driverName,
+                    image: mockDriverImages[index % mockDriverImages.length],
+                    rating: (4.0 + Math.random() * 1.0).toFixed(1),
+                    carType: 'Vehículo particular',
+                    startPoint: travel.origin.direction,
+                    endPoint: travel.destiny.direction,
+                    time: time,
+                    price: `${travel.estimatedCost.toLocaleString('es-CO')} COP`,
+                    availableSeats: travel.availableSlots,
+                    statusColor: statusColor,
+                    fullDate: departureDate
+                };
+            })
+        : sortedOffers;
 
     // Notificaciones
     const notifications = [
@@ -287,9 +343,19 @@ export const HomePassenger: React.FC = () => {
                 <div className="mb-12">
                     <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                         <div>
-                            <h2 className="text-3xl font-bold text-gray-900 mb-1">Ofertas de viaje</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                                {showRecommendationMessage 
+                                    ? `No hay viajes disponibles para "${destination}"`
+                                    : destination.trim() && filteredTravels.length > 0
+                                        ? `Viajes hacia ${destination}`
+                                        : 'Ofertas de viaje'
+                                }
+                            </h2>
                             <p className="text-base text-gray-600">
-                                Mira los viajes que tenemos en este momento
+                                {showRecommendationMessage
+                                    ? 'Pero te recomendamos estos viajes disponibles'
+                                    : 'Mira los viajes que tenemos en este momento'
+                                }
                             </p>
                         </div>
                         <div className="flex gap-3">
@@ -329,7 +395,7 @@ export const HomePassenger: React.FC = () => {
                     )}
 
                     {/* Empty State */}
-                    {!loadingTravels && !errorTravels && sortedOffers.length === 0 && (
+                    {!loadingTravels && !errorTravels && displayOffers.length === 0 && !showRecommendationMessage && (
                         <div className="text-center py-12">
                             <p className="text-gray-600 text-lg">No hay ofertas de viaje disponibles en este momento</p>
                             <p className="text-gray-500 text-sm mt-2">Vuelve más tarde para ver nuevas opciones</p>
@@ -337,12 +403,18 @@ export const HomePassenger: React.FC = () => {
                     )}
 
                     {/* Offer Cards Grid */}
-                    {!loadingTravels && !errorTravels && sortedOffers.length > 0 && (
+                    {!loadingTravels && !errorTravels && displayOffers.length > 0 && (
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {sortedOffers.map((offer) => (
+                            {displayOffers.map((offer) => {
+                                const hasAvailableSeats = offer.availableSeats > 0;
+                                return (
                             <div
                                 key={offer.id}
-                                className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                                className={`rounded-2xl p-4 transition-shadow ${
+                                    hasAvailableSeats 
+                                        ? 'hover:shadow-lg cursor-pointer' 
+                                        : 'opacity-60 cursor-not-allowed'
+                                }`}
                                 style={{backgroundColor: '#E8F4FF'}}
                             >
                                 <div className="flex items-start gap-3 mb-3">
@@ -366,8 +438,13 @@ export const HomePassenger: React.FC = () => {
                                         <p className="text-xs text-gray-500">{offer.carType}</p>
                                     </div>
                                     <button
-                                        onClick={() => navigate(`/app/tripDetails/${offer.id}`)}
-                                        className="shrink-0 -mt-1 -mr-1 p-1 hover:bg-blue-200 rounded-lg transition-colors">
+                                        onClick={() => hasAvailableSeats && navigate(`/app/tripDetails/${offer.id}`)}
+                                        disabled={!hasAvailableSeats}
+                                        className={`shrink-0 -mt-1 -mr-1 p-1 rounded-lg transition-colors ${
+                                            hasAvailableSeats 
+                                                ? 'hover:bg-blue-200 cursor-pointer' 
+                                                : 'cursor-not-allowed opacity-50'
+                                        }`}>
                                         <ArrowRight className="w-5 h-5 text-gray-900"/>
                                     </button>
                                 </div>
@@ -394,13 +471,28 @@ export const HomePassenger: React.FC = () => {
                                     <span className="text-xl font-bold" style={{color: '#0B8EF5'}}>
                                         {offer.price}
                                     </span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${offer.statusColor}`}>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+                                        offer.availableSeats === 0 
+                                            ? 'bg-red-100 text-red-600'
+                                            : offer.statusColor
+                                    }`}>
                                         <Users className="w-3.5 h-3.5"/>
-                                        {offer.availableSeats} {offer.availableSeats === 1 ? 'cupo' : 'cupos'}
+                                        {offer.availableSeats === 0 
+                                            ? 'Sin cupos' 
+                                            : `${offer.availableSeats} ${offer.availableSeats === 1 ? 'cupo' : 'cupos'}`
+                                        }
                                     </span>
                                 </div>
+                                {!hasAvailableSeats && (
+                                    <div className="mt-3 text-center">
+                                        <span className="text-xs font-medium text-red-600 bg-red-50 px-3 py-1.5 rounded-full">
+                                            ❌ Viaje completo - No disponible
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                            ))}
+                            );
+                            })}
                         </div>
                     )}
                 </div>

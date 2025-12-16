@@ -15,15 +15,5 @@ export default defineConfig({
   },
   define: {
     global: 'window'
-  },
-  server: {
-    proxy: {
-      '/api/travels': {
-        target: 'https://nemesistravelmanagementbackend-production.up.railway.app',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/travels/, '/travels'),
-        secure: false,
-      }
-    }
   }
 })

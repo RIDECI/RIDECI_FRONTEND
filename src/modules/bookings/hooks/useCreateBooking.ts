@@ -65,14 +65,15 @@ export const useCreateBooking = () => {
       setIsLoading(false);
       console.log("Reserva creada exitosamente:", bookingResponse);
       
-      // Navegar a la página de confirmación
-      navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
+      // No navegar automáticamente, dejar que el componente lo maneje
+      // navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
       
       return bookingResponse;
     } catch (err: any) {
       setError("Error de conexión con el servidor.");
       setIsLoading(false);
       console.log("Error en la solicitud de creación:", err.message);
+      throw err; // Propagar el error para que el componente lo maneje
     }
   };
 

@@ -10,7 +10,9 @@ import { TripMapPreview } from '../components/pasajero/TripMapPreview';
 import { PaymentMethodSelector } from '../components/pasajero/PaymentMethodSelector';
 import { TripPricingCard } from '../components/pasajero/TripPricingCard';
 import { useTripDetails } from '../hooks/useTripDetails';
-import { createBooking } from '../services/tripsApi';
+import { useCreateBooking } from '../hooks/useCreateBooking';
+import { useUpdateTravelSlots } from '../hooks/useUpdateTravelSlots';
+import type { CreateBookingRequest } from '../types/booking';
 
 export function TripDetails() {
   const navigate = useNavigate();
@@ -18,6 +20,8 @@ export function TripDetails() {
   console.log('TripDetails - bookingId from params:', bookingId);
   console.log('TripDetails - all params:', useParams());
   const { tripDetails, isLoading, error } = useTripDetails(bookingId || '');
+  const { handleCreateBooking } = useCreateBooking();
+  const { updateSlots } = useUpdateTravelSlots();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('nequi');
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
@@ -27,32 +31,61 @@ export function TripDetails() {
     setIsCreatingBooking(true);
     
     try {
-      const bookingData = {
+      // Validar que hay cupos disponibles
+      if (tripDetails.trip.availableSeats < 1) {
+        alert('❌ No hay cupos disponibles para este viaje.');
+        setIsCreatingBooking(false);
+        return;
+      }
+
+      // 1. Crear la reserva en el backend de Poseidon
+      const bookingData: CreateBookingRequest = {
         travelId: tripDetails.id,
         passengerId: 123, // TODO: Obtener del usuario logueado
         reservedSeats: 1,
         totalAmount: tripDetails.pricing.total,
-        status: 'PENDING',
         notes: `Método de pago: ${selectedPaymentMethod}`,
         bookingDate: new Date().toISOString(),
         origin: tripDetails.trip.origin,
         destination: tripDetails.trip.destination,
       };
       
-      console.log('Creando reserva con:', bookingData);
+      console.log('📤 Creando reserva en backend Poseidon:', bookingData);
       
-      const booking = await createBooking(bookingData);
+      const bookingResponse = await handleCreateBooking(bookingData);
       
-      console.log('✅ Reserva creada exitosamente:', booking);
-      console.log('📋 ID de la reserva:', booking._id);
+      if (!bookingResponse) {
+        alert('❌ Error al crear la reserva en el backend.');
+        setIsCreatingBooking(false);
+        return;
+      }
       
-      // Mostrar mensaje de éxito
-      alert(`✅ ¡Reserva creada exitosamente!\n\nID: ${booking._id}\n\nSerás redirigido a la página de confirmación.`);
+      console.log('✅ Reserva creada en Poseidon:', bookingResponse);
       
-      // Navegar a la página de confirmación con el ID real del backend
+      // 2. Actualizar los cupos disponibles en el backend de Nemesis
+      console.log('🔄 Actualizando cupos en backend Nemesis...');
+      const updateResult = await updateSlots(tripDetails.id, 1);
+      
+      if (!updateResult.success) {
+        console.error('⚠️ Error al actualizar cupos:', updateResult.error);
+        alert('⚠️ La reserva se creó, pero hubo un problema al actualizar los cupos disponibles.');
+        // Continuar de todas formas, ya que la reserva se creó
+      } else {
+        console.log('✅ Cupos actualizados exitosamente');
+      }
+      
+      console.log('✅ Reserva completada exitosamente');
+      
+      // Navegar a la página de confirmación con los datos completos
       navigate(`/app/bookingConfirmed`, { 
         state: { 
-          booking,
+          booking: {
+            _id: bookingResponse.id,
+            ...bookingData,
+            status: bookingResponse.status,
+            createdAt: bookingResponse.createdAt,
+            updatedAt: bookingResponse.updatedAt,
+          },
           tripDetails,
           paymentMethod: selectedPaymentMethod 
         } 

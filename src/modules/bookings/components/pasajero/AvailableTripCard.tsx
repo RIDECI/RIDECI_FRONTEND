@@ -78,16 +78,27 @@ export function AvailableTripCard({ trip, onViewDetails }: AvailableTripCardProp
         </div>
       </div>
 
+      {/* Mensaje de viaje completo */}
+      {trip.availableSeats === 0 && (
+        <div className="mt-3 text-center">
+          <span className="text-xs font-medium text-red-600 bg-red-50 px-3 py-1.5 rounded-full">
+            ❌ Viaje completo - No disponible
+          </span>
+        </div>
+      )}
+
       {/* Ver detalles button */}
       <button 
         onClick={(e) => {
           e.stopPropagation();
-          onViewDetails(trip);
+          if (trip.availableSeats > 0) {
+            onViewDetails(trip);
+          }
         }}
         disabled={trip.availableSeats === 0}
         className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
       >
-        Ver detalles
+        {trip.availableSeats === 0 ? 'No disponible' : 'Ver detalles'}
       </button>
     </div>
   );

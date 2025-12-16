@@ -18,12 +18,18 @@ export function SearchTrips() {
   const [showResults, setShowResults] = useState(true);
 
   // Obtener todos los viajes desde el backend
-  const { travels, loading: isLoading, error: backendError } = useGetAllTravels();
+  const { travels, loading: isLoading, error: backendError, refetch: refetchTravels } = useGetAllTravels();
+
+  // Refrescar viajes cuando el componente se monta
+  useEffect(() => {
+    refetchTravels();
+    console.log('🔄 Refrescando lista de viajes en SearchTrips...');
+  }, []);
 
   // Convertir los viajes del backend al formato AvailableTrip
   const availableTrips: AvailableTrip[] = useMemo(() => {
     return travels
-      .filter(travel => travel.availableSlots > 0) // Solo viajes con cupos disponibles
+      // Mostrar TODOS los viajes, incluso sin cupos (para que se vean bloqueados)
       .map((travel: TravelBackendResponse) => ({
         id: travel.id,
         driverName: `Conductor ${travel.driverId || 'Desconocido'}`, // TODO: Obtener nombre real del conductor
