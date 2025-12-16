@@ -36,16 +36,35 @@ export const NotificationSimulator = () => {
             addNotification({ type, title });
         };
 
-        // Simulate one on mount after 2 seconds to prove it works
-        const timer = setTimeout(() => {
-            addNotification({
-                type: "info",
-                title: "Bienvenido al sistema de notificaciones"
-            });
-        }, 2000);
+        // Simulate a sequence of notifications on mount so the user sees all types
+        const timers: NodeJS.Timeout[] = [];
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "info", title: "Bienvenido al sistema de notificaciones" });
+        }, 1000));
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "info", title: "Reserva confirmada: Viaje a Portal 80" });
+        }, 3000));
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "trip", title: "Tu conductor está en camino" });
+        }, 6000));
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "message", title: "Nuevo mensaje de María: 'Ya estoy saliendo'" });
+        }, 9000));
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "success", title: "Viaje finalizado. Gracias por viajar con RideCI" });
+        }, 12000));
+
+        timers.push(setTimeout(() => {
+            addNotification({ type: "success", title: "Alerta: Mantenimiento programado para esta noche" });
+        }, 15000));
 
         return () => {
-            clearTimeout(timer);
+            timers.forEach(t => clearTimeout(t));
             clearInterval(interval);
         };
     }, [addNotification]);

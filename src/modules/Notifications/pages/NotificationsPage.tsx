@@ -35,17 +35,17 @@ export default function NotificationsPage() {
 
   const handleFilterChange = (f: string) => {
     setActiveFilter(f);
-    showToast(`Filtro cambiado a: ${f}`, "info");
+    showToast("", `Filtro cambiado a: ${f}`, "info");
   };
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    showToast(`Notificaciones del ${date.toLocaleDateString("es-ES")}`, "info");
+    showToast("", `Notificaciones del ${date.toLocaleDateString("es-ES")}`, "info");
   };
 
   const clearDateFilter = () => {
     setSelectedDate(null);
-    showToast("Filtro de fecha eliminado", "info");
+    showToast("", "Filtro de fecha eliminado", "info");
   };
 
   return (
@@ -86,8 +86,8 @@ export default function NotificationsPage() {
           <button
             onClick={() => setShowDatePicker(!showDatePicker)}
             className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${selectedDate
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
           >
             <Calendar className="w-5 h-5" />
