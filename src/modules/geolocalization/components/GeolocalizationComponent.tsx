@@ -95,7 +95,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           accuracy: accuracy
         };
 
-        axios.put(`http://nemesisroutesandtrackingbackend-production.up.railway.app/geolocations/${travelId}/traveltracking/location`, locationData)
+        axios.put(`http://nemesisroutesandtrackingbackendmain-production.up.railway.app/geolocations/${travelId}/traveltracking/location`, locationData)
               .then(() => console.log("Location Sent"))
               .catch(e => console.error("Error sending location", e))
       },
@@ -109,7 +109,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
   useEffect(() => {
     if (role !== 'PASSENGER' || !travelId) return;
 
-    const socket = new SockJS('http://nemesisroutesandtrackingbackend-production.up.railway.app/ws/live-tracking');
+    const socket = new SockJS('http://nemesisroutesandtrackingbackendmain-production.up.railway.app/ws/live-tracking');
     const stompClient = Stomp.over(socket);
 
     stompClient.connect({}, (frame: any) => {

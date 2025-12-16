@@ -24,7 +24,7 @@ export function useGetRouteInformation(travelId: string | null): UseGetRouteInfo
 
         try {
             const response = await fetch(
-                `https://nemesisroutesandtrackingbackend-production.up.railway.app/geolocations/${travelId}`,
+                `https://nemesisroutesandtrackingbackendmain-production.up.railway.app/geolocations/${travelId}`,
                 {
                     method: 'GET',
                     headers: {
