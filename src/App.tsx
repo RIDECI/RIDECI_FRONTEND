@@ -33,6 +33,7 @@ import NotificationsPage from './modules/Notifications/pages/NotificationsPage'
 /* ------------------ Bookings ------------------ */
 import { SearchTrips } from "./modules/bookings/pages/SearchTrips";
 import { TripDetails } from "./modules/bookings/pages/TripDetails";
+import { BookingDetails } from "./modules/bookings/pages/BookingDetails";
 import { MyTrips } from "./modules/bookings/pages/MyTrips";
 import { BookingConfirmed } from "./modules/bookings/pages/BookingConfirmed";
 import { TripCompleted } from "./modules/bookings/pages/TripCompleted";
@@ -101,6 +102,7 @@ function App() {
           <Route path="calificationEndTrip" element={<EndTripRating />} />
           <Route path="searchTrips" element={<SearchTrips />} />
           <Route path="tripDetails/:bookingId" element={<TripDetails />} />
+          <Route path="bookingDetails/:bookingId" element={<BookingDetails />} />
           <Route path="myTrips" element={<MyTrips />} />
           <Route path="bookingConfirmed" element={<BookingConfirmed />} />
           <Route path="tripCompleted" element={<TripCompleted />} />
@@ -112,6 +114,7 @@ function App() {
           <Route path="payment/history" element={<PaymentHistory />} />
           <Route path="security/reports" element={<Reports />} />
           <Route path="security/reports/new" element={<ReportForm />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route
           path="*"

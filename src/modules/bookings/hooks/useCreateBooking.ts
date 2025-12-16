@@ -1,15 +1,15 @@
 import { useState } from "react";
 import type { CreateBookingRequest, BookingResponse } from "../types/booking";
 import { useNavigate } from "react-router-dom";
-
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+import { getBookingsApiUrl } from '../utils/apiConfig';
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 
 export const useCreateBooking = () => {
   const [bookingData, setBookingData] = useState<BookingResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { addNotification } = useGlobalNotifications();
 
   const handleCreateBooking = async (data: CreateBookingRequest) => {
     setError(null);
@@ -44,7 +44,11 @@ export const useCreateBooking = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/bookings`, {
+      const baseUrl = getBookingsApiUrl();
+      console.log('📤 Enviando al backend Poseidon:', baseUrl);
+      console.log('📦 Payload:', JSON.stringify(data, null, 2));
+      
+      const response = await fetch(baseUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,27 +56,42 @@ export const useCreateBooking = () => {
         body: JSON.stringify(data),
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        setError(errorData?.message || "Error al crear la reserva.");
+        const errorMessage = errorData?.message || errorData?.error || `Error ${response.status}: ${response.statusText}`;
+        setError(errorMessage);
         setIsLoading(false);
-        console.log("Error al crear reserva:", errorData);
-        return;
+        console.error("❌ Error al crear reserva:", errorData);
+        console.error("❌ Status:", response.status, response.statusText);
+
+        addNotification({
+          title: errorMessage,
+          type: 'info',
+        });
+
+        throw new Error(errorMessage);
       }
 
       const bookingResponse: BookingResponse = await response.json();
       setBookingData(bookingResponse);
       setIsLoading(false);
-      console.log("Reserva creada exitosamente:", bookingResponse);
-      
+      console.log("✅ Reserva creada exitosamente:", bookingResponse);
+
+      addNotification({
+        title: '¡Reserva creada exitosamente!',
+        type: 'success',
+      });
       // No navegar automáticamente, dejar que el componente lo maneje
       // navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
-      
+
       return bookingResponse;
     } catch (err: any) {
-      setError("Error de conexión con el servidor.");
+      const errorMessage = err.message || "Error de conexión con el servidor.";
+      setError(errorMessage);
       setIsLoading(false);
-      console.log("Error en la solicitud de creación:", err.message);
+      console.error("❌ Error en la solicitud de creación:", err);
       throw err; // Propagar el error para que el componente lo maneje
     }
   };

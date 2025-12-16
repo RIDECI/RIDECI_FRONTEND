@@ -1,4 +1,4 @@
-import { MapPin, Clock, ArrowRight, Users, Star } from 'lucide-react';
+import { MapPin, Clock, ArrowRight, Users, Star, Navigation } from 'lucide-react';
 import type { AvailableTrip } from '../../types/Trip';
 
 interface AvailableTripCardProps {
@@ -7,11 +7,6 @@ interface AvailableTripCardProps {
 }
 
 export function AvailableTripCard({ trip, onViewDetails }: AvailableTripCardProps) {
-  const getSeatsColor = (seats: number) => {
-    if (seats > 0) return 'text-green-600 bg-green-50';
-    return 'text-red-600 bg-red-50';
-  };
-
   const getCuposLabel = (seats: number) => {
     if (seats === 0) return 'Sin cupos';
     if (seats === 1) return '1 cupo';
@@ -27,79 +22,78 @@ export function AvailableTripCard({ trip, onViewDetails }: AvailableTripCardProp
     return name.substring(0, 2).toUpperCase();
   };
 
+  const hasAvailableSeats = trip.availableSeats > 0;
+
   return (
-    <div 
-      onClick={() => trip.availableSeats > 0 && onViewDetails(trip)}
-      className={`bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition-all ${
-        trip.availableSeats > 0 ? 'cursor-pointer' : 'opacity-60'
+    <div
+      onClick={() => hasAvailableSeats && onViewDetails(trip)}
+      className={`rounded-2xl p-4 transition-shadow ${
+        hasAvailableSeats 
+          ? 'hover:shadow-lg cursor-pointer' 
+          : 'opacity-60 cursor-not-allowed'
       }`}
+      style={{backgroundColor: '#E8F4FF'}}
     >
-      <div className="flex items-center justify-between mb-4">
-        {/* Conductor Info */}
-        <div className="flex items-center gap-3">
-          {/* Avatar circular */}
-          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold text-lg">
-            {getInitials(trip.driverName)}
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{trip.driverName}</h3>
-            <div className="flex items-center gap-1 text-gray-600">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold">{trip.rating}</span>
-              <span className="text-yellow-400">★</span>
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-gray-300 flex items-center justify-center text-white font-semibold">
+          {getInitials(trip.driverName)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="font-semibold text-sm text-gray-900 truncate">
+              {trip.driverName}
+            </h3>
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-xs text-gray-600">{trip.rating}</span>
+              <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"/>
             </div>
           </div>
+          <p className="text-xs text-gray-500">{trip.vehicleType}</p>
         </div>
-        
-        {/* Arrow icon */}
-        <ArrowRight className="w-6 h-6 text-gray-400" />
-      </div>
-
-      {/* Ruta */}
-      <div className="flex items-center gap-2 mb-2 text-gray-700">
-        <MapPin className="w-4 h-4 flex-shrink-0 text-gray-500" />
-        <p className="text-sm font-medium">{trip.route}</p>
-      </div>
-
-      {/* Hora */}
-      <div className="flex items-center gap-2 mb-4 text-gray-700">
-        <Clock className="w-4 h-4 flex-shrink-0 text-gray-500" />
-        <p className="text-sm font-medium">{trip.departureTime}</p>
-      </div>
-
-      {/* Precio y Cupos */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-        <p className="text-3xl font-bold text-blue-600">
-          ${trip.price.toLocaleString('es-CO', { minimumFractionDigits: 0 })} COP
-        </p>
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${getSeatsColor(trip.availableSeats)}`}>
-          <Users className="w-4 h-4" />
-          <span className="font-semibold text-sm">{getCuposLabel(trip.availableSeats)}</span>
+        <div className="shrink-0 -mt-1 -mr-1 p-1">
+          <ArrowRight className="w-5 h-5 text-gray-900"/>
         </div>
       </div>
 
-      {/* Mensaje de viaje completo */}
-      {trip.availableSeats === 0 && (
+      <div className="mb-3 text-xs text-gray-600 space-y-1">
+        <div className="flex items-center gap-1">
+          <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+          <span className="truncate">{trip.origin || 'undefined'}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Navigation className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+          <span className="truncate">{trip.destination || 'undefined'}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
+        <div className="flex items-center gap-1.5">
+          <Clock className="w-3.5 h-3.5"/>
+          <span>{trip.departureTime}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <span className="text-xl font-bold" style={{color: '#0B8EF5'}}>
+          ${trip.price.toLocaleString('es-CO')} COP
+        </span>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+          trip.availableSeats === 0 
+            ? 'bg-red-100 text-red-600'
+            : 'bg-green-100 text-green-600'
+        }`}>
+          <Users className="w-3.5 h-3.5"/>
+          {getCuposLabel(trip.availableSeats)}
+        </span>
+      </div>
+      
+      {!hasAvailableSeats && (
         <div className="mt-3 text-center">
           <span className="text-xs font-medium text-red-600 bg-red-50 px-3 py-1.5 rounded-full">
             ❌ Viaje completo - No disponible
           </span>
         </div>
       )}
-
-      {/* Ver detalles button */}
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          if (trip.availableSeats > 0) {
-            onViewDetails(trip);
-          }
-        }}
-        disabled={trip.availableSeats === 0}
-        className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
-      >
-        {trip.availableSeats === 0 ? 'No disponible' : 'Ver detalles'}
-      </button>
     </div>
   );
 }

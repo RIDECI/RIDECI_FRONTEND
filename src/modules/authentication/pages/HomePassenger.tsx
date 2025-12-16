@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useGetAllTravels } from '@/modules/trips';
 import type { User } from '@/modules/authentication/types/user';
+import { useGlobalNotifications } from '@/context/GlobalNotificationContext';
 
 export const HomePassenger: React.FC = () => {
     const navigate = useNavigate();
@@ -17,10 +18,22 @@ export const HomePassenger: React.FC = () => {
     // Obtener todos los viajes desde el API
     const { travels, loading: loadingTravels, error: errorTravels, refetch: refetchTravels } = useGetAllTravels();
 
+    const { addNotification } = useGlobalNotifications();
+
     // Refrescar viajes cuando el componente se monta o cuando se vuelve de otra página
     useEffect(() => {
         refetchTravels();
         console.log('🔄 Refrescando lista de viajes...');
+
+        // Notificación de bienvenida (solo una vez por sesión)
+        const hasWelcomeNotification = sessionStorage.getItem('welcome_notification_shown');
+        if (!hasWelcomeNotification) {
+            addNotification({
+                title: '¡Bienvenido a RideCity! Nos alegra verte de nuevo.',
+                type: 'success',
+            });
+            sessionStorage.setItem('welcome_notification_shown', 'true');
+        }
     }, []);
 
     // Obtener información de conductores
@@ -258,7 +271,7 @@ export const HomePassenger: React.FC = () => {
                                 <div
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                     style={{backgroundColor: '#E8F4FF'}}
-                                    onClick={() => document.getElementById('date-input-passenger')?.showPicker()}
+                                    onClick={() => (document.getElementById('date-input-passenger') as HTMLInputElement)?.showPicker()}
                                 >
                                     <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
                                     <div className="flex-1">
@@ -449,7 +462,7 @@ export const HomePassenger: React.FC = () => {
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
+                                <div className="mb-3 text-xs text-gray-600 space-y-1">
                                     <div className="flex items-center gap-1">
                                         <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
                                         <span className="truncate">{offer.startPoint}</span>

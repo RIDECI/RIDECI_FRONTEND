@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { IdentificationType, Role, AccountState } from "../types/user";
 import { useNavigate } from "react-router-dom";
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 
 
 interface RegisterRequest {
@@ -29,6 +30,7 @@ export const useRegister = () => {
     const [registerData, setRegisterData] = useState<UserResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate()
+    const { addNotification } = useGlobalNotifications();
 
     const handleRegister = async (data: RegisterRequest) => {
         setError(null);
@@ -89,6 +91,11 @@ export const useRegister = () => {
             } catch (e) {
                 console.warn('No se pudo guardar en localStorage:', e);
             }
+
+            addNotification({
+                title: '¡Registro exitoso! Bienvenido a RidECI.',
+                type: 'success',
+            });
 
             // Después del registro, ir a la selección de perfil
             navigate("/selectProfile");

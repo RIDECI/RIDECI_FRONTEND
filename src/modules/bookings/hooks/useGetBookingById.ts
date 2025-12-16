@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import type { BookingResponse } from "../types/booking";
-
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+import { getBookingsApiUrl } from '../utils/apiConfig';
 
 export const useGetBookingById = (bookingId: string | null) => {
   const [bookingData, setBookingData] = useState<BookingResponse | null>(null);
@@ -17,7 +15,8 @@ export const useGetBookingById = (bookingId: string | null) => {
       setError(null);
 
       try {
-        const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+        const baseUrl = getBookingsApiUrl();
+        const response = await fetch(`${baseUrl}/${bookingId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

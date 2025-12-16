@@ -10,45 +10,50 @@ export const useBookingConfirmation = (bookingId: string) => {
   useEffect(() => {
     const fetchBookingConfirmation = async () => {
       if (!bookingId) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // 1. Obtener datos de la reserva
         const booking = await getBookingById(bookingId);
-        
+
+        if (!booking) {
+          setError('Reserva no encontrada');
+          setIsLoading(false);
+          return;
+        }
+
         // 2. Obtener detalles del viaje (conductor, vehículo)
         const trip = await getTripDetails(booking.travelId);
-        
-        // 3. Combinar datos para la estructura BookingConfirmation
-        const confirmation: BookingConfirmation = {
-          bookingId: booking.id,
+
+        const confirmation: BookingConfirmation | null = booking ? {
+          bookingId: (booking as any).id || booking._id || '',
           trip: {
             origin: booking.origin,
             destination: booking.destination,
             dateTime: new Date(booking.bookingDate).toLocaleDateString('es-ES', {
-              day: 'numeric',
+              weekday: 'long',
+              year: 'numeric',
               month: 'long',
-              year: 'numeric'
+              day: 'numeric'
             }) + ' a las ' + new Date(booking.bookingDate).toLocaleTimeString('es-ES', {
               hour: '2-digit',
               minute: '2-digit'
-            })
+            }),
           },
           driver: {
             name: trip.driver.name,
-            rating: trip.driver.rating,
-            avatar: trip.driver.avatar
+            rating: trip.driver.rating.toString(),
+            avatar: trip.driver.profileImage
           },
           payment: {
             total: booking.totalAmount,
-            currency: 'COP',
-            method: booking.notes.charAt(0).toUpperCase() + booking.notes.slice(1), // Capitalizar
-            methodIcon: '°N'
+            currency: 'COP', // TODO: Obtener moneda real
+            method: (booking.notes || '').charAt(0).toUpperCase() + (booking.notes || '').slice(1), // Capitalizar
+            methodIcon: '💳', // TODO: Determinar ícono según método
           }
-        };
-        
+        } : null;
         setConfirmationData(confirmation);
       } catch (err) {
         setError('Error al cargar los detalles de la reserva');

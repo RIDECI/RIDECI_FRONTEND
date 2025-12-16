@@ -14,12 +14,12 @@ export function ForgotPasswordForm() {
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!email.includes("@") || !email.includes(".")) {
             alert("Por favor ingresa un email válido");
             return;
         }
-        
+
         handleForgotPassword({ email });
     };
 
@@ -35,9 +35,9 @@ export function ForgotPasswordForm() {
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    
-           
-                    
+
+
+
                     <div className="w-10"></div>
                 </div>
 
@@ -45,9 +45,9 @@ export function ForgotPasswordForm() {
                     <CardTitle className="text-3xl font-bold text-gray-900">
                         ¿Olvidaste tu contraseña?
                     </CardTitle>
-                    
+
                     <CardDescription className="text-lg text-gray-700">
-                        No te preocupes, ingresa tu correo electrónico y te enviaremos 
+                        No te preocupes, ingresa tu correo electrónico y te enviaremos
                         instrucciones para restablecer tu contraseña.
                     </CardDescription>
                 </div>
@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    
+
                     {success && (
                         <Alert className="bg-green-50 border-green-200 animate-in fade-in">
                             <AlertDescription className="text-green-800 font-medium">
@@ -76,7 +76,7 @@ export function ForgotPasswordForm() {
                             <Mail className="h-4 w-4" />
                             Correo electrónico
                         </label>
-                        
+
                         <Input
                             id="email"
                             type="email"
@@ -87,14 +87,14 @@ export function ForgotPasswordForm() {
                             disabled={isLoading}
                             className="h-12 text-base border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
-                        
+
                         <p className="text-sm text-gray-500">
                             Usa tu email institucional de la Escuela
                         </p>
                     </div>
 
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg"
                         disabled={isLoading || !email}
                     >
@@ -115,8 +115,8 @@ export function ForgotPasswordForm() {
                     <p className="text-gray-600">
                         ¿Recordaste tu contraseña?
                     </p>
-                    <Button 
-                        variant="link" 
+                    <Button
+                        variant="link"
                         onClick={() => navigate("/login")}
                         className="text-blue-600 font-semibold text-lg"
                     >

@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { getBookingsApiUrl } from '../utils/apiConfig';
 
-export const useCancelBooking = () => {
+// Helper para obtener la URL base según el entorno
+const getApiUrl = () => {
+  const isDevelopment = window.location.hostname === 'localhost';
+  return isDevelopment 
+    ? '/api/bookings' 
+    : 'https://poseidonsearchandbooking-production-98fe.up.railway.app/bookings';
+};
+
+export const useCompleteBooking = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const cancelBooking = async (bookingId: string) => {
+  const completeBooking = async (bookingId: string) => {
     setError(null);
     setIsLoading(true);
     setIsSuccess(false);
@@ -18,13 +25,13 @@ export const useCancelBooking = () => {
     }
 
     try {
-      const baseUrl = getBookingsApiUrl();
-      const url = `${baseUrl}/${bookingId}`;
-      console.log(`📝 Intentando cancelar reserva: ${bookingId}`);
+      const baseUrl = getApiUrl();
+      const url = `${baseUrl}/${bookingId}/complete`;
+      console.log(`📝 Intentando completar reserva: ${bookingId}`);
       console.log(`🎯 URL: ${url}`);
       
       const response = await fetch(url, {
-        method: "DELETE",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -41,8 +48,8 @@ export const useCancelBooking = () => {
         return false;
       }
 
-      const data = await response.json().catch(() => null);
-      console.log(`✅ Reserva cancelada exitosamente:`, data);
+      const data = await response.json();
+      console.log(`✅ Reserva completada exitosamente:`, data);
       setIsSuccess(true);
       setIsLoading(false);
       return true;
@@ -54,5 +61,5 @@ export const useCancelBooking = () => {
     }
   };
 
-  return { cancelBooking, error, isLoading, isSuccess };
+  return { completeBooking, error, isLoading, isSuccess };
 };

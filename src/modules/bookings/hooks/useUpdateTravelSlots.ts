@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { UpdateTravelRequest } from '../../trips/hooks/updateTravelHook';
+import { getTravelsApiUrl } from '../utils/apiConfig';
 
 interface UpdateSlotsResult {
   success: boolean;
@@ -8,83 +8,75 @@ interface UpdateSlotsResult {
 
 /**
  * Hook para actualizar solo los cupos disponibles de un viaje en el backend Nemesis
- * Obtiene los datos actuales del viaje y solo modifica los cupos disponibles
+ * Usa el nuevo endpoint PATCH /{id}/slots que recibe directamente el número de cupos
  */
 export function useUpdateTravelSlots() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const updateSlots = async (
     travelId: string,
-    slotsToReduce: number
+    quantity: number
   ): Promise<UpdateSlotsResult> => {
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
-      // Primero obtener los datos actuales del viaje
-      const getTravelResponse = await fetch(
-        `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const baseUrl = getTravelsApiUrl();
+      const url = `${baseUrl}/${travelId}/slots`;
+      const bodyToSend = JSON.stringify(quantity);
+      
+      console.log('╔══════════════════════════════════════════════════════════════╗');
+      console.log('║           PATCH REQUEST - Actualización de Cupos             ║');
+      console.log('╠══════════════════════════════════════════════════════════════╣');
+      console.log(`║ Travel ID: ${travelId}`);
+      console.log(`║ Nuevo valor de cupos: ${quantity}`);
+      console.log(`║ URL completa: ${url}`);
+      console.log(`║ Body: ${bodyToSend}`);
+      console.log('╚══════════════════════════════════════════════════════════════╝');
 
-      if (!getTravelResponse.ok) {
-        throw new Error('Error al obtener información del viaje');
-      }
+      // El endpoint espera solo el número en el body
+      const updateResponse = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: bodyToSend,
+      });
 
-      const currentTravel = await getTravelResponse.json();
-      console.log('📊 Viaje actual (GET):', currentTravel);
-
-      // Validar que hay suficientes cupos (usar el nombre correcto del backend)
-      const currentSlots = currentTravel.availableSlots;
-      if (!currentSlots || currentSlots < slotsToReduce) {
-        throw new Error('No hay suficientes cupos disponibles');
-      }
-
-      const newAvailableSlots = currentSlots - slotsToReduce;
-      console.log(`📉 Cupos: ${currentSlots} → ${newAvailableSlots} (reservando ${slotsToReduce})`);
-
-      // Construir el objeto de actualización manteniendo TODOS los campos sin cambios
-      // Solo modificamos availableSlots
-      const updateData: UpdateTravelRequest = {
-        id: currentTravel.id,
-        organizerId: currentTravel.organizerId,
-        driverId: currentTravel.driverId,
-        availableSlots: newAvailableSlots, // ⬅️ ÚNICO CAMPO QUE CAMBIA
-        estimatedCost: currentTravel.estimatedCost,
-        departureDateAndTime: currentTravel.departureDateAndTime,
-        passengersId: currentTravel.passengersId || [],
-        conditions: currentTravel.conditions || '',
-        origin: currentTravel.origin,
-        destiny: currentTravel.destiny,
-      };
-
-      console.log('🔄 Actualizando viaje con:', updateData);
-
-      // Realizar la actualización
-      const updateResponse = await fetch(
-        `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updateData),
-        }
-      );
+      console.log('╔══════════════════════════════════════════════════════════════╗');
+      console.log('║                    RESPUESTA DEL BACKEND                     ║');
+      console.log('╠══════════════════════════════════════════════════════════════╣');
+      console.log(`║ Status: ${updateResponse.status} ${updateResponse.statusText}`);
+      console.log(`║ OK: ${updateResponse.ok}`);
 
       if (!updateResponse.ok) {
-        const errorData = await updateResponse.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error al actualizar cupos: ${updateResponse.status}`);
+        const responseText = await updateResponse.text();
+        console.log(`║ Response Body: ${responseText}`);
+        console.log('╚══════════════════════════════════════════════════════════════╝');
+        console.error('❌ ERROR: La actualización de cupos falló en el backend');
+        
+        let errorData: any = {};
+        try {
+          errorData = JSON.parse(responseText);
+        } catch {
+          errorData = { message: responseText };
+        }
+        
+        const errorMessage = errorData.message || `Error al actualizar cupos: ${updateResponse.status}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const result = await updateResponse.json();
-      console.log('✅ Cupos actualizados exitosamente:', result);
+      console.log(`║ Response Body:`, result);
+      console.log('╚══════════════════════════════════════════════════════════════╝');
+      console.log('✅ ¡ÉXITO! Cupos actualizados correctamente en el backend');
+      console.log('📊 Verifica en la base de datos que el valor de availableSlots sea:', quantity);
+      
+      setSuccess(true);
 
       return {
         success: true,
@@ -92,7 +84,7 @@ export function useUpdateTravelSlots() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar cupos';
       setError(errorMessage);
-      console.error('❌ Error al actualizar cupos:', err);
+      console.error('❌ Error completo al actualizar cupos:', err);
 
       return {
         success: false,
@@ -107,5 +99,6 @@ export function useUpdateTravelSlots() {
     updateSlots,
     loading,
     error,
+    success,
   };
 }

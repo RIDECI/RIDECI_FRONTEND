@@ -44,7 +44,7 @@ export default function LandingPage() {
 
                 </div>
 
-                <div className="pt-40">
+                <div className="pt-40 pb-24">
                     <FeaturesSection />
                 </div>
 

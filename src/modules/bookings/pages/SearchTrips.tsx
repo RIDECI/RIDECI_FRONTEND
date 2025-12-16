@@ -11,7 +11,7 @@ export function SearchTrips() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchState = location.state as { date?: string; origin?: string; destination?: string };
-  
+
   const [destination, setDestination] = useState(searchState?.destination || '');
   const [departureTime, setDepartureTime] = useState(searchState?.date || '');
   const [nearbySearch, setNearbySearch] = useState(true);
@@ -20,29 +20,42 @@ export function SearchTrips() {
   // Obtener todos los viajes desde el backend
   const { travels, loading: isLoading, error: backendError, refetch: refetchTravels } = useGetAllTravels();
 
-  // Refrescar viajes cuando el componente se monta
+  // Refrescar viajes cuando el componente se monta o cuando regresa desde otra pantalla
   useEffect(() => {
+    console.log('🔄 SearchTrips montado - Refrescando lista de viajes...');
     refetchTravels();
-    console.log('🔄 Refrescando lista de viajes en SearchTrips...');
-  }, []);
+  }, [location.pathname]); // Se ejecuta cuando cambia la ruta
 
   // Convertir los viajes del backend al formato AvailableTrip
   const availableTrips: AvailableTrip[] = useMemo(() => {
+    if (travels.length > 0) {
+      console.log('🔍 Primer viaje del backend:', travels[0]);
+      console.log('📍 Origin:', travels[0]?.origin);
+      console.log('📍 Destiny:', travels[0]?.destiny);
+    }
+
     return travels
       // Mostrar TODOS los viajes, incluso sin cupos (para que se vean bloqueados)
-      .map((travel: TravelBackendResponse) => ({
-        id: travel.id,
-        driverName: `Conductor ${travel.driverId || 'Desconocido'}`, // TODO: Obtener nombre real del conductor
-        vehicleType: 'Vehículo', // TODO: Obtener tipo de vehículo real
-        rating: 4.5, // TODO: Obtener rating real del conductor
-        route: `${travel.origin.placeName} → ${travel.destiny.placeName}`,
-        departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        price: travel.estimatedCost,
-        availableSeats: travel.availableSlots,
-      }));
+      .map((travel: TravelBackendResponse) => {
+        const origin = travel.origin?.direction || (travel.origin as any)?.placeName || 'Origen no disponible';
+        const destination = travel.destiny?.direction || (travel.destiny as any)?.placeName || 'Destino no disponible';
+
+        return {
+          id: travel.id,
+          driverName: `Conductor ${travel.driverId || 'Desconocido'}`,
+          vehicleType: 'Vehículo particular',
+          rating: 4.5,
+          route: `${origin} → ${destination}`,
+          origin,
+          destination,
+          departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          price: travel.estimatedCost,
+          availableSeats: travel.availableSlots,
+        };
+      });
   }, [travels]);
 
   // Filtrar viajes según criterios de búsqueda
@@ -52,10 +65,10 @@ export function SearchTrips() {
     }
 
     return availableTrips.filter(trip => {
-      const matchesDestination = !destination || 
+      const matchesDestination = !destination ||
         trip.route.toLowerCase().includes(destination.toLowerCase());
-      
-      const matchesTime = !departureTime || 
+
+      const matchesTime = !departureTime ||
         trip.departureTime.includes(departureTime);
 
       return matchesDestination && matchesTime;
@@ -78,7 +91,7 @@ export function SearchTrips() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate('/bookings')}
+        onClick={() => navigate(-1)}
         className="w-fit text-blue-600 hover:bg-transparent hover:text-blue-700 font-medium"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -126,14 +139,12 @@ export function SearchTrips() {
                 <label className="text-sm font-semibold text-gray-700">Búsqueda por cercanía</label>
                 <button
                   onClick={() => setNearbySearch(!nearbySearch)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors ${
-                    nearbySearch ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors ${nearbySearch ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      nearbySearch ? 'translate-x-5' : 'translate-x-0.5'
-                    }`}
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${nearbySearch ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
                   />
                 </button>
               </div>
@@ -185,8 +196,8 @@ export function SearchTrips() {
         ) : showResults && filteredTrips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTrips.map((trip) => (
-              <AvailableTripCard 
-                key={trip.id} 
+              <AvailableTripCard
+                key={trip.id}
                 trip={trip}
                 onViewDetails={handleViewDetails}
               />

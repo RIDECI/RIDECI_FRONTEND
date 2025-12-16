@@ -14,14 +14,14 @@ export const useSavedCards = () => {
     try {
       setLoading(true);
       const { getSavedCards } = await import('../services/mockPaymentStorage');
-      
+
       const cards = getSavedCards(userId);
 
       const mapped = cards.map((c) => ({
         id: c.id,
         lastFourDigits: c.cardNumber.slice(-4),
         expiryDate: c.expiration,
-        brand: c.alias || "generic",
+        brand: (c.alias || "generic") as any,
         holderName: c.cardHolder,
         isDefault: c.isDefault
       }));

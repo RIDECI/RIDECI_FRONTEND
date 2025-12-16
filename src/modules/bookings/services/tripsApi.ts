@@ -1,8 +1,8 @@
 import type { AvailableTrip, TripDetails } from '../types/Trip';
-import { 
-  saveBooking, 
-  getBookingById as getBookingFromStorage, 
-  cancelBookingById, 
+import {
+  saveBooking,
+  getBookingById as getBookingFromStorage,
+  cancelBookingById,
   confirmBookingById,
   completeBookingById,
   getBookingsByPassenger,
@@ -124,22 +124,25 @@ export const searchTrips = async (params?: SearchTripsParams): Promise<Available
     // Obtener disponibilidad actualizada para cada viaje
     const mockTrips: AvailableTrip[] = baseMockTrips.map(trip => {
       const availability = getTripAvailability(trip.id);
+      const [origin, destination] = trip.route.split(' → ');
       return {
         ...trip,
+        origin: origin || 'Unknown',
+        destination: destination || 'Unknown',
         availableSeats: availability?.availableSeats ?? 0,
       };
     });
 
     console.log('Using mock trips data with dynamic availability');
-    
+
     // Si hay parámetros de búsqueda, filtrar los viajes mock
     if (params?.destination) {
-      const filtered = mockTrips.filter(trip => 
+      const filtered = mockTrips.filter(trip =>
         trip.route.toLowerCase().includes(params.destination!.toLowerCase())
       );
       return filtered.length > 0 ? filtered : mockTrips;
     }
-    
+
     return mockTrips;
   } catch (error) {
     console.error('Error en searchTrips:', error);
@@ -150,7 +153,7 @@ export const searchTrips = async (params?: SearchTripsParams): Promise<Available
 export const getTripDetails = async (tripId: string): Promise<TripDetails> => {
   try {
     console.log('Getting trip details for ID:', tripId);
-    
+
     // Datos mock detallados que coinciden con las imágenes
     const mockDetails: Record<string, TripDetails> = {
       '1': {
@@ -486,7 +489,7 @@ export const getTripDetails = async (tripId: string): Promise<TripDetails> => {
     };
 
     const details = mockDetails[tripId];
-    
+
     if (!details) {
       throw new Error('Viaje no encontrado');
     }
@@ -537,14 +540,14 @@ export interface CreateBookingResponse {
 export const createBooking = async (bookingData: CreateBookingRequest): Promise<CreateBookingResponse> => {
   try {
     console.log('Creating booking with data:', bookingData);
-    
+
     // Reducir disponibilidad antes de crear la reserva
     const availabilityReduced = reduceAvailability(bookingData.travelId, bookingData.reservedSeats);
-    
+
     if (!availabilityReduced) {
       throw new Error('No hay suficientes asientos disponibles para esta reserva');
     }
-    
+
     // Crear reserva usando almacenamiento local
     const newBooking: BookingData = {
       _id: `BOOKING-${Date.now()}`,
@@ -562,10 +565,10 @@ export const createBooking = async (bookingData: CreateBookingRequest): Promise<
       origin: bookingData.origin,
       destination: bookingData.destination,
     };
-    
+
     // Guardar en localStorage
     const savedBooking = saveBooking(newBooking);
-    
+
     console.log('✅ Booking created and saved to localStorage:', savedBooking);
     console.log('📉 Availability reduced for trip:', bookingData.travelId);
     return savedBooking;
@@ -578,10 +581,10 @@ export const createBooking = async (bookingData: CreateBookingRequest): Promise<
 export const getBookingById = async (bookingId: string): Promise<CreateBookingResponse | null> => {
   try {
     console.log('Fetching booking details for ID:', bookingId);
-    
+
     // Obtener de localStorage
     const booking = getBookingFromStorage(bookingId);
-    
+
     if (!booking) {
       console.warn('Booking not found in localStorage:', bookingId);
       throw new Error('Reserva no encontrada');
@@ -598,10 +601,10 @@ export const getBookingById = async (bookingId: string): Promise<CreateBookingRe
 export const getMyBookings = async (passengerId: number): Promise<CreateBookingResponse[]> => {
   try {
     console.log('Fetching bookings for passenger:', passengerId);
-    
+
     // Obtener de localStorage
     const bookings = getBookingsByPassenger(passengerId);
-    
+
     console.log('Bookings received from localStorage:', bookings);
     return bookings;
   } catch (error) {
@@ -613,21 +616,21 @@ export const getMyBookings = async (passengerId: number): Promise<CreateBookingR
 export const cancelBooking = async (bookingId: string): Promise<void> => {
   try {
     console.log('Cancelling booking with ID:', bookingId);
-    
+
     // Primero obtener la reserva para saber cuántos asientos restaurar
     const booking = getBookingFromStorage(bookingId);
-    
+
     if (!booking) {
       throw new Error('Reserva no encontrada.');
     }
-    
+
     // Cancelar en localStorage
     const success = cancelBookingById(bookingId);
-    
+
     if (!success) {
       throw new Error('No se pudo cancelar la reserva.');
     }
-    
+
     // Restaurar disponibilidad
     restoreAvailability(booking.travelId, booking.reservedSeats);
 
@@ -642,9 +645,9 @@ export const cancelBooking = async (bookingId: string): Promise<void> => {
 export const confirmBooking = async (bookingId: string): Promise<void> => {
   try {
     console.log('Confirming booking with ID:', bookingId);
-    
+
     const success = confirmBookingById(bookingId);
-    
+
     if (!success) {
       throw new Error('No se pudo confirmar la reserva.');
     }
@@ -659,9 +662,9 @@ export const confirmBooking = async (bookingId: string): Promise<void> => {
 export const completeBooking = async (bookingId: string): Promise<void> => {
   try {
     console.log('Completing booking with ID:', bookingId);
-    
+
     const success = completeBookingById(bookingId);
-    
+
     if (!success) {
       throw new Error('No se pudo completar la reserva.');
     }
