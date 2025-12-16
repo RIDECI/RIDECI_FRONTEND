@@ -4,7 +4,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 /* ------------------ App  ------------------ */
-import { Statistics } from "./modules/statistics and sustainability";
+import { GeneralStatistics, ReportDownload, Statistics } from "./modules/statistics and sustainability";
 import { Travel } from "./modules/trips";
 import SectionTravel from "./modules/trips/pages/SectionTravel";
 import DetailsOfTravel from "./modules/trips/pages/DetailsOfTravel";

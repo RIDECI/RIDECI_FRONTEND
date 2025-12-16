@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCreateProfile } from "@/modules/reputation&profiles/hooks/CreateProfile/createProfileHook";
 
@@ -35,6 +35,44 @@ export default function ProfileForm() {
   });
 
   const { createProfile, loading } = useCreateProfile();
+
+  // Prellenar formulario con datos del usuario autenticado y del perfil si existe
+  useEffect(() => {
+    const currentProfile = localStorage.getItem('currentProfile');
+    const userName = localStorage.getItem('userName');
+    const userEmail = localStorage.getItem('userEmail');
+    const userId = localStorage.getItem('userId');
+
+    if (currentProfile) {
+      try {
+        const profile = JSON.parse(currentProfile);
+        setFormData({
+          name: profile.name || userName || '',
+          identificationNumber: profile.identificationNumber || userId || '',
+          identificationType: profile.identificationType || 'CC',
+          phoneNumber: profile.phoneNumber || '',
+          birthDate: profile.birthDate ? profile.birthDate.split('T')[0] : '',
+          email: profile.email || userEmail || '',
+          address: profile.address || '',
+          semester: profile.semester || '',
+          program: profile.program || '',
+        });
+        if (profile.profilePictureUrl) {
+          setPhoto(profile.profilePictureUrl);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    } else {
+      // Prellenar solo con datos básicos del usuario autenticado
+      setFormData(prev => ({
+        ...prev,
+        name: userName || '',
+        email: userEmail || '',
+        identificationNumber: userId || '',
+      }));
+    }
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({

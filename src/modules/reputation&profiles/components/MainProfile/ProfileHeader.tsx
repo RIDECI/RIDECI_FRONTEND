@@ -3,24 +3,43 @@ import { useEffect, useState } from 'react';
 
 export default function ProfileHeader() {
   const [profileData, setProfileData] = useState({
-    name: 'Pepito Perez',
-    roles: 'Acompañante, Conductor',
+    name: '',
+    roles: '',
     photo: bob
   });
 
   useEffect(() => {
+    // Primero intentar obtener datos del perfil actual guardado
     const currentProfile = localStorage.getItem('currentProfile');
+    
+    // Si no hay perfil, usar datos del usuario autenticado
+    const userName = localStorage.getItem('userName');
+    const userEmail = localStorage.getItem('userEmail');
+    
     if (currentProfile) {
       try {
         const profile = JSON.parse(currentProfile);
         setProfileData({
-          name: profile.name || 'Pepito Perez',
-          roles: profile.profileType || 'Acompañante, Conductor',
+          name: profile.name || userName || userEmail || 'Usuario',
+          roles: profile.profileType || 'No definido',
           photo: profile.profilePictureUrl || bob
         });
       } catch (error) {
         console.log('Error parsing profile:', error);
+        // Fallback a datos del usuario autenticado
+        setProfileData({
+          name: userName || userEmail || 'Usuario',
+          roles: 'No definido',
+          photo: bob
+        });
       }
+    } else {
+      // No hay perfil creado, usar datos del usuario autenticado
+      setProfileData({
+        name: userName || userEmail || 'Usuario',
+        roles: 'No definido',
+        photo: bob
+      });
     }
   }, []);
 
