@@ -112,6 +112,7 @@ function App() {
           <Route path="payment/history" element={<PaymentHistory />} />
           <Route path="security/reports" element={<Reports />} />
           <Route path="security/reports/new" element={<ReportForm />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route
           path="*"

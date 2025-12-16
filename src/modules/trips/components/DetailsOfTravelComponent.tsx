@@ -100,6 +100,7 @@ function DetailsOfTravelComponent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { addNotification } = useGlobalNotifications();
 
   // Obtener travelId desde query params o desde location.state
   const travelIdFromParams = searchParams.get("travelId");
