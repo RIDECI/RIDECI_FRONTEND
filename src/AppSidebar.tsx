@@ -55,9 +55,9 @@ export function AppSidebar() {
       <SidebarHeader className="bg-transparent h-16 flex items-center px-4">
         <div className="flex items-center gap-3 w-full group-data-[collapsible=icon]:justify-center">
           <SidebarTrigger className="text-white hover:bg-white/20" />
-          <img 
-            src="/RidECISidebar.png" 
-            alt="Rideci Logo" 
+          <img
+            src="/RidECISidebar.png"
+            alt="Rideci Logo"
             className="h-10 w-auto object-contain group-data-[collapsible=icon]:hidden"
           />
         </div>
