@@ -22,13 +22,13 @@ export const AddNewCard: React.FC = () => {
   } = useAddCard();
 
   const handleCancel = () => {
-    navigate(`/payment/cards`);
+    navigate(`/app/payment/cards`);
   };
 
   const handleSave = async () => {
     const success = await handleSaveCard();
     if (success) {
-      navigate(`/payment/cards`);
+      navigate(`/app/payment/cards`);
     }
   };
 
@@ -38,7 +38,7 @@ export const AddNewCard: React.FC = () => {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate('/payment/cards')}
+        onClick={() => navigate('/app/payment/cards')}
         className="w-fit text-blue-600 hover:bg-transparent hover:text-blue-700 font-medium mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />

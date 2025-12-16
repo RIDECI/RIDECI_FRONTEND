@@ -37,7 +37,7 @@ export const useSavedCards = () => {
   };
 
   const handleAddNewCard = () => {
-    window.location.href = "/payment/cards/add";
+    window.location.href = "/app/payment/cards/new";
   };
 
   useEffect(() => {
