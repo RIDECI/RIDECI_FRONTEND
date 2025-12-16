@@ -60,7 +60,7 @@ export function AppSidebar() {
       items: [
         {
           title: "Calendario",
-          url: "/app/calendar",
+          url: "/app/searchTrips",
           icon: Calendar,
         },
         {
