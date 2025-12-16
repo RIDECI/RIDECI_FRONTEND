@@ -49,8 +49,6 @@ function GeolocalizationComponent({ role = "PASSENGER" }: GeolocalizationCompone
 
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
-
-
   useEffect(() => {
     if (route && isLoaded && globalThis.google) {
       // Decodificar la polyline del backend
@@ -312,7 +310,7 @@ function GeolocalizationComponent({ role = "PASSENGER" }: GeolocalizationCompone
               title='Mi Ubicacion'
               icon={{
                 url: '/car-icon.png',
-                scaledSize: new window.google.maps.Size(30,30)
+                scaledSize: new window.google.maps.Size(30, 30)
               }}
               zIndex={1000}
             />
