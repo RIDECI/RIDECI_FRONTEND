@@ -1,22 +1,78 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { TabType } from '../types/Trip';
+import type { TabType, Trip } from '../types/Trip';
 import { TripCard } from '../components/pasajero/TripCard';
-import { useTrips } from '../hooks/useTrips';
+import { useGetBookingsByPassenger } from '../hooks/useGetBookingsByPassenger';
 
 export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
-  const [refreshKey, setRefreshKey] = useState(0);
-  const { scheduledTrips, historyTrips, isLoading, error } = useTrips();
+  
+  // Obtener reservas del backend - TODO: usar ID real del usuario logueado
+  const { bookingsData, isLoading, error, refetch } = useGetBookingsByPassenger(123);
+
+  // Convertir BookingResponse[] a Trip[] y separar por estado
+  const { scheduledTrips, historyTrips } = useMemo(() => {
+    if (!bookingsData || bookingsData.length === 0) {
+      return { scheduledTrips: [], historyTrips: [] };
+    }
+
+    const trips: Trip[] = bookingsData.map((booking) => {
+      const bookingDate = new Date(booking.bookingDate);
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      let dateStr = bookingDate.toLocaleDateString('es-ES', { 
+        day: 'numeric', 
+        month: 'short' 
+      });
+      
+      if (bookingDate.toDateString() === today.toDateString()) {
+        dateStr = 'Hoy';
+      } else if (bookingDate.toDateString() === tomorrow.toDateString()) {
+        dateStr = 'Mañana';
+      }
+      
+      const timeStr = bookingDate.toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+
+      return {
+        id: booking.id,
+        bookingId: booking.id,
+        driverName: `Conductor #${booking.passengerId}`,
+        driverImage: 'https://i.pravatar.cc/150?img=3',
+        rating: '4.5',
+        carType: 'Vehículo particular',
+        origin: booking.origin,
+        destination: booking.destination,
+        date: dateStr,
+        time: timeStr,
+        passengers: booking.reservedSeats,
+        price: booking.totalAmount,
+        status: booking.status as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED',
+      };
+    });
+
+    // Separar viajes por estado
+    const scheduled = trips.filter(
+      (trip) => trip.status === 'PENDING' || trip.status === 'CONFIRMED'
+    );
+    const history = trips.filter(
+      (trip) => trip.status === 'COMPLETED' || trip.status === 'CANCELLED'
+    );
+
+    return { scheduledTrips: scheduled, historyTrips: history };
+  }, [bookingsData]);
 
   console.log('MyTrips render:', { scheduledTrips, historyTrips, isLoading, error });
 
   const handleStatusChange = () => {
-    // Forzar recarga incrementando el refreshKey
-    setRefreshKey(prev => prev + 1);
-    window.location.reload(); // Recarga completa para actualizar desde localStorage
+    // Refrescar desde el backend
+    refetch();
   };
 
   if (isLoading) {

@@ -2,6 +2,7 @@
 export { MyTrips } from './pages/MyTrips';
 export { SearchTrips } from './pages/SearchTrips';
 export { TripDetails } from './pages/TripDetails';
+export { BookingDetails } from './pages/BookingDetails';
 export { BookingConfirmed } from './pages/BookingConfirmed';
 export { TripCompleted } from './pages/TripCompleted';
 export { MyAccompaniments } from './pages/MyAccompaniments';
@@ -30,3 +31,5 @@ export { useGetBookingById } from './hooks/useGetBookingById';
 export { useGetBookingsByPassenger } from './hooks/useGetBookingsByPassenger';
 export { useValidateAvailability } from './hooks/useValidateAvailability';
 export { useCancelBooking } from './hooks/useCancelBooking';
+export { useConfirmBooking } from './hooks/useConfirmBooking';
+export { useCompleteBooking } from './hooks/useCompleteBooking';

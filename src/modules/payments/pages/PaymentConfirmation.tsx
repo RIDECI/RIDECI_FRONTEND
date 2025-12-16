@@ -16,70 +16,52 @@ export const PaymentConfirmation: React.FC = () => {
 
   // 🔒 BookingId seguro
   const safeBookingId = bookingId || "BKG-TEST-001";
+  
+  console.log('💳 PaymentConfirmation - BookingId:', bookingId);
+  console.log('💳 Safe BookingId:', safeBookingId);
 
   const handleConfirmPayment = async () => {
     if (!selectedMethod) return;
 
-    /* ================= CARD ================= */
-    if (selectedMethod === 'card') {
-      navigate(`/app/payment/cards`);
-      return;
-    }
+    console.log('💳 Procesando pago para booking:', safeBookingId);
+    console.log('💳 Método seleccionado:', selectedMethod);
 
-    /* ================= BRE-B ================= */
-    if (selectedMethod === 'bre-b') {
-      await api.post("/payment-methods", {
-        userId: "USR-200",
-        alias: "Método BRE-B",
-        type: "BRE_B_key"
-      });
-
-      navigate(`/app/payment/breb/${safeBookingId}`);
-      return;
-    }
-
-    /* ================= NEQUI ================= */
-    if (selectedMethod === 'nequi') {
-      await api.post("/payment-methods", {
-        userId: "USR-200",
-        alias: "Nequi personal",
-        type: "NEQUI"
-      });
-
-      const txBody = {
-        bookingId: safeBookingId,
-        passengerId: "USR-200", // ✅ corregido
-        amount: paymentAmount,
-        paymentMethod: "NEQUI",
-        extra: "nequi-test",
-        receiptCode: `RCPT-${Date.now()}`
-      };
-
-      const resTx = await api.post("/payments/create", txBody);
-      navigate(`/app/payment/success/${resTx.data.id}`);
-      return;
-    }
-
-    /* ================= CASH ================= */
-    if (selectedMethod === 'cash') {
-      await api.post("/payment-methods", {
-        userId: "USR-200",
-        alias: "Pago en efectivo",
-        type: "CASH"
-      });
-
-      const txBody = {
+    try {
+      // Importar el servicio de almacenamiento mock
+      const { createTransaction } = await import('../services/mockPaymentStorage');
+      
+      // Crear transacción en localStorage
+      const transaction = createTransaction({
         bookingId: safeBookingId,
         passengerId: "USR-200",
         amount: paymentAmount,
-        paymentMethod: "CASH",
-        extra: "cash-test",
-        receiptCode: `RCPT-${Date.now()}`
-      };
+        paymentMethod: selectedMethod.toUpperCase(),
+        extra: `Pago con ${selectedMethod}`,
+        receiptCode: `RCPT-${Date.now()}`,
+      });
 
-      const resTx = await api.post("/payments/create", txBody);
-      navigate(`/app/payment/success/${resTx.data.id}`);
-      return;
+      console.log('✅ Transacción guardada en localStorage:', transaction);
+
+      /* ================= CARD ================= */
+      if (selectedMethod === 'card') {
+        navigate(`/app/payment/cards`);
+        return;
+      }
+
+      /* ================= Otros métodos (BRE-B, NEQUI, CASH) ================= */
+      // Navegar a la página de éxito con el ID de la transacción
+      navigate(`/app/payment/success/${transaction.id}`, {
+        state: { 
+          transaction: {
+            ...transaction,
+            currency: currency,
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Error al procesar pago:', error);
+      alert('Error al procesar el pago. Intenta de nuevo.');
     }
   };
 

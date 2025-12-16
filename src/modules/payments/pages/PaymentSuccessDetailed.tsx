@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { PaymentSuccessIcon } from '../components/PaymentSuccessIcon';
 import { TransactionDetailsCard } from '../components/TransactionDetailsCard';
 import { PaymentSuccessActions } from '../components/PaymentSuccessActions';
@@ -7,9 +7,46 @@ import { useTransactionDetails } from '../hooks/useTransactionDetails';
 
 export const PaymentSuccessDetailed: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { paymentId } = useParams<{ paymentId: string }>();
 
+  // Intentar obtener la transacción desde el estado de navegación (mock)
+  const mockTransaction = (location.state as any)?.transaction;
+  
   const { tx, loading } = useTransactionDetails(paymentId!);
+
+  // Si hay una transacción mock, usarla directamente
+  if (mockTransaction) {
+    console.log('✅ Usando transacción mock:', mockTransaction);
+    
+    const formattedDate = new Date(mockTransaction.timestamp || mockTransaction.createdAt).toLocaleDateString('es-CO');
+    const formattedTime = new Date(mockTransaction.timestamp || mockTransaction.createdAt).toLocaleTimeString('es-CO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return (
+      <div className="max-w-8xl mx-auto">
+        <PaymentSuccessIcon />
+
+        <TransactionDetailsCard
+          transaction={{
+            paymentMethod: mockTransaction.paymentMethod,
+            amount: mockTransaction.amount,
+            currency: mockTransaction.currency || "COP",
+            referenceId: mockTransaction.receiptCode || mockTransaction.id,
+            date: formattedDate,
+            time: formattedTime
+          }}
+        />
+
+        <PaymentSuccessActions
+          onGoToHistory={() => navigate("/app/payment/history")}
+          onGoToHome={() => navigate("/app/myTrips")}
+        />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

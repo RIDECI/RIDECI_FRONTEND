@@ -13,6 +13,7 @@ import { useTripDetails } from '../hooks/useTripDetails';
 import { useCreateBooking } from '../hooks/useCreateBooking';
 import { useUpdateTravelSlots } from '../hooks/useUpdateTravelSlots';
 import type { CreateBookingRequest } from '../types/booking';
+import { useToast } from '@/components/ToastContext';
 
 export function TripDetails() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export function TripDetails() {
   const { tripDetails, isLoading, error } = useTripDetails(bookingId || '');
   const { handleCreateBooking } = useCreateBooking();
   const { updateSlots } = useUpdateTravelSlots();
+  const { showToast } = useToast();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('nequi');
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
@@ -33,7 +35,7 @@ export function TripDetails() {
     try {
       // Validar que hay cupos disponibles
       if (tripDetails.trip.availableSeats < 1) {
-        alert('❌ No hay cupos disponibles para este viaje.');
+        showToast('No hay cupos disponibles para este viaje', 'error');
         setIsCreatingBooking(false);
         return;
       }
@@ -55,7 +57,9 @@ export function TripDetails() {
       const bookingResponse = await handleCreateBooking(bookingData);
       
       if (!bookingResponse) {
-        alert('❌ Error al crear la reserva en el backend.');
+        const errorMsg = 'Error al crear la reserva en el backend. El servidor pudo haber rechazado la solicitud.';
+        console.error(errorMsg);
+        showToast(errorMsg, 'error');
         setIsCreatingBooking(false);
         return;
       }
@@ -68,7 +72,7 @@ export function TripDetails() {
       
       if (!updateResult.success) {
         console.error('⚠️ Error al actualizar cupos:', updateResult.error);
-        alert('⚠️ La reserva se creó, pero hubo un problema al actualizar los cupos disponibles.');
+        showToast('La reserva se creó, pero hubo un problema al actualizar los cupos disponibles', 'error');
         // Continuar de todas formas, ya que la reserva se creó
       } else {
         console.log('✅ Cupos actualizados exitosamente');
@@ -81,6 +85,7 @@ export function TripDetails() {
         state: { 
           booking: {
             _id: bookingResponse.id,
+            id: bookingResponse.id,
             ...bookingData,
             status: bookingResponse.status,
             createdAt: bookingResponse.createdAt,
@@ -92,7 +97,7 @@ export function TripDetails() {
       });
     } catch (err) {
       console.error('❌ Error al crear la reserva:', err);
-      alert('❌ Error al crear la reserva. Por favor, intenta nuevamente.');
+      showToast('Error al crear la reserva. Por favor, intenta nuevamente.', 'error');
     } finally {
       setIsCreatingBooking(false);
     }

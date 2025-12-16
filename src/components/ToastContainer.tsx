@@ -62,6 +62,18 @@ export default function ToastContainer() {
           </button>
         </div>
       ))}
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 0.98;
+          }
+        }
+      `}</style>
     </div>
   );
 }
