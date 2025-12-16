@@ -49,7 +49,7 @@ export function AppSidebar() {
     },
     {
       title: "Calendario",
-      url: "/app/calendar",
+      url: "/app/searchTrips",
       icon: Calendar,
     },
     {

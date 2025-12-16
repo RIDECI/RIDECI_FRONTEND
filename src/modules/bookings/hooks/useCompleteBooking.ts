@@ -3,12 +3,12 @@ import { useState } from "react";
 // URL del backend desplegado
 const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
 
-export const useCancelBooking = () => {
+export const useCompleteBooking = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
-  const cancelBooking = async (bookingId: string) => {
+  const completeBooking = async (bookingId: string) => {
     setError(null);
     setIsLoading(true);
     setIsSuccess(false);
@@ -20,11 +20,11 @@ export const useCancelBooking = () => {
     }
 
     try {
-      console.log(`📝 Intentando cancelar reserva: ${bookingId}`);
-      console.log(`🎯 URL: ${API_URL}/bookings/${bookingId}`);
+      console.log(`📝 Intentando completar reserva: ${bookingId}`);
+      console.log(`🎯 URL: ${API_URL}/bookings/${bookingId}/complete`);
       
-      const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
-        method: "DELETE",
+      const response = await fetch(`${API_URL}/bookings/${bookingId}/complete`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -41,8 +41,8 @@ export const useCancelBooking = () => {
         return false;
       }
 
-      const data = await response.json().catch(() => null);
-      console.log(`✅ Reserva cancelada exitosamente:`, data);
+      const data = await response.json();
+      console.log(`✅ Reserva completada exitosamente:`, data);
       setIsSuccess(true);
       setIsLoading(false);
       return true;
@@ -54,5 +54,5 @@ export const useCancelBooking = () => {
     }
   };
 
-  return { cancelBooking, error, isLoading, isSuccess };
+  return { completeBooking, error, isLoading, isSuccess };
 };

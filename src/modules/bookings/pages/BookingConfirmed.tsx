@@ -20,9 +20,12 @@ export function BookingConfirmed() {
     paymentMethod: string;
   };
   
+  console.log('📋 BookingConfirmed - State:', state);
+  console.log('📋 Booking ID:', state?.booking?._id);
+  
   // Construir confirmationData desde el estado de navegación
-  const confirmationData: BookingConfirmation | null = state ? {
-    bookingId: state.booking._id,
+  const confirmationData: BookingConfirmation | null = state && (state.booking?._id || state.booking?.id) ? {
+    bookingId: state.booking._id || state.booking.id,
     trip: {
       origin: state.tripDetails.trip.origin,
       destination: state.tripDetails.trip.destination,

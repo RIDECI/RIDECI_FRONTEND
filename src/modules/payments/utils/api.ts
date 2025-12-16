@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://poseidonpayments-production-b501.up.railway.app/api",
+  baseURL: "/api/payments",
   headers: {
     "Content-Type": "application/json",
   },

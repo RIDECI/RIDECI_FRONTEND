@@ -1,8 +1,12 @@
 import { MapPin, Clock, CheckCircle, Flag, X, Eye } from 'lucide-react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import type { Trip } from '../../types/Trip';
-import { confirmBooking, completeBooking, cancelBooking } from '../../services/tripsApi';
+import { useConfirmBooking } from '../../hooks/useConfirmBooking';
+import { useCompleteBooking } from '../../hooks/useCompleteBooking';
+import { useCancelBooking } from '../../hooks/useCancelBooking';
+import { useToast } from '@/components/ToastContext';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 interface TripCardProps {
   trip: Trip;
@@ -17,59 +21,78 @@ const statusColors = {
 
 export function TripCard({ trip, onStatusChange }: TripCardProps) {
   const navigate = useNavigate();
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
+  const { showToast } = useToast();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  
+  // Hooks para actualizar estado de reservas
+  const { confirmBooking, isLoading: isConfirming, error: confirmError } = useConfirmBooking();
+  const { completeBooking, isLoading: isCompleting, error: completeError } = useCompleteBooking();
+  const { cancelBooking, isLoading: isCancelling, error: cancelError } = useCancelBooking();
 
   const handleViewDetails = () => {
-    navigate(`/app/tripDetails/${trip.travelId}`);
+    // Navegar a los detalles de la reserva existente
+    navigate(`/app/bookingDetails/${trip.id}`);
   };
 
-  const handleConfirm = async () => {
-    if (window.confirm('¿Deseas confirmar esta reserva?')) {
-      setIsConfirming(true);
-      try {
-        await confirmBooking(trip.id);
-        alert('✅ Reserva confirmada exitosamente');
+  const handleConfirmClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmConfirm = async () => {
+    setShowConfirmDialog(false);
+    try {
+      const success = await confirmBooking(trip.id);
+      if (success) {
+        showToast('Reserva confirmada exitosamente', 'success');
         onStatusChange?.();
-      } catch (error) {
-        console.error('Error confirming booking:', error);
-        alert('❌ Error al confirmar la reserva');
-      } finally {
-        setIsConfirming(false);
+      } else {
+        showToast(confirmError || 'Error al confirmar la reserva', 'error');
       }
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      showToast('Error al confirmar la reserva', 'error');
     }
   };
 
-  const handleComplete = async () => {
-    if (window.confirm('¿Has completado este viaje? Esto lo moverá al historial.')) {
-      setIsCompleting(true);
-      try {
-        await completeBooking(trip.id);
-        alert('✅ Viaje completado exitosamente');
+  const handleCompleteClick = () => {
+    setShowCompleteDialog(true);
+  };
+
+  const handleCompleteConfirm = async () => {
+    setShowCompleteDialog(false);
+    try {
+      const success = await completeBooking(trip.id);
+      if (success) {
+        showToast('Viaje completado exitosamente', 'success');
         onStatusChange?.();
-      } catch (error) {
-        console.error('Error completing booking:', error);
-        alert('❌ Error al completar el viaje');
-      } finally {
-        setIsCompleting(false);
+      } else {
+        showToast(completeError || 'Error al completar el viaje', 'error');
       }
+    } catch (error) {
+      console.error('Error completing booking:', error);
+      showToast('Error al completar el viaje', 'error');
     }
   };
 
-  const handleCancel = async () => {
-    if (window.confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-      setIsCancelling(true);
-      try {
-        await cancelBooking(trip.id);
-        alert('✅ Reserva cancelada exitosamente');
+  const handleCancelClick = () => {
+    setShowCancelDialog(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    setShowCancelDialog(false);
+    try {
+      const success = await cancelBooking(trip.id);
+      if (success) {
+        showToast('Reserva cancelada exitosamente', 'success');
         onStatusChange?.();
-      } catch (error) {
-        console.error('Error cancelling booking:', error);
-        alert('❌ Error al cancelar la reserva');
-      } finally {
-        setIsCancelling(false);
+      } else {
+        showToast(cancelError || 'Error al cancelar la reserva', 'error');
       }
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      showToast('Error al cancelar la reserva', 'error');
     }
   };
 
@@ -121,7 +144,7 @@ export function TripCard({ trip, onStatusChange }: TripCardProps) {
           {trip.status === 'Pendiente' && (
             <>
               <button
-                onClick={handleConfirm}
+                onClick={handleConfirmClick}
                 disabled={isConfirming}
                 className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
               >
@@ -129,7 +152,7 @@ export function TripCard({ trip, onStatusChange }: TripCardProps) {
                 {isConfirming ? 'Confirmando...' : 'Confirmar'}
               </button>
               <button
-                onClick={handleCancel}
+                onClick={handleCancelClick}
                 disabled={isCancelling}
                 className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
               >
@@ -143,7 +166,7 @@ export function TripCard({ trip, onStatusChange }: TripCardProps) {
           {trip.status === 'Confirmado' && (
             <>
               <button
-                onClick={handleComplete}
+                onClick={handleCompleteClick}
                 disabled={isCompleting}
                 className="flex items-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
               >
@@ -151,7 +174,7 @@ export function TripCard({ trip, onStatusChange }: TripCardProps) {
                 {isCompleting ? 'Terminando...' : 'Terminar viaje'}
               </button>
               <button
-                onClick={handleCancel}
+                onClick={handleCancelClick}
                 disabled={isCancelling}
                 className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
               >
@@ -162,6 +185,37 @@ export function TripCard({ trip, onStatusChange }: TripCardProps) {
           )}
         </div>
       </div>
+
+      {/* Modales de confirmación */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="¿Confirmar reserva?"
+        message="¿Deseas confirmar esta reserva?"
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmConfirm}
+        onCancel={() => setShowConfirmDialog(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showCompleteDialog}
+        title="¿Completar viaje?"
+        message="¿Has completado este viaje? Esto lo moverá al historial."
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+        onConfirm={handleCompleteConfirm}
+        onCancel={() => setShowCompleteDialog(false)}
+      />
+
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        title="¿Cancelar reserva?"
+        message="¿Estás seguro de que deseas cancelar esta reserva?"
+        confirmText="Aceptar"
+        cancelText="Cancelar"
+        onConfirm={handleCancelConfirm}
+        onCancel={() => setShowCancelDialog(false)}
+      />
     </div>
   );
 }
