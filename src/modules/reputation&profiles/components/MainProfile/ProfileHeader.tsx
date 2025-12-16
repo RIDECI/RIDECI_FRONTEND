@@ -1,7 +1,12 @@
 import bob from '../../../../assets/bob.jpeg';
 import { useEffect, useState } from 'react';
+import type { Profile } from '@/modules/reputation&profiles/hooks/GetProfile/getProfileHook';
 
-export default function ProfileHeader() {
+interface ProfileHeaderProps {
+  readonly profile: Profile | null;
+}
+
+export default function ProfileHeader({ profile }: ProfileHeaderProps) {
   const [profileData, setProfileData] = useState({
     name: '',
     roles: '',
@@ -9,24 +14,31 @@ export default function ProfileHeader() {
   });
 
   useEffect(() => {
-    // Primero intentar obtener datos del perfil actual guardado
+    // Primero usar los datos del profile del hook si están disponibles
+    if (profile) {
+      setProfileData({
+        name: profile.name || 'Usuario',
+        roles: profile.profileType || 'No definido',
+        photo: profile.profilePictureUrl || bob
+      });
+      return;
+    }
+
+    // Fallback: intentar obtener datos del localStorage
     const currentProfile = localStorage.getItem('currentProfile');
-    
-    // Si no hay perfil, usar datos del usuario autenticado
     const userName = localStorage.getItem('userName');
     const userEmail = localStorage.getItem('userEmail');
     
     if (currentProfile) {
       try {
-        const profile = JSON.parse(currentProfile);
+        const storedProfile = JSON.parse(currentProfile);
         setProfileData({
-          name: profile.name || userName || userEmail || 'Usuario',
-          roles: profile.profileType || 'No definido',
-          photo: profile.profilePictureUrl || bob
+          name: storedProfile.name || userName || userEmail || 'Usuario',
+          roles: storedProfile.profileType || 'No definido',
+          photo: storedProfile.profilePictureUrl || bob
         });
       } catch (error) {
         console.log('Error parsing profile:', error);
-        // Fallback a datos del usuario autenticado
         setProfileData({
           name: userName || userEmail || 'Usuario',
           roles: 'No definido',
@@ -34,14 +46,14 @@ export default function ProfileHeader() {
         });
       }
     } else {
-      // No hay perfil creado, usar datos del usuario autenticado
+      // No hay perfil, usar datos básicos del usuario autenticado
       setProfileData({
         name: userName || userEmail || 'Usuario',
         roles: 'No definido',
         photo: bob
       });
     }
-  }, []);
+  }, [profile]);
 
   return (
     <div className="flex items-center gap-6">

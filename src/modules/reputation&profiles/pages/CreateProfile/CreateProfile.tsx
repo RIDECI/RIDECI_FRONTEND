@@ -17,17 +17,17 @@ export default function CreateProfile() {
   };
 
   const [photo, setPhoto] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    identificationNumber: "",
-    identificationType: "CC",
-    phoneNumber: "",
-    birthDate: "",
-    email: "",
-    address: "",
-    semester: "",
-    program: "",
-  });
+  const [formData, setFormData] = useState(() => ({
+    name: localStorage.getItem("userName") || "",
+    identificationNumber: localStorage.getItem("identificationNumber") || "",
+    identificationType: (localStorage.getItem("identificationType") as string) || "CC",
+    phoneNumber: localStorage.getItem("phoneNumber") || "",
+    birthDate: localStorage.getItem("birthDate") || "",
+    email: localStorage.getItem("userEmail") || "",
+    address: localStorage.getItem("address") || "",
+    semester: localStorage.getItem("semester") || "",
+    program: localStorage.getItem("program") || "",
+  }));
 
   const { createProfile, loading } = useCreateProfile();
 
@@ -71,27 +71,24 @@ export default function CreateProfile() {
 
   
   return (
-  <div className="p-12 max-w-6xl mx-auto pb-24 bg-[#e8f1fd] rounded-2xl shadow-md border border-slate-200">
-    <h1 className="text-4xl font-bold mb-10 text-slate-800">Completa tu Perfil</h1>
+    <div className="min-h-screen flex items-start justify-center bg-transparent">
+      <div className="p-12 max-w-5xl w-full mt-24 pb-24 bg-[#e8f1fd] rounded-2xl shadow-md border border-slate-200">
+        <h1 className="text-4xl font-bold mb-10 text-slate-800">Completa tu Perfil</h1>
 
-    <div className="space-y-12 w-full">
-      <ProfileInfo 
-        role={roleReceived} 
-        photo={photo}
-        onPhotoChange={handlePhotoChange}
-        formData={formData}
-        onInputChange={handleInputChange}
-      />
+        <div className="space-y-12 w-full">
+          <ProfileInfo
+            role={roleReceived}
+            photo={photo}
+            onPhotoChange={handlePhotoChange}
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
 
-      <div className="pt-10 flex justify-end border-t border-slate-300 mt-10">
-        <SaveChangesButton
-          onConfirm={handleConfirm} 
-          loading={loading} 
-        />
+          <div className="pt-10 flex justify-end border-t border-slate-300 mt-10">
+            <SaveChangesButton onConfirm={handleConfirm} loading={loading} />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
-
-
+  );
 }

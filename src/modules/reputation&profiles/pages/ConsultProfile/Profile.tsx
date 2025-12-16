@@ -39,7 +39,7 @@ export default function Profile() {
       <main className="flex-1 p-12 overflow-y-auto">
         <div className="bg-white shadow-2xl rounded-3xl p-14 max-w-6xl mx-auto">
 
-          <ProfileHeader />
+          <ProfileHeader profile={profileData} />
 
           <div className="mt-12">
             <RatingSummary profile={profileData} />

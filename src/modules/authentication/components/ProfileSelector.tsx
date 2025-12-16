@@ -13,7 +13,10 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
     const [selectedProfile, setSelectedProfile] = useState<ProfileType | null>(null);
     const navigate = useNavigate();
 
-    const profiles: Profile[] = [
+    // Obtener el rol del usuario desde localStorage
+    const userProfileType = localStorage.getItem('userProfileType'); // "Conductor", "Pasajero", "Acompañante"
+    
+    const allProfiles: Profile[] = [
         {
             id: 'conductor',
             title: 'Conductor',
@@ -33,6 +36,11 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
             image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=300&fit=crop'
         }
     ];
+
+    // Filtrar para mostrar solo el perfil creado por el usuario
+    const profiles = userProfileType 
+        ? allProfiles.filter(p => p.title === userProfileType)
+        : allProfiles;
 
     const handleProfileSelect = (profileId: ProfileType) => {
         setSelectedProfile(profileId);

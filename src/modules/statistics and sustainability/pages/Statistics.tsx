@@ -9,11 +9,11 @@ export function Statistics() {
   const navigate = useNavigate();
 
   const handleGenerateReport = () => {
-    navigate('/statistics/report-download');
+    navigate('/app/statistics/report-download');
   };
 
   const handleGeneralStatistics = () => {
-    navigate('/statistics/general');
+    navigate('/app/statistics/general');
   };
 
   return (
