@@ -48,7 +48,7 @@ export const useCreateBooking = () => {
     try {
       console.log('📤 Enviando al backend Poseidon:', `${API_URL}/bookings`);
       console.log('📦 Payload:', JSON.stringify(data, null, 2));
-      
+
       const response = await fetch(`${API_URL}/bookings`, {
         method: "POST",
         headers: {
@@ -61,42 +61,29 @@ export const useCreateBooking = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-<<<<<<< HEAD
-        const errorMsg = errorData?.message || "Error al crear la reserva.";
-        setError(errorMsg);
-        setIsLoading(false);
-        console.log("Error al crear reserva:", errorData);
-
-        addNotification({
-          title: errorMsg,
-          type: 'info',
-        });
-        return;
-=======
         const errorMessage = errorData?.message || errorData?.error || `Error ${response.status}: ${response.statusText}`;
         setError(errorMessage);
         setIsLoading(false);
         console.error("❌ Error al crear reserva:", errorData);
         console.error("❌ Status:", response.status, response.statusText);
+
+        addNotification({
+          title: errorMessage,
+          type: 'info',
+        });
+
         throw new Error(errorMessage);
->>>>>>> d820b38c2ea572da5080de6b76430a5d496038d8
       }
 
       const bookingResponse: BookingResponse = await response.json();
       setBookingData(bookingResponse);
       setIsLoading(false);
-<<<<<<< HEAD
-      console.log("Reserva creada exitosamente:", bookingResponse);
+      console.log("✅ Reserva creada exitosamente:", bookingResponse);
 
       addNotification({
         title: '¡Reserva creada exitosamente!',
         type: 'success',
       });
-
-=======
-      console.log("✅ Reserva creada exitosamente:", bookingResponse);
-      
->>>>>>> d820b38c2ea572da5080de6b76430a5d496038d8
       // No navegar automáticamente, dejar que el componente lo maneje
       // navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
 
