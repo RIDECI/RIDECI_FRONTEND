@@ -57,6 +57,14 @@ export const useRegister = () => {
             const userResponse: UserResponse = await response.json();
             setRegisterData(userResponse);
             console.log("Registro melo: ", userResponse)
+
+            const maybeRole = (userResponse as any)?.role;
+            if (maybeRole === "ADMINISTRATOR" || maybeRole === "ADMIN") {
+                localStorage.setItem("role", "ADMINISTRATOR");
+                navigate("/app/admin", { replace: true });
+                return; 
+            }
+
             navigate("/roleRegisterPick");
         }catch (err: any) {
             setError("Error de conexión con el servidor.");

@@ -70,6 +70,13 @@ export const useLogin = () => {
       localStorage.setItem("userId", result.institutionalId.toString());
       localStorage.setItem("userEmail", data.email); // Guardar email para referencia
 
+      const maybeRole = (result as any)?.role;
+      if (maybeRole === "ADMINISTRATOR" || maybeRole === "ADMIN") {
+        localStorage.setItem("role", "ADMINISTRATOR");
+        navigate("/app/admin", { replace: true });
+        return; 
+      }
+
       navigate("/pickRole");
 
     } catch (err: any) {
