@@ -17,33 +17,29 @@ const libraries: ("geometry" | "places")[] = ["geometry", "places"];
 interface MapComponentProps {
   origin: string;
   destination: string;
-  departureDate: string;
-  departureTime: string;
+  departureDateAndTime: string;
   estimatedCost: string;
   onOriginChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onDateChange: (value: string) => void;
-  onTimeChange: (value: string) => void;
   onCostChange: (value: string) => void;
 }
 
 function MyMapComponent({
   origin,
   destination,
-  departureDate,
-  departureTime,
+  departureDateAndTime,
   estimatedCost,
   onOriginChange,
   onDestinationChange,
   onDateChange,
-  onTimeChange,
   onCostChange
 }: MapComponentProps) {
 
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
-  const [originMarker, setOriginMarker] = useState<{lat: number, lng: number} | null>(null);
-  const [destinationMarker, setDestinationMarker] = useState<{lat: number, lng: number} | null>(null);
+  const [originMarker, setOriginMarker] = useState<{ lat: number, lng: number } | null>(null);
+  const [destinationMarker, setDestinationMarker] = useState<{ lat: number, lng: number } | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -66,7 +62,7 @@ function MyMapComponent({
     // Geocodificar origen
     geocoder.geocode({ address: origin }, (resultsOrigin, statusOrigin) => {
       console.log('Geocoding origen:', statusOrigin, resultsOrigin);
-      
+
       if (statusOrigin === 'OK' && resultsOrigin && resultsOrigin[0]) {
         const originLocation = resultsOrigin[0].geometry.location;
         const originCoords = {
@@ -79,7 +75,7 @@ function MyMapComponent({
         // Geocodificar destino
         geocoder.geocode({ address: destination }, (resultsDest, statusDest) => {
           console.log('Geocoding destino:', statusDest, resultsDest);
-          
+
           if (statusDest === 'OK' && resultsDest && resultsDest[0]) {
             const destLocation = resultsDest[0].geometry.location;
             const destCoords = {
@@ -98,10 +94,10 @@ function MyMapComponent({
               },
               (result, status) => {
                 console.log('Ruta calculada:', status);
-                
+
                 if (status === 'OK' && result) {
                   setDirectionsResponse(result);
-                  
+
                   // Ajustar el mapa para mostrar toda la ruta
                   if (map && result.routes[0]) {
                     const bounds = new google.maps.LatLngBounds();
@@ -181,7 +177,7 @@ function MyMapComponent({
       >
         {/* Mostrar marcadores solo si no hay ruta calculada */}
         {!directionsResponse && originMarker && (
-          <Marker 
+          <Marker
             position={originMarker}
             label="A"
             icon={{
@@ -189,9 +185,9 @@ function MyMapComponent({
             }}
           />
         )}
-        
+
         {!directionsResponse && destinationMarker && (
-          <Marker 
+          <Marker
             position={destinationMarker}
             label="B"
             icon={{
@@ -202,7 +198,7 @@ function MyMapComponent({
 
         {/* Mostrar la ruta si está calculada */}
         {directionsResponse && (
-          <DirectionsRenderer 
+          <DirectionsRenderer
             directions={directionsResponse}
             options={{
               suppressMarkers: false,
@@ -215,16 +211,14 @@ function MyMapComponent({
           />
         )}
       </GoogleMap>
-      <CardMapComponent 
+      <CardMapComponent
         origin={origin}
         destination={destination}
-        departureDate={departureDate}
-        departureTime={departureTime}
+        departureDateAndTime={departureDateAndTime}
         estimatedCost={estimatedCost}
         onOriginChange={onOriginChange}
         onDestinationChange={onDestinationChange}
         onDateChange={onDateChange}
-        onTimeChange={onTimeChange}
         onCostChange={onCostChange}
       />
     </div>
