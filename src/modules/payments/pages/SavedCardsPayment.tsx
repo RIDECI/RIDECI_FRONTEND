@@ -6,12 +6,15 @@ import { SavedCardsList } from '../components/SavedCardsList';
 import { AddCardButton } from '../components/AddCardButton';
 import { PaymentConfirmButton } from '../components/PaymentConfirmButton';
 import { useSavedCards } from '../hooks/useSavedCards';
-import { api } from "../utils/api";
 import { Button } from "@/components/ui/button";
+import { useCompleteBooking } from '../../bookings/hooks/useCompleteBooking';
+import { useToast } from '@/components/ToastContext';
 
 export const SavedCardsPayment: React.FC = () => {
   const navigate = useNavigate();
   const { bookingId } = useParams();
+  const { completeBooking } = useCompleteBooking();
+  const { showToast } = useToast();
 
   const {
     savedCards,
@@ -27,29 +30,53 @@ export const SavedCardsPayment: React.FC = () => {
     if (!selectedCardId) return;
 
     try {
-      console.log("Procesando pago REAL con tarjeta:", {
+      console.log("🔄 Procesando pago MOCK con tarjeta:", {
         bookingId,
         cardId: selectedCardId
       });
 
-      const body = {
-        bookingId: bookingId || "BKG-TEST-001",   // <--- VALOR POR DEFECTO
+      // Importar el servicio de almacenamiento mock
+      const { createTransaction } = await import('../services/mockPaymentStorage');
+      
+      // Crear transacción mock en localStorage
+      const transaction = createTransaction({
+        bookingId: bookingId || "BKG-TEST-001",
         passengerId: "USR-200",
         amount: 20000,
         paymentMethod: "CREDIT_CARD_PAYU",
         extra: selectedCardId,
-        receiptCode: `RCPT-${Date.now()}`
-      };
+        receiptCode: `RCPT-${Date.now()}`,
+      });
 
-      const res = await api.post("/payments/create", body);
+      console.log("✅ Transacción mock creada:", transaction);
 
-      const txId = res.data.id; // Backend retorna TransactionResponse
+      // Simular delay de procesamiento
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // 🔹 Mantener tu flujo EXACTO (ir a success)
-      navigate(`/app/payment/success/${txId}`);
+      // Completar la reserva en el backend
+      if (bookingId) {
+        console.log('🔄 Completando reserva en backend...');
+        const success = await completeBooking(bookingId);
+        if (success) {
+          console.log('✅ Reserva completada exitosamente');
+          showToast('Pago realizado y viaje completado', 'success');
+        } else {
+          console.warn('⚠️ No se pudo completar la reserva, pero el pago se registró');
+          showToast('Pago realizado, pero hubo un problema al actualizar la reserva', 'error');
+        }
+      }
 
-    } catch (err) {
-      console.error("❌ Error creando pago:", err);
+      navigate(`/app/payment/success/${transaction.id}`, {
+        state: { 
+          transaction: {
+            ...transaction,
+            currency: 'COP',
+          }
+        }
+      });
+
+    } catch (err: any) {
+      console.error("❌ Error al procesar pago:", err);
       alert("Error procesando el pago. Intenta de nuevo.");
     }
   };

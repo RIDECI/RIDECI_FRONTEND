@@ -1,7 +1,12 @@
 import { useState } from "react";
 
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+// Helper para obtener la URL base según el entorno
+const getApiUrl = () => {
+  const isDevelopment = window.location.hostname === 'localhost';
+  return isDevelopment 
+    ? '/api/bookings' 
+    : 'https://poseidonsearchandbooking-production-98fe.up.railway.app/bookings';
+};
 
 export const useCompleteBooking = () => {
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +25,12 @@ export const useCompleteBooking = () => {
     }
 
     try {
+      const baseUrl = getApiUrl();
+      const url = `${baseUrl}/${bookingId}/complete`;
       console.log(`📝 Intentando completar reserva: ${bookingId}`);
-      console.log(`🎯 URL: ${API_URL}/bookings/${bookingId}/complete`);
+      console.log(`🎯 URL: ${url}`);
       
-      const response = await fetch(`${API_URL}/bookings/${bookingId}/complete`, {
+      const response = await fetch(url, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

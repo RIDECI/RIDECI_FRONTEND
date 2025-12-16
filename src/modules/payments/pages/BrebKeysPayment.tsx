@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { ArrowLeft, Key } from 'lucide-react';
 import { BrebKeysHeader } from '../components/BrebKeysHeader';
 import { BrebKeysList } from '../components/BrebKeysList';
 import { AddBrebKeyButton } from '../components/AddBrebKeyButton';
 import { AddBrebKeyForm } from '../components/AddBrebKeyForm';
-import { PaymentConfirmButton } from '../components/PaymentConfirmButton';
 import { useBrebKeys } from '../hooks/useBrebKeys';
-import { api } from "../utils/api";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useCompleteBooking } from '../../bookings/hooks/useCompleteBooking';
+import { useToast } from '@/components/ToastContext';
 
 export const BrebKeysPayment: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { bookingId } = useParams();
+  const paymentAmount = (location.state as any)?.amount || 6600;
+  const { completeBooking } = useCompleteBooking();
+  const { showToast } = useToast();
 
   const { 
     brebKeys, 
@@ -25,40 +30,74 @@ export const BrebKeysPayment: React.FC = () => {
   } = useBrebKeys();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [brebKey, setBrebKey] = useState('');
+  const [showConfirmForm, setShowConfirmForm] = useState(false);
 
-  /* -------------------------------------------------
-        🔵 Confirmar pago con BreB (crea transacción)
-  ---------------------------------------------------*/
+  const handleShowConfirmForm = () => {
+    if (!selectedKeyId) {
+      alert('Por favor selecciona una llave BreB');
+      return;
+    }
+    setShowConfirmForm(true);
+  };
+
   const handleConfirmPayment = async () => {
-    if (!selectedKeyId) return;
+    if (!brebKey.trim()) {
+      alert('Por favor ingresa tu llave BreB');
+      return;
+    }
 
     try {
       setIsProcessing(true);
 
-      console.log("Creando pago BREB con:", {
+      console.log("🔄 Procesando pago MOCK con BreB:", {
         bookingId,
-        keyId: selectedKeyId
+        keyId: selectedKeyId,
+        brebKey
       });
 
-      // 🔹 cuerpo EXACTO que pide tu backend
-      const body = {
-        bookingId: bookingId || "BKG-001",
+      // Importar el servicio de almacenamiento mock
+      const { createTransaction } = await import('../services/mockPaymentStorage');
+      
+      // Crear transacción mock en localStorage
+      const transaction = createTransaction({
+        bookingId: bookingId || "BKG-TEST-001",
         passengerId: "USR-200",
-        amount: 20000,
-        paymentMethod: "BRE_B_key",
-        extra: selectedKeyId,
-        receiptCode: `RCPT-${Date.now()}`
-      };
+        amount: paymentAmount,
+        paymentMethod: "BRE_B_KEY",
+        extra: `BreB Key: ${brebKey}`,
+        receiptCode: `RCPT-${Date.now()}`,
+      });
 
-      const res = await api.post("/payments/create", body);
+      console.log("✅ Transacción mock creada:", transaction);
 
-      // backend retorna TransactionResponse
-      const txId = res.data.id;
+      // Simular delay de procesamiento
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      navigate(`/payment/success/${txId}`);
+      // Completar la reserva en el backend
+      if (bookingId) {
+        console.log('🔄 Completando reserva en backend...');
+        const success = await completeBooking(bookingId);
+        if (success) {
+          console.log('✅ Reserva completada exitosamente');
+          showToast('Pago realizado y viaje completado', 'success');
+        } else {
+          console.warn('⚠️ No se pudo completar la reserva, pero el pago se registró');
+          showToast('Pago realizado, pero hubo un problema al actualizar la reserva', 'error');
+        }
+      }
+
+      navigate(`/app/payment/success/${transaction.id}`, {
+        state: { 
+          transaction: {
+            ...transaction,
+            currency: 'COP',
+          }
+        }
+      });
 
     } catch (err) {
-      console.error("❌ Error en pago BREB:", err);
+      console.error("❌ Error al procesar pago:", err);
       alert("Error procesando pago. Intenta nuevamente.");
     } finally {
       setIsProcessing(false);
@@ -99,13 +138,66 @@ export const BrebKeysPayment: React.FC = () => {
         />
       )}
 
-      <div className="mt-8">
-        <PaymentConfirmButton
-          disabled={!selectedKeyId}
-          isLoading={isProcessing}
-          onConfirm={handleConfirmPayment}
-        />
-      </div>
+      {!showConfirmForm ? (
+        <div className="mt-8">
+          <Button
+            onClick={handleShowConfirmForm}
+            disabled={!selectedKeyId}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-xl text-lg"
+          >
+            Continuar con el pago
+          </Button>
+        </div>
+      ) : (
+        <div className="mt-8 bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Key className="w-6 h-6 text-blue-600" />
+            Confirmar pago con BreB
+          </h3>
+          
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Llave BreB
+              </label>
+              <Input
+                type="text"
+                placeholder="Ingresa tu llave BreB"
+                value={brebKey}
+                onChange={(e) => setBrebKey(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold">Monto a pagar:</span>{' '}
+                <span className="text-xl font-bold text-blue-600">
+                  ${paymentAmount.toLocaleString('es-CO')} COP
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowConfirmForm(false)}
+              variant="outline"
+              className="flex-1 py-6 text-base"
+              disabled={isProcessing}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmPayment}
+              disabled={!brebKey.trim() || isProcessing}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 text-base"
+            >
+              {isProcessing ? 'Procesando...' : 'Confirmar Pago'}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

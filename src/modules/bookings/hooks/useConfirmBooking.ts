@@ -1,7 +1,5 @@
 import { useState } from "react";
-
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+import { getBookingsApiUrl } from '../utils/apiConfig';
 
 export const useConfirmBooking = () => {
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +18,12 @@ export const useConfirmBooking = () => {
     }
 
     try {
+      const baseUrl = getBookingsApiUrl();
+      const url = `${baseUrl}/${bookingId}/confirm`;
       console.log(`📝 Intentando confirmar reserva: ${bookingId}`);
-      console.log(`🎯 URL: ${API_URL}/bookings/${bookingId}/confirm`);
+      console.log(`🎯 URL: ${url}`);
       
-      const response = await fetch(`${API_URL}/bookings/${bookingId}/confirm`, {
+      const response = await fetch(url, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

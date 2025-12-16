@@ -1,7 +1,5 @@
 import { useState } from "react";
-
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+import { getBookingsApiUrl } from '../utils/apiConfig';
 
 export const useCancelBooking = () => {
   const [error, setError] = useState<string | null>(null);
@@ -20,10 +18,12 @@ export const useCancelBooking = () => {
     }
 
     try {
+      const baseUrl = getBookingsApiUrl();
+      const url = `${baseUrl}/${bookingId}`;
       console.log(`📝 Intentando cancelar reserva: ${bookingId}`);
-      console.log(`🎯 URL: ${API_URL}/bookings/${bookingId}`);
+      console.log(`🎯 URL: ${url}`);
       
-      const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+      const response = await fetch(url, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

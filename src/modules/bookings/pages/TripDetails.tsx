@@ -67,8 +67,10 @@ export function TripDetails() {
       console.log('✅ Reserva creada en Poseidon:', bookingResponse);
       
       // 2. Actualizar los cupos disponibles en el backend de Nemesis
-      console.log('🔄 Actualizando cupos en backend Nemesis...');
-      const updateResult = await updateSlots(tripDetails.id, 1);
+      const newAvailableSlots = tripDetails.trip.availableSeats - bookingData.reservedSeats;
+      console.log(`🔄 Actualizando cupos en backend Nemesis: ${tripDetails.trip.availableSeats} → ${newAvailableSlots}`);
+      
+      const updateResult = await updateSlots(tripDetails.id, newAvailableSlots);
       
       if (!updateResult.success) {
         console.error('⚠️ Error al actualizar cupos:', updateResult.error);

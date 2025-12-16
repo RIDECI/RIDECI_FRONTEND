@@ -126,21 +126,17 @@ export function BookingDetails() {
     }
   };
 
-  const handleComplete = async () => {
-    if (!bookingId) return;
+  const handleComplete = () => {
+    if (!bookingId || !bookingData) return;
     
-    try {
-      const success = await completeBooking(bookingId);
-      if (success) {
-        showToast('Viaje completado exitosamente', 'success');
-        setTimeout(() => navigate('/app/myTrips'), 1000);
-      } else {
-        showToast(completeError || 'Error al completar el viaje', 'error');
+    // Redirigir a la página de pago
+    navigate(`/app/payment/confirm/${bookingId}`, {
+      state: {
+        bookingData,
+        travelData,
+        driverData,
       }
-    } catch (error) {
-      console.error('Error al completar viaje:', error);
-      showToast('Error al completar el viaje', 'error');
-    }
+    });
   };
 
   const handleCancelClick = () => {
@@ -376,26 +372,15 @@ export function BookingDetails() {
             </>
           )}
           
-          {/* Terminar viaje and Cancelar buttons - only for Confirmado */}
+          {/* Terminar viaje button - only for Confirmado */}
           {bookingData.status === 'CONFIRMED' && (
-            <>
-              <button
-                onClick={handleComplete}
-                disabled={isCompleting}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
-              >
-                <Flag className="w-5 h-5" />
-                {isCompleting ? 'Terminando...' : 'Terminar viaje'}
-              </button>
-              <button
-                onClick={handleCancelClick}
-                disabled={isCancelling}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
-              >
-                <X className="w-5 h-5" />
-                {isCancelling ? 'Cancelando...' : 'Cancelar reserva'}
-              </button>
-            </>
+            <button
+              onClick={handleComplete}
+              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
+            >
+              <Flag className="w-5 h-5" />
+              Terminar viaje
+            </button>
           )}
 
           {/* Para estados finales (COMPLETED o CANCELLED), no mostrar botones de acción */}

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import type { CreateBookingRequest, BookingResponse } from "../types/booking";
 import { useNavigate } from "react-router-dom";
-
-// URL del backend desplegado
-const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
+import { getBookingsApiUrl } from '../utils/apiConfig';
 
 export const useCreateBooking = () => {
   const [bookingData, setBookingData] = useState<BookingResponse | null>(null);
@@ -44,10 +42,11 @@ export const useCreateBooking = () => {
     }
 
     try {
-      console.log('📤 Enviando al backend Poseidon:', `${API_URL}/bookings`);
+      const baseUrl = getBookingsApiUrl();
+      console.log('📤 Enviando al backend Poseidon:', baseUrl);
       console.log('📦 Payload:', JSON.stringify(data, null, 2));
       
-      const response = await fetch(`${API_URL}/bookings`, {
+      const response = await fetch(baseUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
