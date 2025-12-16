@@ -1,8 +1,23 @@
-import type { AvailableTrip, TripDetails, BookingConfirmation } from '../types/Trip';
+import type { AvailableTrip, TripDetails } from '../types/Trip';
+import { 
+  saveBooking, 
+  getBookingById as getBookingFromStorage, 
+  cancelBookingById, 
+  confirmBookingById,
+  completeBookingById,
+  getBookingsByPassenger,
+  getTripAvailability,
+  reduceAvailability,
+  restoreAvailability,
+  initializeTripAvailability
+} from './mockBookingStorage';
+import type { BookingData } from './mockBookingStorage';
 
-// URL de los backends desplegados
-const TRAVELS_BASE_URL = 'https://nemesistravelmanagementbackend-production.up.railway.app'; // Para búsqueda de viajes
-const BOOKINGS_BASE_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app'; // Para reservas
+// Inicializar disponibilidad al cargar el módulo
+initializeTripAvailability();
+
+// URL del backend de reservas desplegado (no usado actualmente - todo en frontend)
+// const BOOKINGS_BASE_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
 
 export interface SearchTripsParams {
   destination?: string;
@@ -10,38 +25,122 @@ export interface SearchTripsParams {
   nearbySearch?: boolean;
 }
 
-export const searchTrips = async (params: SearchTripsParams): Promise<AvailableTrip[]> => {
+export const searchTrips = async (params?: SearchTripsParams): Promise<AvailableTrip[]> => {
   try {
-    const queryParams = new URLSearchParams();
-    
-    if (params.destination) {
-      queryParams.append('destination', params.destination);
-    }
-    
-    if (params.departureTime) {
-      queryParams.append('departureTime', params.departureTime);
-    }
-    
-    if (params.nearbySearch !== undefined) {
-      queryParams.append('nearbySearch', params.nearbySearch.toString());
-    }
-
-    const response = await fetch(
-      `${TRAVELS_BASE_URL}/travels?${queryParams}`,
+    // Datos base de los viajes mock
+    const baseMockTrips = [
       {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
+        id: '1',
+        driverName: 'Juan Pérez',
+        vehicleType: 'Chevrolet Spark',
+        rating: 4.2,
+        route: 'Portal Norte → Universidad',
+        departureTime: '07:00',
+        price: 5500,
+      },
+      {
+        id: '2',
+        driverName: 'María González',
+        vehicleType: 'Mazda CX-5',
+        rating: 4.8,
+        route: 'Centro → Aeropuerto',
+        departureTime: '15:45',
+        price: 8500,
+      },
+      {
+        id: '3',
+        driverName: 'Carlos Santana',
+        vehicleType: 'Volkswagen Nivus',
+        rating: 4.5,
+        route: 'Universidad Nacional → Portal 80',
+        departureTime: '18:30',
+        price: 6000,
+      },
+      {
+        id: '4',
+        driverName: 'Ana María López',
+        vehicleType: 'Renault Logan',
+        rating: 4.7,
+        route: 'Portal 80 → Centro',
+        departureTime: '06:30',
+        price: 4500,
+      },
+      {
+        id: '5',
+        driverName: 'Roberto Díaz',
+        vehicleType: 'Toyota Corolla',
+        rating: 4.6,
+        route: 'Suba → Universidad',
+        departureTime: '08:15',
+        price: 7000,
+      },
+      {
+        id: '6',
+        driverName: 'Laura Martínez',
+        vehicleType: 'Nissan Versa',
+        rating: 4.9,
+        route: 'Fontibón → Terminal',
+        departureTime: '09:00',
+        price: 6500,
+      },
+      {
+        id: '7',
+        driverName: 'Pedro Ramírez',
+        vehicleType: 'Kia Sportage',
+        rating: 4.4,
+        route: 'Usaquén → Centro',
+        departureTime: '07:30',
+        price: 5800,
+      },
+      {
+        id: '8',
+        driverName: 'Sofía Torres',
+        vehicleType: 'Honda City',
+        rating: 4.6,
+        route: 'Kennedy → Portal 80',
+        departureTime: '16:00',
+        price: 4800,
+      },
+      {
+        id: '9',
+        driverName: 'Miguel Ángel Castro',
+        vehicleType: 'Chevrolet Onix',
+        rating: 4.3,
+        route: 'Chapinero → Salitre',
+        departureTime: '10:15',
+        price: 5200,
+      },
+      {
+        id: '10',
+        driverName: 'Isabella Rojas',
+        vehicleType: 'Mazda 3',
+        rating: 4.8,
+        route: 'Suba → Calle 100',
+        departureTime: '14:30',
+        price: 6200,
+      },
+    ];
 
-    if (!response.ok) {
-      throw new Error(`Error al buscar viajes: ${response.statusText}`);
+    // Obtener disponibilidad actualizada para cada viaje
+    const mockTrips: AvailableTrip[] = baseMockTrips.map(trip => {
+      const availability = getTripAvailability(trip.id);
+      return {
+        ...trip,
+        availableSeats: availability?.availableSeats ?? 0,
+      };
+    });
+
+    console.log('Using mock trips data with dynamic availability');
+    
+    // Si hay parámetros de búsqueda, filtrar los viajes mock
+    if (params?.destination) {
+      const filtered = mockTrips.filter(trip => 
+        trip.route.toLowerCase().includes(params.destination!.toLowerCase())
+      );
+      return filtered.length > 0 ? filtered : mockTrips;
     }
-
-    const data: AvailableTrip[] = await response.json();
-    return data;
+    
+    return mockTrips;
   } catch (error) {
     console.error('Error en searchTrips:', error);
     throw error;
@@ -50,30 +149,356 @@ export const searchTrips = async (params: SearchTripsParams): Promise<AvailableT
 
 export const getTripDetails = async (tripId: string): Promise<TripDetails> => {
   try {
-    console.log('Fetching trip details for ID:', tripId);
-    console.log('URL:', `${TRAVELS_BASE_URL}/travels/${tripId}`);
+    console.log('Getting trip details for ID:', tripId);
     
-    const response = await fetch(
-      `${TRAVELS_BASE_URL}/travels/${tripId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
+    // Datos mock detallados que coinciden con las imágenes
+    const mockDetails: Record<string, TripDetails> = {
+      '1': {
+        id: '1',
+        driver: {
+          name: 'Juan Pérez',
+          rating: 4.2,
+          totalTrips: 145,
+          phoneNumber: '+57 312 456 7890',
+          profileImage: 'https://i.pravatar.cc/150?img=1',
+        },
+        vehicle: {
+          brand: 'Chevrolet',
+          model: 'Spark',
+          year: 2020,
+          color: 'Blanco',
+          plate: 'ABC-123',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Cra. 74 #163-33, Bogotá, Colombia',
+          destination: 'AK 45 (Autopista) #205-59, Suba, Bogotá, Colombia',
+          departureTime: '24/12/2025, 10:00 a.m.',
+          estimatedArrival: '10:30 a.m.',
+          availableSeats: 1,
+          distance: '15.2 km',
+        },
+        pricing: {
+          basePrice: 5000,
+          serviceFee: 500,
+          total: 5500,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '2': {
+        id: '2',
+        driver: {
+          name: 'María González',
+          rating: 4.8,
+          totalTrips: 320,
+          phoneNumber: '+57 315 789 1234',
+          profileImage: 'https://i.pravatar.cc/150?img=5',
+        },
+        vehicle: {
+          brand: 'Mazda',
+          model: 'CX-5',
+          year: 2022,
+          color: 'Gris',
+          plate: 'XYZ-789',
+          type: 'SUV',
+        },
+        trip: {
+          origin: 'Centro, Bogotá, Colombia',
+          destination: 'El Dorado Airport, Bogotá, Colombia',
+          departureTime: '24/12/2025, 3:45 p.m.',
+          estimatedArrival: '4:30 p.m.',
+          availableSeats: 2,
+          distance: '12.5 km',
+        },
+        pricing: {
+          basePrice: 7500,
+          serviceFee: 1000,
+          total: 8500,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '3': {
+        id: '3',
+        driver: {
+          name: 'Carlos Santana',
+          rating: 4.5,
+          totalTrips: 210,
+          phoneNumber: '+57 318 234 5678',
+          profileImage: 'https://i.pravatar.cc/150?img=3',
+        },
+        vehicle: {
+          brand: 'Volkswagen',
+          model: 'Nivus',
+          year: 2021,
+          color: 'Negro',
+          plate: 'DEF-456',
+          type: 'SUV',
+        },
+        trip: {
+          origin: 'Universidad Nacional, Bogotá, Colombia',
+          destination: 'Portal 80, Suba, Bogotá, Colombia',
+          departureTime: '24/12/2025, 6:30 p.m.',
+          estimatedArrival: '7:15 p.m.',
+          availableSeats: 3,
+          distance: '18.7 km',
+        },
+        pricing: {
+          basePrice: 5500,
+          serviceFee: 500,
+          total: 6000,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '4': {
+        id: '4',
+        driver: {
+          name: 'Ana María López',
+          rating: 4.7,
+          totalTrips: 189,
+          phoneNumber: '+57 310 987 6543',
+          profileImage: 'https://i.pravatar.cc/150?img=9',
+        },
+        vehicle: {
+          brand: 'Renault',
+          model: 'Logan',
+          year: 2019,
+          color: 'Azul',
+          plate: 'GHI-789',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Portal 80, Suba, Bogotá, Colombia',
+          destination: 'Centro, Bogotá, Colombia',
+          departureTime: '24/12/2025, 6:30 a.m.',
+          estimatedArrival: '7:15 a.m.',
+          availableSeats: 2,
+          distance: '16.3 km',
+        },
+        pricing: {
+          basePrice: 4000,
+          serviceFee: 500,
+          total: 4500,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '5': {
+        id: '5',
+        driver: {
+          name: 'Roberto Díaz',
+          rating: 4.6,
+          totalTrips: 267,
+          phoneNumber: '+57 316 345 6789',
+          profileImage: 'https://i.pravatar.cc/150?img=12',
+        },
+        vehicle: {
+          brand: 'Toyota',
+          model: 'Corolla',
+          year: 2023,
+          color: 'Plata',
+          plate: 'JKL-012',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Suba, Bogotá, Colombia',
+          destination: 'Universidad Nacional, Bogotá, Colombia',
+          departureTime: '24/12/2025, 8:15 a.m.',
+          estimatedArrival: '9:00 a.m.',
+          availableSeats: 1,
+          distance: '14.8 km',
+        },
+        pricing: {
+          basePrice: 6500,
+          serviceFee: 500,
+          total: 7000,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '6': {
+        id: '6',
+        driver: {
+          name: 'Laura Martínez',
+          rating: 4.9,
+          totalTrips: 340,
+          phoneNumber: '+57 320 123 4567',
+          profileImage: 'https://i.pravatar.cc/150?img=10',
+        },
+        vehicle: {
+          brand: 'Nissan',
+          model: 'Versa',
+          year: 2022,
+          color: 'Blanco',
+          plate: 'MNO-345',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Fontibón, Bogotá, Colombia',
+          destination: 'Terminal de Transporte, Bogotá, Colombia',
+          departureTime: '24/12/2025, 9:00 a.m.',
+          estimatedArrival: '9:35 a.m.',
+          availableSeats: 3,
+          distance: '10.2 km',
+        },
+        pricing: {
+          basePrice: 6000,
+          serviceFee: 500,
+          total: 6500,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '7': {
+        id: '7',
+        driver: {
+          name: 'Pedro Ramírez',
+          rating: 4.4,
+          totalTrips: 156,
+          phoneNumber: '+57 314 567 8901',
+          profileImage: 'https://i.pravatar.cc/150?img=7',
+        },
+        vehicle: {
+          brand: 'Kia',
+          model: 'Sportage',
+          year: 2021,
+          color: 'Rojo',
+          plate: 'PQR-678',
+          type: 'SUV',
+        },
+        trip: {
+          origin: 'Usaquén, Bogotá, Colombia',
+          destination: 'Centro Internacional, Bogotá, Colombia',
+          departureTime: '24/12/2025, 7:30 a.m.',
+          estimatedArrival: '8:15 a.m.',
+          availableSeats: 2,
+          distance: '13.8 km',
+        },
+        pricing: {
+          basePrice: 5300,
+          serviceFee: 500,
+          total: 5800,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '8': {
+        id: '8',
+        driver: {
+          name: 'Sofía Torres',
+          rating: 4.6,
+          totalTrips: 198,
+          phoneNumber: '+57 319 234 5678',
+          profileImage: 'https://i.pravatar.cc/150?img=16',
+        },
+        vehicle: {
+          brand: 'Honda',
+          model: 'City',
+          year: 2020,
+          color: 'Gris oscuro',
+          plate: 'STU-901',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Kennedy, Bogotá, Colombia',
+          destination: 'Portal 80, Bogotá, Colombia',
+          departureTime: '24/12/2025, 4:00 p.m.',
+          estimatedArrival: '4:40 p.m.',
+          availableSeats: 4,
+          distance: '11.5 km',
+        },
+        pricing: {
+          basePrice: 4300,
+          serviceFee: 500,
+          total: 4800,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '9': {
+        id: '9',
+        driver: {
+          name: 'Miguel Ángel Castro',
+          rating: 4.3,
+          totalTrips: 178,
+          phoneNumber: '+57 311 345 6789',
+          profileImage: 'https://i.pravatar.cc/150?img=13',
+        },
+        vehicle: {
+          brand: 'Chevrolet',
+          model: 'Onix',
+          year: 2022,
+          color: 'Azul',
+          plate: 'VWX-234',
+          type: 'Hatchback',
+        },
+        trip: {
+          origin: 'Chapinero, Bogotá, Colombia',
+          destination: 'Salitre, Bogotá, Colombia',
+          departureTime: '24/12/2025, 10:15 a.m.',
+          estimatedArrival: '10:50 a.m.',
+          availableSeats: 1,
+          distance: '8.3 km',
+        },
+        pricing: {
+          basePrice: 4700,
+          serviceFee: 500,
+          total: 5200,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+      '10': {
+        id: '10',
+        driver: {
+          name: 'Isabella Rojas',
+          rating: 4.8,
+          totalTrips: 245,
+          phoneNumber: '+57 317 890 1234',
+          profileImage: 'https://i.pravatar.cc/150?img=20',
+        },
+        vehicle: {
+          brand: 'Mazda',
+          model: '3',
+          year: 2023,
+          color: 'Plateado',
+          plate: 'YZA-567',
+          type: 'Sedán',
+        },
+        trip: {
+          origin: 'Suba Centro, Bogotá, Colombia',
+          destination: 'Calle 100, Bogotá, Colombia',
+          departureTime: '24/12/2025, 2:30 p.m.',
+          estimatedArrival: '3:10 p.m.',
+          availableSeats: 2,
+          distance: '9.7 km',
+        },
+        pricing: {
+          basePrice: 5700,
+          serviceFee: 500,
+          total: 6200,
+          currency: 'COP',
+        },
+        mapImageUrl: '/map-preview.png',
+      },
+    };
 
-    console.log('Response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      throw new Error(`Error al obtener detalles del viaje: ${response.status} ${response.statusText}`);
+    const details = mockDetails[tripId];
+    
+    if (!details) {
+      throw new Error('Viaje no encontrado');
     }
 
-    const data: TripDetails = await response.json();
-    console.log('Trip details received:', data);
-    return data;
+    // Obtener disponibilidad actualizada
+    const availability = getTripAvailability(tripId);
+    if (availability) {
+      details.trip.availableSeats = availability.availableSeats;
+    }
+
+    console.log('Trip details (mock):', details);
+    return details;
   } catch (error) {
     console.error('Error en getTripDetails:', error);
     throw error;
@@ -83,87 +508,87 @@ export const getTripDetails = async (tripId: string): Promise<TripDetails> => {
 export interface CreateBookingRequest {
   travelId: string;
   passengerId: number;
-  origin: string;
-  destination: string;
   reservedSeats: number;
   totalAmount: number;
-  status?: string;
+  status: string; // "PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"
   notes?: string;
-  bookingDate: string;
+  bookingDate: string; // ISO 8601 format
+  origin: string;
+  destination: string;
 }
 
 export interface CreateBookingResponse {
-  id: string;
+  _id: string;
   travelId: string;
   passengerId: number;
-  origin: string;
-  destination: string;
   reservedSeats: number;
   totalAmount: number;
   status: string;
-  notes: string;
+  notes?: string;
   bookingDate: string;
+  confirmationDate?: string;
   createdAt: string;
   updatedAt: string;
+  _class?: string;
+  origin: string;
+  destination: string;
 }
 
 export const createBooking = async (bookingData: CreateBookingRequest): Promise<CreateBookingResponse> => {
   try {
     console.log('Creating booking with data:', bookingData);
     
-    const response = await fetch(
-      `${BOOKINGS_BASE_URL}/bookings`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData)
-      }
-    );
-
-    console.log('Booking response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error creating booking:', errorText);
-      throw new Error(`Error al crear la reserva: ${response.status} ${response.statusText}`);
+    // Reducir disponibilidad antes de crear la reserva
+    const availabilityReduced = reduceAvailability(bookingData.travelId, bookingData.reservedSeats);
+    
+    if (!availabilityReduced) {
+      throw new Error('No hay suficientes asientos disponibles para esta reserva');
     }
-
-    const data: CreateBookingResponse = await response.json();
-    console.log('Booking created:', data);
-    return data;
+    
+    // Crear reserva usando almacenamiento local
+    const newBooking: BookingData = {
+      _id: `BOOKING-${Date.now()}`,
+      travelId: bookingData.travelId,
+      passengerId: bookingData.passengerId,
+      reservedSeats: bookingData.reservedSeats,
+      totalAmount: bookingData.totalAmount,
+      status: bookingData.status,
+      notes: bookingData.notes,
+      bookingDate: bookingData.bookingDate,
+      confirmationDate: bookingData.status === 'CONFIRMED' ? new Date().toISOString() : undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      _class: 'edu.dosw.rideci.infrastructure.persistence.entity.BookingDocument',
+      origin: bookingData.origin,
+      destination: bookingData.destination,
+    };
+    
+    // Guardar en localStorage
+    const savedBooking = saveBooking(newBooking);
+    
+    console.log('✅ Booking created and saved to localStorage:', savedBooking);
+    console.log('📉 Availability reduced for trip:', bookingData.travelId);
+    return savedBooking;
   } catch (error) {
     console.error('Error en createBooking:', error);
     throw error;
   }
 };
 
-export const getBookingById = async (bookingId: string): Promise<CreateBookingResponse> => {
+export const getBookingById = async (bookingId: string): Promise<CreateBookingResponse | null> => {
   try {
     console.log('Fetching booking details for ID:', bookingId);
     
-    const response = await fetch(
-      `${BOOKINGS_BASE_URL}/bookings/${bookingId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    console.log('Booking response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error fetching booking:', errorText);
-      throw new Error(`Error al obtener la reserva: ${response.status} ${response.statusText}`);
+    // Obtener de localStorage
+    const booking = getBookingFromStorage(bookingId);
+    
+    if (!booking) {
+      console.warn('Booking not found in localStorage:', bookingId);
+      throw new Error('Reserva no encontrada');
     }
 
-    const data: CreateBookingResponse = await response.json();
-    console.log('Booking details received:', data);
-    return data;
+    console.log('Booking details received from localStorage:', booking);
+    return booking;
   } catch (error) {
     console.error('Error en getBookingById:', error);
     throw error;
@@ -174,27 +599,11 @@ export const getMyBookings = async (passengerId: number): Promise<CreateBookingR
   try {
     console.log('Fetching bookings for passenger:', passengerId);
     
-    const response = await fetch(
-      `${BOOKINGS_BASE_URL}/bookings/passenger/${passengerId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    console.log('My bookings response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error fetching bookings:', errorText);
-      throw new Error(`Error al obtener las reservas: ${response.status} ${response.statusText}`);
-    }
-
-    const data: CreateBookingResponse[] = await response.json();
-    console.log('Bookings received:', data);
-    return data;
+    // Obtener de localStorage
+    const bookings = getBookingsByPassenger(passengerId);
+    
+    console.log('Bookings received from localStorage:', bookings);
+    return bookings;
   } catch (error) {
     console.error('Error en getMyBookings:', error);
     throw error;
@@ -205,27 +614,61 @@ export const cancelBooking = async (bookingId: string): Promise<void> => {
   try {
     console.log('Cancelling booking with ID:', bookingId);
     
-    const response = await fetch(
-      `${BOOKINGS_BASE_URL}/bookings/${bookingId}/cancel`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      }
-    );
-
-    console.log('Cancel booking response status:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error cancelling booking:', errorText);
-      throw new Error(`Error al cancelar la reserva: ${response.status} ${response.statusText}`);
+    // Primero obtener la reserva para saber cuántos asientos restaurar
+    const booking = getBookingFromStorage(bookingId);
+    
+    if (!booking) {
+      throw new Error('Reserva no encontrada.');
     }
+    
+    // Cancelar en localStorage
+    const success = cancelBookingById(bookingId);
+    
+    if (!success) {
+      throw new Error('No se pudo cancelar la reserva.');
+    }
+    
+    // Restaurar disponibilidad
+    restoreAvailability(booking.travelId, booking.reservedSeats);
 
-    console.log('Booking cancelled successfully');
+    console.log('✅ Booking cancelled successfully');
+    console.log('📈 Availability restored for trip:', booking.travelId);
   } catch (error) {
     console.error('Error en cancelBooking:', error);
+    throw error;
+  }
+};
+
+export const confirmBooking = async (bookingId: string): Promise<void> => {
+  try {
+    console.log('Confirming booking with ID:', bookingId);
+    
+    const success = confirmBookingById(bookingId);
+    
+    if (!success) {
+      throw new Error('No se pudo confirmar la reserva.');
+    }
+
+    console.log('✅ Booking confirmed successfully');
+  } catch (error) {
+    console.error('Error en confirmBooking:', error);
+    throw error;
+  }
+};
+
+export const completeBooking = async (bookingId: string): Promise<void> => {
+  try {
+    console.log('Completing booking with ID:', bookingId);
+    
+    const success = completeBookingById(bookingId);
+    
+    if (!success) {
+      throw new Error('No se pudo completar la reserva.');
+    }
+
+    console.log('✅ Booking completed successfully');
+  } catch (error) {
+    console.error('Error en completeBooking:', error);
     throw error;
   }
 };

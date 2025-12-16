@@ -1,19 +1,45 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookingConfirmedHeader } from '../components/pasajero/BookingConfirmedHeader';
 import { TripSummaryCard } from '../components/pasajero/TripSummaryCard';
 import { DriverCard } from '../components/pasajero/DriverCard';
 import { PaymentSummaryCard } from '../components/pasajero/PaymentSummaryCard';
 import { BookingActions } from '../components/pasajero/BookingActions';
-import { useBookingConfirmation } from '../hooks/useBookingConfirmation';
 import { cancelBooking } from '../services/tripsApi';
+import type { BookingConfirmation } from '../types/Trip';
+import type { CreateBookingResponse } from '../services/tripsApi';
+import type { TripDetails } from '../types/Trip';
 
 export function BookingConfirmed() {
   const navigate = useNavigate();
-  const { bookinId } = useParams<{ bookinId: string }>();
-  const { confirmationData, isLoading, error } = useBookingConfirmation(bookinId || '');
+  const location = useLocation();
+  const state = location.state as { 
+    booking: CreateBookingResponse; 
+    tripDetails: TripDetails;
+    paymentMethod: string;
+  };
+  
+  // Construir confirmationData desde el estado de navegación
+  const confirmationData: BookingConfirmation | null = state ? {
+    bookingId: state.booking._id,
+    trip: {
+      origin: state.tripDetails.trip.origin,
+      destination: state.tripDetails.trip.destination,
+      dateTime: state.tripDetails.trip.departureTime,
+    },
+    driver: {
+      name: state.tripDetails.driver.name,
+      rating: state.tripDetails.driver.rating.toString(),
+      avatar: state.tripDetails.driver.profileImage,
+    },
+    payment: {
+      total: state.booking.totalAmount,
+      currency: 'COP',
+      method: state.paymentMethod,
+      methodIcon: state.paymentMethod === 'nequi' ? '°N' : '💳',
+    }
+  } : null;
 
   const handleTrackRealTime = () => {
     // TODO: Navegar a pantalla de seguimiento en tiempo real
@@ -28,18 +54,18 @@ export function BookingConfirmed() {
   };
 
   const handleCancelBooking = async () => {
-    if (!bookinId) {
+    if (!confirmationData?.bookingId) {
       alert('Error: ID de reserva no válido');
       return;
     }
 
     if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
       try {
-        console.log('Cancelling booking:', bookinId);
-        await cancelBooking(bookinId);
+        console.log('Cancelling booking:', confirmationData.bookingId);
+        await cancelBooking(confirmationData.bookingId);
         
         alert('Reserva cancelada exitosamente');
-        navigate('/bookings');
+        navigate('/app/myTrips');
       } catch (error) {
         console.error('Error cancelling booking:', error);
         alert('Error al cancelar la reserva');
@@ -47,31 +73,20 @@ export function BookingConfirmed() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
-          <p className="text-gray-600 text-lg">Cargando confirmación de reserva...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !confirmationData) {
+  if (!confirmationData) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
             <p className="text-red-600 font-medium mb-4">
-              {error || 'No se pudo cargar la reserva'}
+              No se encontraron datos de la reserva
             </p>
             <Button
-              onClick={() => navigate('/bookings')}
+              onClick={() => navigate('/app/searchTrips')}
               variant="outline"
               className="border-red-300 text-red-600 hover:bg-red-50"
             >
-              Volver a Mis Viajes
+              Volver a buscar viajes
             </Button>
           </div>
         </div>

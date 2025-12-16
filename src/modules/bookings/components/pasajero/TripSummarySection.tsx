@@ -5,9 +5,10 @@ interface TripSummarySectionProps {
   trip: {
     origin: string;
     destination: string;
-    date: string;
     departureTime: string;
-    arrivalTime: string;
+    estimatedArrival: string;
+    availableSeats: number;
+    distance: string;
   };
 }
 
@@ -22,23 +23,27 @@ export const TripSummarySection: React.FC<TripSummarySectionProps> = ({ trip }) 
       <div className="space-y-3">
         <div className="flex justify-between">
           <span className="text-gray-600">Origen</span>
-          <span className="text-gray-900 font-medium text-right">{trip.origin}</span>
+          <span className="text-gray-900 font-medium text-right max-w-md">{trip.origin}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Destino</span>
-          <span className="text-gray-900 font-medium text-right">{trip.destination}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Fecha</span>
-          <span className="text-gray-900 font-medium">{trip.date}</span>
+          <span className="text-gray-900 font-medium text-right max-w-md">{trip.destination}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-600">Salida</span>
           <span className="text-gray-900 font-medium">{trip.departureTime}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-600">Llegada</span>
-          <span className="text-gray-900 font-medium">{trip.arrivalTime}</span>
+          <span className="text-gray-600">Llegada estimada</span>
+          <span className="text-gray-900 font-medium">{trip.estimatedArrival}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Distancia</span>
+          <span className="text-gray-900 font-medium">{trip.distance}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Cupos disponibles</span>
+          <span className="text-green-600 font-semibold">{trip.availableSeats}</span>
         </div>
       </div>
     </div>
