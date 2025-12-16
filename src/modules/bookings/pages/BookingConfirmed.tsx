@@ -18,8 +18,8 @@ export function BookingConfirmed() {
   const { showToast } = useToast();
   const { cancelBooking, isLoading: isCancelling, error: cancelError } = useCancelBooking();
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const state = location.state as { 
-    booking: CreateBookingResponse; 
+  const state = location.state as {
+    booking: CreateBookingResponse;
     tripDetails: TripDetails;
     paymentMethod: string;
   };
@@ -66,7 +66,7 @@ export function BookingConfirmed() {
 
   const confirmCancelBooking = async () => {
     setShowCancelModal(false);
-    
+
     if (!confirmationData?.bookingId) {
       console.error('❌ Error: No hay bookingId disponible');
       console.log('confirmationData:', confirmationData);
@@ -85,9 +85,6 @@ export function BookingConfirmed() {
         console.error('Error cancelling booking:', error);
         alert('Error al cancelar la reserva');
       }
-    } catch (error) {
-      console.error('❌ Error al cancelar la reserva:', error);
-      showToast('Error al cancelar la reserva', 'error');
     }
   };
 
@@ -136,7 +133,7 @@ export function BookingConfirmed() {
           onChatWithDriver={handleChatWithDriver}
           onCancelBooking={handleCancelBooking}
         />
-        
+
         {/* Botón para volver */}
         <div className="flex justify-center">
           <Button
@@ -161,7 +158,7 @@ export function BookingConfirmed() {
             >
               ✕
             </button>
-            
+
             {/* Ícono de alerta */}
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
@@ -170,7 +167,7 @@ export function BookingConfirmed() {
                 </svg>
               </div>
             </div>
-            
+
             {/* Título y descripción */}
             <h3 className="text-center text-lg font-bold text-gray-900 mb-2">
               ¿Cancelar reserva?
@@ -178,7 +175,7 @@ export function BookingConfirmed() {
             <p className="text-center text-sm text-gray-600 mb-6 px-2">
               Se cancelará tu reserva y se liberarán los cupos. ¿Estás seguro?
             </p>
-            
+
             {/* Botones */}
             <div className="flex gap-3">
               <Button

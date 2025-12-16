@@ -33,13 +33,13 @@ export function SearchTrips() {
       console.log('📍 Origin:', travels[0]?.origin);
       console.log('📍 Destiny:', travels[0]?.destiny);
     }
-    
+
     return travels
       // Mostrar TODOS los viajes, incluso sin cupos (para que se vean bloqueados)
       .map((travel: TravelBackendResponse) => {
-        const origin = travel.origin?.direction || travel.origin?.placeName || 'Origen no disponible';
-        const destination = travel.destiny?.direction || travel.destiny?.placeName || 'Destino no disponible';
-        
+        const origin = travel.origin?.direction || (travel.origin as any)?.placeName || 'Origen no disponible';
+        const destination = travel.destiny?.direction || (travel.destiny as any)?.placeName || 'Destino no disponible';
+
         return {
           id: travel.id,
           driverName: `Conductor ${travel.driverId || 'Desconocido'}`,
@@ -48,9 +48,9 @@ export function SearchTrips() {
           route: `${origin} → ${destination}`,
           origin,
           destination,
-          departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+          departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit'
           }),
           price: travel.estimatedCost,
           availableSeats: travel.availableSlots,
