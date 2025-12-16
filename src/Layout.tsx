@@ -6,7 +6,7 @@ import AppMainCard from './AppMainCard'
 export function Layout() {
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar />
+      <AppSidebar />  
       <SidebarInset className="bg-transparent">
         <AppMainCard>
           <Outlet />

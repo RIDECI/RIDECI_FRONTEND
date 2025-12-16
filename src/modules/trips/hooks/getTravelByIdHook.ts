@@ -24,7 +24,7 @@ export function useGetTravelById(travelId: string | null): UseGetTravelByIdResul
 
         try {
             const response = await fetch(
-                `https://nemesistravelmanagementbackend-production.up.railway.app/travels/${travelId}`,
+                `https://nemesistravelmanagementbackendmain-production.up.railway.app/travels/${travelId}`,
                 {
                     method: 'GET',
                     headers: {

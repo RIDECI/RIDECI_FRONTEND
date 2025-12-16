@@ -44,7 +44,7 @@ export function useUpdateTravel() {
         setError(null);
 
         try {
-            const response = await fetch(`https://nemesistravelmanagementbackend-production.up.railway.app/travels/${id}`, {
+            const response = await fetch(`https://nemesistravelmanagementbackendmain-production.up.railway.app/travels/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

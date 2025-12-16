@@ -20,7 +20,7 @@ function CardSectionTravel(){
                     <h1 className="text-3xl font-bold">Ver mis viajes</h1>
                 </div>
                 <Button 
-                    onClick={() => navigate('/travels')}
+                    onClick={() => navigate('/app/travels')}
                     className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-6"
                 >
                     Añadir viaje
@@ -114,15 +114,17 @@ function CardSectionTravel(){
                                         ${formattedCost} COP
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {trip.availableSlots > 0 
-                                            ? `${trip.availableSlots} ${trip.availableSlots === 1 ? 'cupo' : 'cupos'} disponible${trip.availableSlots === 1 ? '' : 's'}`
-                                            : 'Sin cupos'
-                                        }
+                                        {(() => {
+                                            if (trip.availableSlots === 0) return 'Sin cupos';
+                                            const cupoText = trip.availableSlots === 1 ? 'cupo' : 'cupos';
+                                            const disponibleText = trip.availableSlots === 1 ? 'disponible' : 'disponibles';
+                                            return `${trip.availableSlots} ${cupoText} ${disponibleText}`;
+                                        })()}
                                     </div>
                                 </CardContent>
                                 <CardFooter>
                                     <Button
-                                        onClick={() => navigate('/detailsOfTravel', { state: { travel: trip } })}
+                                        onClick={() => navigate('/app/detailsOfTravel', { state: { travel: trip } })}
                                         className="w-full bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg"
                                     >
                                         Ver detalles

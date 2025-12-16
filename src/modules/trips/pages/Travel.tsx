@@ -79,7 +79,7 @@ export function Travel(){
             const result = await updateTravel(travelToEdit.id, updateData);
             
             if (result.success && result.data) {
-                navigate('/detailsOfTravel', { 
+                navigate('/app/detailsOfTravel', { 
                     state: { travel: result.data } 
                 });
             } else {
@@ -101,7 +101,7 @@ export function Travel(){
             const result = await createTravel(travelData);
             
             if (result.success && result.data) {
-                navigate('/detailsOfTravel', { 
+                navigate('/app/detailsOfTravel', { 
                     state: { travel: result.data } 
                 });
             } else {
