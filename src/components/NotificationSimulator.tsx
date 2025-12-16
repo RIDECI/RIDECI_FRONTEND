@@ -37,7 +37,7 @@ export const NotificationSimulator = () => {
         };
 
         // Simulate a sequence of notifications on mount so the user sees all types
-        const timers: NodeJS.Timeout[] = [];
+        const timers: ReturnType<typeof setTimeout>[] = [];
 
         timers.push(setTimeout(() => {
             addNotification({ type: "info", title: "Bienvenido al sistema de notificaciones" });

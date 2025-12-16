@@ -23,13 +23,13 @@ export function BookingConfirmed() {
     tripDetails: TripDetails;
     paymentMethod: string;
   };
-  
+
   console.log('📋 BookingConfirmed - State:', state);
   console.log('📋 Booking ID:', state?.booking?._id);
-  
+
   // Construir confirmationData desde el estado de navegación
-  const confirmationData: BookingConfirmation | null = state && (state.booking?._id || state.booking?.id) ? {
-    bookingId: state.booking._id || state.booking.id,
+  const confirmationData: BookingConfirmation | null = state && (state.booking?._id || (state.booking as any)?.id) ? {
+    bookingId: state.booking._id || (state.booking as any).id,
     trip: {
       origin: state.tripDetails.trip.origin,
       destination: state.tripDetails.trip.destination,
@@ -74,15 +74,16 @@ export function BookingConfirmed() {
       return;
     }
 
-    try {
-      console.log('🔄 Intentando cancelar reserva:', confirmationData.bookingId);
-      const success = await cancelBooking(confirmationData.bookingId);
-      
-      if (success) {
-        showToast('Reserva cancelada exitosamente', 'success');
-        setTimeout(() => navigate('/app/myTrips'), 1000);
-      } else {
-        showToast(cancelError || 'Error al cancelar la reserva', 'error');
+    if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
+      try {
+        console.log('Cancelling booking:', confirmationData.bookingId);
+        await cancelBooking(confirmationData.bookingId);
+
+        alert('Reserva cancelada exitosamente');
+        navigate('/app/myTrips');
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        alert('Error al cancelar la reserva');
       }
     } catch (error) {
       console.error('❌ Error al cancelar la reserva:', error);

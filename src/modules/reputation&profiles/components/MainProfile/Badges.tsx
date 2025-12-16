@@ -6,9 +6,9 @@ interface BadgesProps {
   readonly profile: Profile | null;
 }
 
-function getIconForBadge(index: number): JSX.Element {
+function getIconForBadge(index: number): React.ReactNode {
   const iconIndex = index % 7;
-  
+
   switch (iconIndex) {
     case 0: return <Star />;
     case 1: return <Clock />;
@@ -24,7 +24,7 @@ function getIconForBadge(index: number): JSX.Element {
 export default function Badges({ profile }: BadgesProps) {
   // Obtener badges reales del perfil
   const profileBadges = profile?.badges || [];
-  
+
   // Si no hay badges, mostrar mensaje
   const hasBadges = profileBadges.length > 0;
 

@@ -33,7 +33,7 @@ export default function ViewAllComments() {
     const navigate = useNavigate();
 
     const [showModal, setShowModal] = useState(false);
-    const [selectedComment, setSelectedComment] = useState(null);
+    const [selectedComment, setSelectedComment] = useState<any>(null);
 
     const openModal = (comment) => {
         setSelectedComment(comment);

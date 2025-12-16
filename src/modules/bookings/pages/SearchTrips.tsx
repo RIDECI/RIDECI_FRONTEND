@@ -11,7 +11,7 @@ export function SearchTrips() {
   const navigate = useNavigate();
   const location = useLocation();
   const searchState = location.state as { date?: string; origin?: string; destination?: string };
-  
+
   const [destination, setDestination] = useState(searchState?.destination || '');
   const [departureTime, setDepartureTime] = useState(searchState?.date || '');
   const [nearbySearch, setNearbySearch] = useState(true);
@@ -65,10 +65,10 @@ export function SearchTrips() {
     }
 
     return availableTrips.filter(trip => {
-      const matchesDestination = !destination || 
+      const matchesDestination = !destination ||
         trip.route.toLowerCase().includes(destination.toLowerCase());
-      
-      const matchesTime = !departureTime || 
+
+      const matchesTime = !departureTime ||
         trip.departureTime.includes(departureTime);
 
       return matchesDestination && matchesTime;
@@ -139,14 +139,12 @@ export function SearchTrips() {
                 <label className="text-sm font-semibold text-gray-700">Búsqueda por cercanía</label>
                 <button
                   onClick={() => setNearbySearch(!nearbySearch)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors ${
-                    nearbySearch ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors ${nearbySearch ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                      nearbySearch ? 'translate-x-5' : 'translate-x-0.5'
-                    }`}
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${nearbySearch ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
                   />
                 </button>
               </div>
@@ -198,8 +196,8 @@ export function SearchTrips() {
         ) : showResults && filteredTrips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTrips.map((trip) => (
-              <AvailableTripCard 
-                key={trip.id} 
+              <AvailableTripCard
+                key={trip.id}
                 trip={trip}
                 onViewDetails={handleViewDetails}
               />

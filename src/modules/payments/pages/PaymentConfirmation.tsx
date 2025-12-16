@@ -25,7 +25,7 @@ export const PaymentConfirmation: React.FC = () => {
 
   // 🔒 BookingId seguro
   const safeBookingId = bookingId || "BKG-TEST-001";
-  
+
   console.log('💳 PaymentConfirmation - BookingId:', bookingId);
   console.log('💳 Safe BookingId:', safeBookingId);
 
@@ -45,7 +45,7 @@ export const PaymentConfirmation: React.FC = () => {
     }
 
     // Si es BreB, ir a selección de llaves
-    if (selectedMethod === 'breb') {
+    if ((selectedMethod as string) === 'breb') {
       navigate(`/app/payment/breb`, { state: { amount: paymentAmount } });
       return;
     }
@@ -71,7 +71,7 @@ export const PaymentConfirmation: React.FC = () => {
 
       // Importar el servicio de almacenamiento mock
       const { createTransaction } = await import('../services/mockPaymentStorage');
-      
+
       // Crear transacción en localStorage
       const transaction = createTransaction({
         bookingId: safeBookingId,
@@ -102,14 +102,14 @@ export const PaymentConfirmation: React.FC = () => {
 
       // Navegar a la página de éxito
       navigate(`/app/payment/success/${transaction.id}`, {
-        state: { 
+        state: {
           transaction: {
             ...transaction,
             currency: currency,
           }
         }
       });
-      
+
     } catch (error) {
       console.error('❌ Error al procesar pago:', error);
       alert('Error al procesar el pago. Intenta de nuevo.');
@@ -144,7 +144,7 @@ export const PaymentConfirmation: React.FC = () => {
             <Smartphone className="w-6 h-6 text-blue-600" />
             Confirmar pago con Nequi
           </h3>
-          
+
           <div className="space-y-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

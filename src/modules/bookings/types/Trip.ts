@@ -1,4 +1,4 @@
-export type TripStatus = 'Confirmado' | 'Confirmado' | 'Pendiente' | 'Cancelado';
+export type TripStatus = 'Confirmado' | 'Pendiente' | 'Cancelado' | 'Completado' | 'CONFIRMED' | 'PENDING' | 'CANCELLED' | 'COMPLETED';
 
 export interface Trip {
   id: string;
@@ -79,7 +79,7 @@ export interface BookingConfirmation {
     method: string;
     methodIcon: string;
   };
-  
+
 }
 export interface CompletedTrip {
   tripId: string;
