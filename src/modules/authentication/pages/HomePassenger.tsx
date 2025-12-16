@@ -1,20 +1,67 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Calendar, MapPin, Navigation, Star, ArrowRight, CheckCircle, AlertTriangle, HandCoins, Clock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useGetAllTravels } from '@/modules/trips';
+import type { User } from '@/modules/authentication/types/user';
 
 export const HomePassenger: React.FC = () => {
     const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState('');
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
+    const [driversInfo, setDriversInfo] = useState<Record<number, User>>({});
+    const fetchedDriverIds = useRef<Set<number>>(new Set());
     
     // Obtener todos los viajes desde el API
     const { travels, loading: loadingTravels, error: errorTravels } = useGetAllTravels();
 
-    // Imágenes mock para los conductores
+    // Obtener información de conductores
+    useEffect(() => {
+        const fetchDriversInfo = async () => {
+            if (!travels || travels.length === 0) return;
+
+            const driverIds = new Set<number>();
+            travels.forEach(travel => {
+                const id = travel.driverId || travel.organizerId;
+                if (id && !fetchedDriverIds.current.has(id)) {
+                    driverIds.add(id);
+                }
+            });
+
+            if (driverIds.size === 0) return;
+
+            const driversData: Record<number, User> = { ...driversInfo };
+            
+            await Promise.all(
+                Array.from(driverIds).map(async (driverId) => {
+                    try {
+                        const response = await fetch(
+                            `https://kratosusermanagementbackend-production.up.railway.app/users/${driverId}`,
+                            {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            const user: User = await response.json();
+                            driversData[driverId] = user;
+                            fetchedDriverIds.current.add(driverId);
+                        }
+                    } catch (err) {
+                        console.error(`Error fetching driver ${driverId}:`, err);
+                    }
+                })
+            );
+
+            setDriversInfo(driversData);
+        };
+
+        fetchDriversInfo();
+    }, [travels?.length]);
+
     const mockDriverImages = [
         'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
@@ -23,7 +70,6 @@ export const HomePassenger: React.FC = () => {
         'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop'
     ];
 
-    // Transformar los viajes del backend a formato de ofertas
     const travelOffers = useMemo(() => {
         if (!travels || travels.length === 0) return [];
 
@@ -45,10 +91,32 @@ export const HomePassenger: React.FC = () => {
                     statusColor = 'bg-yellow-100 text-yellow-700';
                 }
 
+                // Obtener información del conductor
+                const driverId = travel.driverId || travel.organizerId || 0;
+                const driverInfo = driversInfo[driverId];
+                
+                // Si es el conductor actual y no se pudo cargar desde el API, usar datos del localStorage
+                const currentUserId = localStorage.getItem('userId');
+                const userName = localStorage.getItem('userName');
+                const userEmail = localStorage.getItem('userEmail');
+                let driverName = driverInfo?.name || `Conductor ${driverId}`;
+                
+                if (driverId.toString() === currentUserId && !driverInfo) {
+                    // Priorizar nombre del JWT, luego email
+                    if (userName) {
+                        driverName = userName;
+                    } else if (userEmail) {
+                        driverName = userEmail.split('@')[0];
+                    }
+                }
+                
+                // Debug log
+                console.log(`Travel ${travel.id} - driverId: ${driverId}, driverInfo:`, driverInfo, 'name:', driverName);
+
                 return {
                     id: travel.id,
-                    driverId: travel.driverId || travel.organizerId || 0,
-                    driver: `Conductor ${travel.driverId || travel.organizerId || 'Desconocido'}`,
+                    driverId: driverId,
+                    driver: driverName,
                     image: mockDriverImages[index % mockDriverImages.length],
                     rating: (4.0 + Math.random() * 1.0).toFixed(1), // Rating mock entre 4.0 y 5.0
                     carType: 'Vehículo particular',
@@ -62,7 +130,7 @@ export const HomePassenger: React.FC = () => {
                 };
             })
             .sort((a, b) => a.availableSeats - b.availableSeats); // Ordenar por urgencia
-    }, [travels]);
+    }, [travels, driversInfo]);
 
     // Usar ofertas reales o mostrar mensaje de carga
     const sortedOffers = travelOffers.length > 0 ? travelOffers.slice(0, 6) : [];
@@ -224,16 +292,18 @@ export const HomePassenger: React.FC = () => {
                                 Mira los viajes que tenemos en este momento
                             </p>
                         </div>
-                        <Button
-                            onClick={() => navigate('/app/searchTrips')}
-                            className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
-                            style={{
-                                backgroundColor: '#0B8EF5',
-                                borderRadius: '8px'
-                            }}
-                        >
-                            Más ofertas
-                        </Button>
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={() => navigate('/app/searchTrips')}
+                                className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
+                                style={{
+                                    backgroundColor: '#0B8EF5',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                Más ofertas
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Loading State */}

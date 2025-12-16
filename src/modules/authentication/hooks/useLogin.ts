@@ -53,17 +53,30 @@ export const useLogin = () => {
       console.log("Login exitoso:", result);
       console.log(result);
 
+      // Decodificar JWT para extraer el nombre del usuario
+      try {
+        const payload = JSON.parse(atob(result.accessToken.split('.')[1]));
+        console.log("JWT payload:", payload);
+
+        if (payload.name) {
+          localStorage.setItem("userName", payload.name);
+        }
+      } catch (e) {
+        console.error("Error decodificando JWT:", e);
+      }
+
       localStorage.setItem("accessToken", result.accessToken);
       localStorage.setItem("refreshToken", result.refreshToken);
       localStorage.setItem("userId", result.institutionalId.toString());
+      localStorage.setItem("userEmail", data.email); // Guardar email para referencia
 
       navigate("/pickRole");
-      
+
     } catch (err: any) {
       setError("Error de conexión con el servidor.");
       console.log("Error en la solicitud:", err.message);
     }
   };
 
-  return { authData, handleLogin , error};
+  return { authData, handleLogin, error };
 };

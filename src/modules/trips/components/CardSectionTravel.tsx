@@ -8,7 +8,8 @@ import { useGetTravelsByDriver } from "../hooks/getTravelsByDriverId";
 
 function CardSectionTravel(){
     const navigate = useNavigate();
-    const driverId = "1";
+    // Obtener el userId del usuario actual desde localStorage
+    const driverId = localStorage.getItem('userId') || '';
     const { travels, loading, error } = useGetTravelsByDriver(driverId);
     const [searchTerm, setSearchTerm] = useState('');
 
