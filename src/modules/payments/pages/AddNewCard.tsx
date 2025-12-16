@@ -28,7 +28,10 @@ export const AddNewCard: React.FC = () => {
   const handleSave = async () => {
     const success = await handleSaveCard();
     if (success) {
+      alert('✅ Tarjeta guardada exitosamente');
       navigate(`/app/payment/cards`);
+    } else {
+      alert('❌ Error al guardar la tarjeta. Verifica los datos e intenta nuevamente.');
     }
   };
 

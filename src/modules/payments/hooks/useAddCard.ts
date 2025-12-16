@@ -53,25 +53,26 @@ export const useAddCard = () => {
 
     setIsLoading(true);
     try {
-      // ⚠ TODO — Reemplaza con usuario real de sesión
+      // TODO — Reemplaza con usuario real de sesión
       const userId = "USR-200";
 
-      const payload = {
+      const { saveCard } = await import('../services/mockPaymentStorage');
+      
+      const newCard = saveCard({
         userId,
         cardHolder: formData.holderName,
         cardNumber: formData.cardNumber.replace(/\s/g, ''),
         expiration: formData.expiryDate,
         cvv: formData.cvv,
-        alias: detectBrand(formData.cardNumber) // ✔ marca automática
-      };
+        alias: detectBrand(formData.cardNumber),
+        isDefault: false,
+      });
 
-      const res = await api.post("/credit-cards", payload);
-
-      console.log("Tarjeta creada:", res.data);
+      console.log("✅ Tarjeta guardada en localStorage:", newCard);
 
       return true;
     } catch (err) {
-      console.error("Error guardando tarjeta:", err);
+      console.error("❌ Error guardando tarjeta:", err);
       return false;
     } finally {
       setIsLoading(false);

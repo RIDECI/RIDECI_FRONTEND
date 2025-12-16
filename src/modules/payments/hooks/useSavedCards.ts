@@ -13,9 +13,11 @@ export const useSavedCards = () => {
   const loadCards = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/credit-cards/user/${userId}`);
+      const { getSavedCards } = await import('../services/mockPaymentStorage');
+      
+      const cards = getSavedCards(userId);
 
-      const mapped = res.data.map((c: any) => ({
+      const mapped = cards.map((c) => ({
         id: c.id,
         lastFourDigits: c.cardNumber.slice(-4),
         expiryDate: c.expiration,
@@ -25,6 +27,7 @@ export const useSavedCards = () => {
       }));
 
       setSavedCards(mapped);
+      console.log("✅ Tarjetas cargadas desde localStorage:", mapped.length);
     } catch (err) {
       console.error("Error loading cards", err);
     } finally {
