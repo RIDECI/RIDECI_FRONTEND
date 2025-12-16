@@ -99,7 +99,7 @@ function App() {
           <Route path="detailsOfTravel" element={<DetailsOfTravel />} />
           <Route path="geolocalization" element={<Geolocalization />} />
           <Route path="homeDriver" element={<HomeDriver />} />
-          <Route path="homePassenger" element={<HomePassenger />} /> // RUTA PARA HOME PASAJERO
+          <Route path="homePassenger" element={<HomePassenger />} />
           <Route path="homeCompanion" element={<HomeCompanion />} />
           <Route path="calificationEndTrip" element={<EndTripRating />} />
 
