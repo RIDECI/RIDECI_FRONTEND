@@ -33,13 +33,15 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("🟢 Frontend: LoginForm onSubmit triggered");
+    console.log("   Data:", { email, password: password ? "********" : "empty" });
     handleLogin({ email, password });
   };
 
 
   return (
-      <Card
-        className="
+    <Card
+      className="
           w-full max-w-lg
           bg-white/10
           backdrop-blur-xl
@@ -49,84 +51,84 @@ export function LoginForm({ handleLogin }: LoginFormProps) {
           text-white
           p-6
         "
-      >
-        <CardHeader>
-          <CardTitle className="text-center text-3xl font-bold">
-            Iniciar Sesión
-          </CardTitle>
-        </CardHeader>
+    >
+      <CardHeader>
+        <CardTitle className="text-center text-3xl font-bold">
+          Iniciar Sesión
+        </CardTitle>
+      </CardHeader>
 
-        <CardContent>
-          <form onSubmit={onSubmit}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <label htmlFor="email" className="text-white">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  className="
+      <CardContent>
+        <form onSubmit={onSubmit}>
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <label htmlFor="email" className="text-white">
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                className="
                     bg-black/20 
                     border border-white/20
                     text-white
                     placeholder-white
                     focus:border-white/40
                   "
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <label htmlFor="password" className="text-white">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="********"
-                  className="
-                    bg-black/20 
-                    border border-white/20
-                    text-white
-                    placeholder-white
-                    focus:border-white/40
-                  "
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-center">
-                <Button type="submit" className="submit-button">
-                  Entrar
-                </Button>
-              </div>
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
-          </form>
-        </CardContent>
 
-        <CardFooter className="card-footer">
-          <div className="flex flex-col justify-center items-center gap-1">
-            <CardAction className="w-full flex justify-center">
-              <Button
-                variant="link"
-                className="text-white"
-                onClick={toRegister}
-              >
-                Registrarse
-              </Button>
-            </CardAction>
+            <div className="grid gap-2">
+              <label htmlFor="password" className="text-white">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="********"
+                className="
+                    bg-black/20 
+                    border border-white/20
+                    text-white
+                    placeholder-white
+                    focus:border-white/40
+                  "
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-            <CardAction>
-              <Button variant="link" className="text-white" onClick={toForgotPassword}>
-                ¿Olvidaste la contraseña?
+            <div className="flex justify-center">
+              <Button type="submit" className="submit-button">
+                Entrar
               </Button>
-            </CardAction>
+            </div>
           </div>
-        </CardFooter>
-      </Card>
+        </form>
+      </CardContent>
+
+      <CardFooter className="card-footer">
+        <div className="flex flex-col justify-center items-center gap-1">
+          <CardAction className="w-full flex justify-center">
+            <Button
+              variant="link"
+              className="text-white"
+              onClick={toRegister}
+            >
+              Registrarse
+            </Button>
+          </CardAction>
+
+          <CardAction>
+            <Button variant="link" className="text-white" onClick={toForgotPassword}>
+              ¿Olvidaste la contraseña?
+            </Button>
+          </CardAction>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
