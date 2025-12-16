@@ -88,6 +88,8 @@ function App() {
           <Route index element={<Home />} />
           <Route path="home" element={<Home />} />
           <Route path="statistics" element={<Statistics />} />
+          <Route path="statistics/report-download" element={<ReportDownload />} />
+          <Route path="statistics/general" element={<GeneralStatistics />} />
           <Route path="updateProfile" element={<UpdateProfile />} />
           <Route path="profile" element={<Profile />} />
           <Route path="tripHistory" element={<TripHistory />} />
