@@ -22,7 +22,7 @@ export const useConfirmBooking = () => {
       const url = `${baseUrl}/${bookingId}/confirm`;
       console.log(`📝 Intentando confirmar reserva: ${bookingId}`);
       console.log(`🎯 URL: ${url}`);
-      
+
       const response = await fetch(url, {
         method: "PATCH",
         headers: {
@@ -36,15 +36,15 @@ export const useConfirmBooking = () => {
         const errorText = await response.text();
         console.error(`❌ Error del servidor - Status: ${response.status}`);
         console.error(`❌ Response body:`, errorText);
-        
+
         let errorData = null;
         try {
           errorData = JSON.parse(errorText);
         } catch (e) {
           // No es JSON
         }
-        
-        const errorMsg = errorData?.message || errorText || `Error ${response.status}: ${response.statusText}`;
+
+        const errorMsg = (errorData as any)?.message || errorText || `Error ${response.status}: ${response.statusText}`;
         console.error(`❌ Error final:`, errorMsg);
         setError(errorMsg);
         setIsLoading(false);
@@ -53,7 +53,7 @@ export const useConfirmBooking = () => {
 
       const responseText = await response.text();
       console.log(`📄 Response text:`, responseText);
-      
+
       let data = null;
       if (responseText) {
         try {
@@ -63,7 +63,7 @@ export const useConfirmBooking = () => {
           console.log(`✅ Reserva confirmada (sin JSON response)`);
         }
       }
-      
+
       setIsSuccess(true);
       setIsLoading(false);
       return true;

@@ -93,7 +93,7 @@ export const HomeCompanion: React.FC = () => {
     };
 
     const getTransportIcon = (type: string) => {
-        switch(type) {
+        switch (type) {
             case 'transmilenio':
                 return <Bus className="w-3.5 h-3.5" />;
             case 'bicicleta':
@@ -106,7 +106,7 @@ export const HomeCompanion: React.FC = () => {
     };
 
     const getTransportLabel = (type: string) => {
-        switch(type) {
+        switch (type) {
             case 'transmilenio':
                 return 'Transmilenio';
             case 'bicicleta':
@@ -150,10 +150,10 @@ export const HomeCompanion: React.FC = () => {
                                 <div className="relative">
                                     <div
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
-                                        style={{backgroundColor: '#E8F4FF'}}
-                                        onClick={() => document.getElementById('date-input-companion')?.showPicker()}
+                                        style={{ backgroundColor: '#E8F4FF' }}
+                                        onClick={() => (document.getElementById('date-input-companion') as any)?.showPicker()}
                                     >
-                                        <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
+                                        <Calendar className="w-5 h-5 text-gray-700 shrink-0" />
                                         <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Escoge la fecha
@@ -176,10 +176,10 @@ export const HomeCompanion: React.FC = () => {
                                 <div className="relative">
                                     <div
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
-                                        style={{backgroundColor: '#E8F4FF'}}
-                                        onClick={() => document.getElementById('time-input-companion')?.showPicker()}
+                                        style={{ backgroundColor: '#E8F4FF' }}
+                                        onClick={() => (document.getElementById('time-input-companion') as any)?.showPicker()}
                                     >
-                                        <Clock className="w-5 h-5 text-gray-700 shrink-0"/>
+                                        <Clock className="w-5 h-5 text-gray-700 shrink-0" />
                                         <div className="flex-1">
                                             <div className="text-xs text-gray-600 mb-1 font-medium">
                                                 Hora del encuentro
@@ -203,9 +203,9 @@ export const HomeCompanion: React.FC = () => {
                             <div className="relative">
                                 <div
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
-                                    style={{backgroundColor: '#E8F4FF'}}
+                                    style={{ backgroundColor: '#E8F4FF' }}
                                 >
-                                    <MapPin className="w-5 h-5 text-gray-700 shrink-0"/>
+                                    <MapPin className="w-5 h-5 text-gray-700 shrink-0" />
                                     <Input
                                         type="text"
                                         placeholder="Punto de encuentro"
@@ -220,9 +220,9 @@ export const HomeCompanion: React.FC = () => {
                             <div className="relative">
                                 <div
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent"
-                                    style={{backgroundColor: '#E8F4FF'}}
+                                    style={{ backgroundColor: '#E8F4FF' }}
                                 >
-                                    <Navigation className="w-5 h-5 text-gray-700 shrink-0"/>
+                                    <Navigation className="w-5 h-5 text-gray-700 shrink-0" />
                                     <Input
                                         type="text"
                                         placeholder="Destino"
@@ -285,7 +285,7 @@ export const HomeCompanion: React.FC = () => {
                             <div
                                 key={group.id}
                                 className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                                style={{backgroundColor: '#E8F4FF'}}
+                                style={{ backgroundColor: '#E8F4FF' }}
                             >
                                 <div className="flex items-start gap-3 mb-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
@@ -302,37 +302,37 @@ export const HomeCompanion: React.FC = () => {
                                             </h3>
                                             <div className="flex items-center gap-1 shrink-0">
                                                 <span className="text-xs text-gray-600">{group.rating}</span>
-                                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"/>
+                                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
                                             </div>
                                         </div>
                                         <p className="text-xs text-gray-500">Líder del grupo</p>
                                     </div>
                                     <button
                                         className="shrink-0 -mt-1 -mr-1 p-1 hover:bg-blue-200 rounded-lg transition-colors">
-                                        <ArrowRight className="w-5 h-5 text-gray-900"/>
+                                        <ArrowRight className="w-5 h-5 text-gray-900" />
                                     </button>
                                 </div>
 
                                 <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
                                     <div className="flex items-center gap-1">
-                                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                         <span className="truncate">{group.startPoint}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <Navigation className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
+                                        <Navigation className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                         <span className="truncate">{group.endPoint}</span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
                                     <div className="flex items-center gap-1.5">
-                                        <Clock className="w-3.5 h-3.5"/>
+                                        <Clock className="w-3.5 h-3.5" />
                                         <span>{group.time}</span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xl font-bold" style={{color: '#0B8EF5'}}>
+                                    <span className="text-xl font-bold" style={{ color: '#0B8EF5' }}>
                                         {group.price}
                                     </span>
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${group.statusColor}`}>
@@ -374,7 +374,7 @@ export const HomeCompanion: React.FC = () => {
                                     className="flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-200 bg-white hover:shadow-md transition-shadow cursor-pointer"
                                 >
                                     <div className="shrink-0">
-                                        <IconComponent className={`w-8 h-8 ${notification.iconColor}`}/>
+                                        <IconComponent className={`w-8 h-8 ${notification.iconColor}`} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-gray-900 font-medium">

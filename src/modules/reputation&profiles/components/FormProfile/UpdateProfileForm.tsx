@@ -23,7 +23,7 @@ export default function UpdateProfileForm() {
     phoneNumber: "",
     ratings: [] as string[],
     badges: [] as string[],
-    profileType: profile.profileType,
+    profileType: profile?.profileType || 'NOT_DEFINED',
     reputation: { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
     identificationType: "CC" as const,
     identificationNumber: "",
@@ -47,7 +47,7 @@ export default function UpdateProfileForm() {
   useEffect(() => {
     if (profile) {
       console.log('Perfil cargado:', profile);
-      
+
       // Convertir birthDate a formato YYYY-MM-DD para el input date
       let birthDateStr = "";
       if (profile.birthDate) {
@@ -73,7 +73,7 @@ export default function UpdateProfileForm() {
         semester: "",
         program: "",
       };
-      
+
       console.log('Formulario actualizado con:', newFormData);
       setFormData(newFormData);
       setPhoto(profile.profilePictureUrl || null);

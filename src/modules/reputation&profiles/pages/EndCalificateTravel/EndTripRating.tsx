@@ -53,7 +53,7 @@ export default function EndTripRating() {
               id={p.id}
               avatarUrl={p.avatar}
               onRate={(r) => console.log(`Rating de ${p.name}:`, r)}
-              onReport={() => alert(`Reportando a ${p.name}`)}
+
             />
           ))}
         </div>

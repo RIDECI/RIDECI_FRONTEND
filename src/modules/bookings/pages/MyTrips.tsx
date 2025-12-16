@@ -8,7 +8,7 @@ import { useGetBookingsByPassenger } from '../hooks/useGetBookingsByPassenger';
 export function MyTrips() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'scheduled' | 'history'>('scheduled');
-  
+
   // Obtener reservas del backend - TODO: usar ID real del usuario logueado
   const { bookingsData, isLoading, error, refetch } = useGetBookingsByPassenger(123);
 
@@ -23,21 +23,21 @@ export function MyTrips() {
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      let dateStr = bookingDate.toLocaleDateString('es-ES', { 
-        day: 'numeric', 
-        month: 'short' 
+
+      let dateStr = bookingDate.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short'
       });
-      
+
       if (bookingDate.toDateString() === today.toDateString()) {
         dateStr = 'Hoy';
       } else if (bookingDate.toDateString() === tomorrow.toDateString()) {
         dateStr = 'Mañana';
       }
-      
-      const timeStr = bookingDate.toLocaleTimeString('es-ES', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+
+      const timeStr = bookingDate.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
 
       return {
@@ -54,6 +54,8 @@ export function MyTrips() {
         passengers: booking.reservedSeats,
         price: booking.totalAmount,
         status: booking.status as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED',
+        route: `${booking.origin} → ${booking.destination}`,
+        statusColor: booking.status === 'CONFIRMED' ? 'green' : booking.status === 'CANCELLED' ? 'red' : 'yellow',
       };
     });
 
@@ -116,7 +118,7 @@ export function MyTrips() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Mis Viajes</h1>
-        <button 
+        <button
           onClick={() => navigate('/bookings/search')}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
@@ -131,11 +133,10 @@ export function MyTrips() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`pb-3 font-medium text-base transition-colors ${
-              activeTab === tab.id
+            className={`pb-3 font-medium text-base transition-colors ${activeTab === tab.id
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             {tab.label}
           </button>

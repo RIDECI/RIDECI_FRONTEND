@@ -14,18 +14,18 @@ import type { TripDetails } from '../types/Trip';
 export function BookingConfirmed() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { 
-    booking: CreateBookingResponse; 
+  const state = location.state as {
+    booking: CreateBookingResponse;
     tripDetails: TripDetails;
     paymentMethod: string;
   };
-  
+
   console.log('📋 BookingConfirmed - State:', state);
   console.log('📋 Booking ID:', state?.booking?._id);
-  
+
   // Construir confirmationData desde el estado de navegación
-  const confirmationData: BookingConfirmation | null = state && (state.booking?._id || state.booking?.id) ? {
-    bookingId: state.booking._id || state.booking.id,
+  const confirmationData: BookingConfirmation | null = state && (state.booking?._id || (state.booking as any)?.id) ? {
+    bookingId: state.booking._id || (state.booking as any).id,
     trip: {
       origin: state.tripDetails.trip.origin,
       destination: state.tripDetails.trip.destination,
@@ -66,7 +66,7 @@ export function BookingConfirmed() {
       try {
         console.log('Cancelling booking:', confirmationData.bookingId);
         await cancelBooking(confirmationData.bookingId);
-        
+
         alert('Reserva cancelada exitosamente');
         navigate('/app/myTrips');
       } catch (error) {
