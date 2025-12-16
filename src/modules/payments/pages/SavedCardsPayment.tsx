@@ -46,7 +46,7 @@ export const SavedCardsPayment: React.FC = () => {
       const txId = res.data.id; // Backend retorna TransactionResponse
 
       // 🔹 Mantener tu flujo EXACTO (ir a success)
-      navigate(`/payment/success/${txId}`);
+      navigate(`/app/payment/success/${txId}`);
 
     } catch (err) {
       console.error("❌ Error creando pago:", err);

@@ -43,8 +43,8 @@ export const PaymentSuccessDetailed: React.FC = () => {
       />
 
       <PaymentSuccessActions
-        onGoToHistory={() => navigate("/payment/history")}
-        onGoToHome={() => navigate("/home")}
+        onGoToHistory={() => navigate("/app/payment/history")}
+        onGoToHome={() => navigate("/app/myTrips")}
       />
     </div>
   );

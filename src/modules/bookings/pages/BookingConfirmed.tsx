@@ -112,7 +112,19 @@ export function BookingConfirmed() {
       </div>
 
       {/* Actions */}
-      <div className="mt-8">
+      <div className="mt-8 space-y-4">
+        {/* Botón principal: Proceder al pago */}
+        <div className="flex justify-center">
+          <Button
+            onClick={() => navigate(`/app/payment/confirm/${confirmationData.bookingId}`)}
+            className="w-full max-w-md bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg font-semibold"
+            size="lg"
+          >
+            💳 Proceder al pago
+          </Button>
+        </div>
+
+        {/* Acciones secundarias */}
         <BookingActions
           onTrackRealTime={handleTrackRealTime}
           onChatWithDriver={handleChatWithDriver}

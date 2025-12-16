@@ -37,6 +37,14 @@ import { MyTrips } from "./modules/bookings/pages/MyTrips";
 import { BookingConfirmed } from "./modules/bookings/pages/BookingConfirmed";
 import { TripCompleted } from "./modules/bookings/pages/TripCompleted";
 
+/* ------------------ Payments ------------------ */
+import { PaymentConfirmation } from "./modules/payments/pages/PaymentConfirmation";
+import { SavedCardsPayment } from "./modules/payments/pages/SavedCardsPayment";
+import { AddNewCard } from "./modules/payments/pages/AddNewCard";
+import { BrebKeysPayment } from "./modules/payments/pages/BrebKeysPayment";
+import { PaymentSuccessDetailed } from "./modules/payments/pages/PaymentSuccessDetailed";
+import { PaymentHistory } from "./modules/payments/pages/PaymentHistory";
+
 /* ------------------ Admin ------------------ */
 import AdminLayout from "./modules/administration/AdminLayout";
 import AdminHome from "./modules/administration/pages/AdminHome";
@@ -100,6 +108,14 @@ function App() {
           <Route path="myTrips" element={<MyTrips />} />
           <Route path="bookingConfirmed" element={<BookingConfirmed />} />
           <Route path="tripCompleted" element={<TripCompleted />} />
+
+          {/* Rutas de Payments */}
+          <Route path="payment/confirm/:bookingId" element={<PaymentConfirmation />} />
+          <Route path="payment/cards" element={<SavedCardsPayment />} />
+          <Route path="payment/cards/new" element={<AddNewCard />} />
+          <Route path="payment/breb/:bookingId" element={<BrebKeysPayment />} />
+          <Route path="payment/success/:paymentId" element={<PaymentSuccessDetailed />} />
+          <Route path="payment/history" element={<PaymentHistory />} />
 
           {/* Rutas de Alerts */}
           <Route path="alerts" element={<Alerts />} />

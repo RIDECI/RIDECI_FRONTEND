@@ -22,7 +22,7 @@ export const PaymentConfirmation: React.FC = () => {
 
     /* ================= CARD ================= */
     if (selectedMethod === 'card') {
-      navigate(`/payment/cards`);
+      navigate(`/app/payment/cards`);
       return;
     }
 
@@ -34,7 +34,7 @@ export const PaymentConfirmation: React.FC = () => {
         type: "BRE_B_key"
       });
 
-      navigate(`/payment/breb/${safeBookingId}`);
+      navigate(`/app/payment/breb/${safeBookingId}`);
       return;
     }
 
@@ -56,7 +56,7 @@ export const PaymentConfirmation: React.FC = () => {
       };
 
       const resTx = await api.post("/payments/create", txBody);
-      navigate(`/payment/success/${resTx.data.id}`);
+      navigate(`/app/payment/success/${resTx.data.id}`);
       return;
     }
 
@@ -78,7 +78,7 @@ export const PaymentConfirmation: React.FC = () => {
       };
 
       const resTx = await api.post("/payments/create", txBody);
-      navigate(`/payment/success/${resTx.data.id}`);
+      navigate(`/app/payment/success/${resTx.data.id}`);
       return;
     }
   };
