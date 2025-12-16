@@ -1,29 +1,27 @@
-import { MapPin, LocateFixed, CircleDollarSign, Calendar} from "lucide-react"
+import { MapPin, LocateFixed, CircleDollarSign, Calendar } from "lucide-react"
 
 interface CardMapComponentProps {
   origin: string;
   destination: string;
-  departureDate: string;
-  departureTime: string;
+  departureDateAndTime: string;
   estimatedCost: string;
   onOriginChange: (value: string) => void;
   onDestinationChange: (value: string) => void;
   onDateChange: (value: string) => void;
-  onTimeChange: (value: string) => void;
   onCostChange: (value: string) => void;
 }
 
 const CardMapComponent = ({
   origin,
   destination,
-  departureDate,
+  departureDateAndTime,
   estimatedCost,
   onOriginChange,
   onDestinationChange,
   onDateChange,
   onCostChange
 }: CardMapComponentProps) => {
-  
+
   const handleCostChange = (value: string) => {
     const numericValue = value.replaceAll(/\D/g, '');
     const formatted = numericValue.replaceAll(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -49,10 +47,10 @@ const CardMapComponent = ({
     },
     {
       id: 'date',
-      placeholder: 'Fecha de Salida',
+      placeholder: 'Fecha y Hora de Salida',
       type: 'datetime-local',
       icon: Calendar,
-      value: departureDate,
+      value: departureDateAndTime,
       onChange: onDateChange
     },
 
@@ -72,8 +70,8 @@ const CardMapComponent = ({
         {fields.map((field) => {
           const Icon = field.icon;
           return (
-            <div 
-              key={field.id} 
+            <div
+              key={field.id}
               className="flex items-center gap-3 bg-sky-50 rounded-full px-4 py-3 transition-all duration-200 hover:bg-sky-100 border border-sky-200/50 hover:border-sky-300 hover:shadow-md"
             >
               <div className="shrink-0 text-gray-700">

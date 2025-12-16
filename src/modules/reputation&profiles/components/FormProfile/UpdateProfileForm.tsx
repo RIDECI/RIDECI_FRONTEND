@@ -23,7 +23,7 @@ export default function UpdateProfileForm() {
     phoneNumber: "",
     ratings: [] as string[],
     badges: [] as string[],
-    profileType: profile.profileType,
+    profileType: profile?.profileType || 'NOT_DEFINED',
     reputation: { wightedScores: {}, average: 0, totalRatings: 0 } as Reputation,
     identificationType: "CC" as const,
     identificationNumber: "",
@@ -47,7 +47,7 @@ export default function UpdateProfileForm() {
   useEffect(() => {
     if (profile) {
       console.log('Perfil cargado:', profile);
-      
+
       // Convertir birthDate a formato YYYY-MM-DD para el input date
       let birthDateStr = "";
       if (profile.birthDate) {
@@ -73,7 +73,7 @@ export default function UpdateProfileForm() {
         semester: "",
         program: "",
       };
-      
+
       console.log('Formulario actualizado con:', newFormData);
       setFormData(newFormData);
       setPhoto(profile.profilePictureUrl || null);
@@ -87,6 +87,20 @@ export default function UpdateProfileForm() {
     }));
   };
 
+  const handlePhotoChange = (file: File | null) => {
+    if (file) {
+      // Convertir la imagen a base64 para poder guardarla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPhoto(base64String);
+        // También guardar en localStorage para persistencia
+        localStorage.setItem('profilePictureUrl', base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleConfirm = async () => {
     const profileData = {
       ...formData,
@@ -97,6 +111,10 @@ export default function UpdateProfileForm() {
     const response = await updateProfile(formData.id.toString(), profileData);
 
     if (response.success) {
+      // Guardar la imagen actualizada en localStorage
+      if (photo) {
+        localStorage.setItem('profilePictureUrl', photo);
+      }
       navigate("/app/profile");
     }
   };
@@ -135,7 +153,7 @@ export default function UpdateProfileForm() {
         <div className="flex-1 space-y-10">
           <ProfileInfo
             photo={photo}
-            onPhotoChange={(file) => setPhoto(file ? URL.createObjectURL(file) : null)}
+            onPhotoChange={handlePhotoChange}
             role={getRoleName(formData.profileType)}
             formData={formData}
             onInputChange={handleInputChange}

@@ -28,7 +28,7 @@ export function useWebSocket({
   useEffect(() => {
     if (!userId) return;
 
-    const socket = socketIOClient("http://localhost:8081", {
+    const socket = socketIOClient("https://dalton-pseudozealous-paloma.ngrok-free.dev", {
       query: { userId },
       transports: ["websocket"],
     });

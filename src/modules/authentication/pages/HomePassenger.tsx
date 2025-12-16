@@ -1,58 +1,208 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Calendar, MapPin, Navigation, Star, ArrowRight, CheckCircle, AlertTriangle, HandCoins, Clock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
+import { useGetAllTravels } from '@/modules/trips';
+import type { User } from '@/modules/authentication/types/user';
+import { useGlobalNotifications } from '@/context/GlobalNotificationContext';
 
 export const HomePassenger: React.FC = () => {
+    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState('');
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
+    const [driversInfo, setDriversInfo] = useState<Record<number, User>>({});
+    const fetchedDriverIds = useRef<Set<number>>(new Set());
+    
+    // Obtener todos los viajes desde el API
+    const { travels, loading: loadingTravels, error: errorTravels, refetch: refetchTravels } = useGetAllTravels();
 
-    // Ofertas de viaje disponibles
-    const allMockOffers = [
-        {
-            id: 1,
-            driver: 'Carlos Santana',
-            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
-            rating: 4.5,
-            carType: 'Volkswagen Nivus',
-            startPoint: 'Universidad Nacional',
-            endPoint: 'Portal 80',
-            time: '18:30',
-            price: '6.000 COP',
-            availableSeats: 3,
-            statusColor: 'bg-green-100 text-green-700'
-        },
-        {
-            id: 2,
-            driver: 'María González',
-            image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-            rating: 4.8,
-            carType: 'Mazda CX-5',
-            startPoint: 'Centro',
-            endPoint: 'Aeropuerto',
-            time: '15:45',
-            price: '8.500 COP',
-            availableSeats: 2,
-            statusColor: 'bg-yellow-100 text-yellow-700'
-        },
-        {
-            id: 3,
-            driver: 'Juan Pérez',
-            image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-            rating: 4.2,
-            carType: 'Chevrolet Spark',
-            startPoint: 'Portal Norte',
-            endPoint: 'Universidad',
-            time: '07:00',
-            price: '5.500 COP',
-            availableSeats: 1,
-            statusColor: 'bg-red-100 text-red-700'
+    const { addNotification } = useGlobalNotifications();
+
+    // Refrescar viajes cuando el componente se monta o cuando se vuelve de otra página
+    useEffect(() => {
+        refetchTravels();
+        console.log('🔄 Refrescando lista de viajes...');
+
+        // Notificación de bienvenida (solo una vez por sesión)
+        const hasWelcomeNotification = sessionStorage.getItem('welcome_notification_shown');
+        if (!hasWelcomeNotification) {
+            addNotification({
+                title: '¡Bienvenido a RideCity! Nos alegra verte de nuevo.',
+                type: 'success',
+            });
+            sessionStorage.setItem('welcome_notification_shown', 'true');
         }
+    }, []);
+
+    // Obtener información de conductores
+    useEffect(() => {
+        const fetchDriversInfo = async () => {
+            if (!travels || travels.length === 0) return;
+
+            const driverIds = new Set<number>();
+            travels.forEach(travel => {
+                const id = travel.driverId || travel.organizerId;
+                if (id && !fetchedDriverIds.current.has(id)) {
+                    driverIds.add(id);
+                }
+            });
+
+            if (driverIds.size === 0) return;
+
+            const driversData: Record<number, User> = { ...driversInfo };
+            
+            await Promise.all(
+                Array.from(driverIds).map(async (driverId) => {
+                    try {
+                        const response = await fetch(
+                            `https://kratosuser-managementbackend-production.up.railway.app/users/${driverId}`,
+                            {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                            }
+                        );
+                        
+                        if (response.ok) {
+                            const user: User = await response.json();
+                            driversData[driverId] = user;
+                            fetchedDriverIds.current.add(driverId);
+                        }
+                    } catch (err) {
+                        console.error(`Error fetching driver ${driverId}:`, err);
+                    }
+                })
+            );
+
+            setDriversInfo(driversData);
+        };
+
+        fetchDriversInfo();
+    }, [travels?.length]);
+
+    const mockDriverImages = [
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop',
+        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop'
     ];
 
-    // Ordenar ofertas por cupos disponibles (menor a mayor = más urgente primero)
-    const sortedOffers = [...allMockOffers].sort((a, b) => a.availableSeats - b.availableSeats);
+    // Filtrar viajes por destino
+    const filteredTravels = useMemo(() => {
+        if (!travels || travels.length === 0) return [];
+        
+        const activeTravels = travels.filter(travel => travel.status === 'ACTIVE');
+        
+        // Si no hay destino escrito, devolver todos
+        if (!destination.trim()) return activeTravels;
+        
+        // Filtrar por destino
+        const searchTerm = destination.toLowerCase().trim();
+        return activeTravels.filter(travel => 
+            travel.destiny.direction.toLowerCase().includes(searchTerm)
+        );
+    }, [travels, destination]);
+
+    const travelOffers = useMemo(() => {
+        if (!filteredTravels || filteredTravels.length === 0) return [];
+
+        return filteredTravels
+            .map((travel, index) => {
+                // Formatear fecha y hora
+                const departureDate = new Date(travel.departureDateAndTime);
+                const time = departureDate.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+
+                // Determinar color según disponibilidad
+                let statusColor = 'bg-green-100 text-green-700';
+                if (travel.availableSlots <= 1) {
+                    statusColor = 'bg-red-100 text-red-700';
+                } else if (travel.availableSlots <= 2) {
+                    statusColor = 'bg-yellow-100 text-yellow-700';
+                }
+
+                // Obtener información del conductor
+                const driverId = travel.driverId || travel.organizerId || 0;
+                const driverInfo = driversInfo[driverId];
+                
+                // Si es el conductor actual y no se pudo cargar desde el API, usar datos del localStorage
+                const currentUserId = localStorage.getItem('userId');
+                const userName = localStorage.getItem('userName');
+                const userEmail = localStorage.getItem('userEmail');
+                let driverName = driverInfo?.name || `Conductor ${driverId}`;
+                
+                if (driverId.toString() === currentUserId && !driverInfo) {
+                    // Priorizar nombre del JWT, luego email
+                    if (userName) {
+                        driverName = userName;
+                    } else if (userEmail) {
+                        driverName = userEmail.split('@')[0];
+                    }
+                }
+                
+                // Debug log
+                console.log(`Travel ${travel.id} - driverId: ${driverId}, driverInfo:`, driverInfo, 'name:', driverName);
+
+                return {
+                    id: travel.id,
+                    driverId: driverId,
+                    driver: driverName,
+                    image: mockDriverImages[index % mockDriverImages.length],
+                    rating: (4.0 + Math.random() * 1.0).toFixed(1), // Rating mock entre 4.0 y 5.0
+                    carType: 'Vehículo particular',
+                    startPoint: travel.origin.direction,
+                    endPoint: travel.destiny.direction,
+                    time: time,
+                    price: `${travel.estimatedCost.toLocaleString('es-CO')} COP`,
+                    availableSeats: travel.availableSlots,
+                    statusColor: statusColor,
+                    fullDate: departureDate
+                };
+            })
+            .sort((a, b) => a.availableSeats - b.availableSeats); // Ordenar por urgencia
+    }, [filteredTravels, driversInfo]);
+
+    // Usar ofertas reales o mostrar mensaje de carga
+    const sortedOffers = travelOffers.length > 0 ? travelOffers.slice(0, 6) : [];
+    
+    // Determinar si mostrar mensaje de recomendación
+    const showRecommendationMessage = destination.trim() && filteredTravels.length === 0 && travels.length > 0;
+    
+    // Si hay búsqueda pero no resultados, mostrar todos los viajes disponibles
+    const displayOffers = showRecommendationMessage 
+        ? travels
+            .filter(travel => travel.status === 'ACTIVE')
+            .slice(0, 6)
+            .map((travel, index) => {
+                const departureDate = new Date(travel.departureDateAndTime);
+                const time = departureDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                let statusColor = 'bg-green-100 text-green-700';
+                if (travel.availableSlots <= 1) statusColor = 'bg-red-100 text-red-700';
+                else if (travel.availableSlots <= 2) statusColor = 'bg-yellow-100 text-yellow-700';
+                const driverId = travel.driverId || travel.organizerId || 0;
+                const driverInfo = driversInfo[driverId];
+                let driverName = driverInfo?.name || `Conductor ${driverId}`;
+                return {
+                    id: travel.id,
+                    driverId: driverId,
+                    driver: driverName,
+                    image: mockDriverImages[index % mockDriverImages.length],
+                    rating: (4.0 + Math.random() * 1.0).toFixed(1),
+                    carType: 'Vehículo particular',
+                    startPoint: travel.origin.direction,
+                    endPoint: travel.destiny.direction,
+                    time: time,
+                    price: `${travel.estimatedCost.toLocaleString('es-CO')} COP`,
+                    availableSeats: travel.availableSlots,
+                    statusColor: statusColor,
+                    fullDate: departureDate
+                };
+            })
+        : sortedOffers;
 
     // Notificaciones
     const notifications = [
@@ -80,10 +230,18 @@ export const HomePassenger: React.FC = () => {
     ];
 
     const handleReserve = () => {
-        console.log('Reservando viaje:', {
-            selectedDate,
-            origin,
-            destination
+        if (!selectedDate || !origin || !destination) {
+            console.log('Por favor completa todos los campos');
+            return;
+        }
+        
+        // Navegar a la página de búsqueda con los parámetros
+        navigate('/app/searchTrips', {
+            state: {
+                date: selectedDate,
+                origin,
+                destination
+            }
         });
     };
 
@@ -113,7 +271,7 @@ export const HomePassenger: React.FC = () => {
                                 <div
                                     className="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent cursor-pointer"
                                     style={{backgroundColor: '#E8F4FF'}}
-                                    onClick={() => document.getElementById('date-input-passenger')?.showPicker()}
+                                    onClick={() => (document.getElementById('date-input-passenger') as HTMLInputElement)?.showPicker()}
                                 >
                                     <Calendar className="w-5 h-5 text-gray-700 shrink-0"/>
                                     <div className="flex-1">
@@ -198,28 +356,78 @@ export const HomePassenger: React.FC = () => {
                 <div className="mb-12">
                     <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                         <div>
-                            <h2 className="text-3xl font-bold text-gray-900 mb-1">Ofertas de viaje</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                                {showRecommendationMessage 
+                                    ? `No hay viajes disponibles para "${destination}"`
+                                    : destination.trim() && filteredTravels.length > 0
+                                        ? `Viajes hacia ${destination}`
+                                        : 'Ofertas de viaje'
+                                }
+                            </h2>
                             <p className="text-base text-gray-600">
-                                Mira los viajes que tenemos en este momento
+                                {showRecommendationMessage
+                                    ? 'Pero te recomendamos estos viajes disponibles'
+                                    : 'Mira los viajes que tenemos en este momento'
+                                }
                             </p>
                         </div>
-                        <Button
-                            className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
-                            style={{
-                                backgroundColor: '#0B8EF5',
-                                borderRadius: '8px'
-                            }}
-                        >
-                            Más ofertas
-                        </Button>
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={() => navigate('/app/searchTrips')}
+                                className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
+                                style={{
+                                    backgroundColor: '#0B8EF5',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                Más ofertas
+                            </Button>
+                        </div>
                     </div>
 
+                    {/* Loading State */}
+                    {loadingTravels && (
+                        <div className="text-center py-12">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-500"></div>
+                            <p className="mt-4 text-gray-600">Cargando ofertas de viaje...</p>
+                        </div>
+                    )}
+
+                    {/* Error State */}
+                    {errorTravels && !loadingTravels && (
+                        <div className="text-center py-12 text-red-600">
+                            <p>Error al cargar los viajes: {errorTravels}</p>
+                            <Button
+                                onClick={() => window.location.reload()}
+                                className="mt-4"
+                                style={{ backgroundColor: '#0B8EF5' }}
+                            >
+                                Reintentar
+                            </Button>
+                        </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!loadingTravels && !errorTravels && displayOffers.length === 0 && !showRecommendationMessage && (
+                        <div className="text-center py-12">
+                            <p className="text-gray-600 text-lg">No hay ofertas de viaje disponibles en este momento</p>
+                            <p className="text-gray-500 text-sm mt-2">Vuelve más tarde para ver nuevas opciones</p>
+                        </div>
+                    )}
+
                     {/* Offer Cards Grid */}
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {sortedOffers.map((offer) => (
+                    {!loadingTravels && !errorTravels && displayOffers.length > 0 && (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {displayOffers.map((offer) => {
+                                const hasAvailableSeats = offer.availableSeats > 0;
+                                return (
                             <div
                                 key={offer.id}
-                                className="rounded-2xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                                className={`rounded-2xl p-4 transition-shadow ${
+                                    hasAvailableSeats 
+                                        ? 'hover:shadow-lg cursor-pointer' 
+                                        : 'opacity-60 cursor-not-allowed'
+                                }`}
                                 style={{backgroundColor: '#E8F4FF'}}
                             >
                                 <div className="flex items-start gap-3 mb-3">
@@ -243,12 +451,18 @@ export const HomePassenger: React.FC = () => {
                                         <p className="text-xs text-gray-500">{offer.carType}</p>
                                     </div>
                                     <button
-                                        className="shrink-0 -mt-1 -mr-1 p-1 hover:bg-blue-200 rounded-lg transition-colors">
+                                        onClick={() => hasAvailableSeats && navigate(`/app/tripDetails/${offer.id}`)}
+                                        disabled={!hasAvailableSeats}
+                                        className={`shrink-0 -mt-1 -mr-1 p-1 rounded-lg transition-colors ${
+                                            hasAvailableSeats 
+                                                ? 'hover:bg-blue-200 cursor-pointer' 
+                                                : 'cursor-not-allowed opacity-50'
+                                        }`}>
                                         <ArrowRight className="w-5 h-5 text-gray-900"/>
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
+                                <div className="mb-3 text-xs text-gray-600 space-y-1">
                                     <div className="flex items-center gap-1">
                                         <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
                                         <span className="truncate">{offer.startPoint}</span>
@@ -270,14 +484,30 @@ export const HomePassenger: React.FC = () => {
                                     <span className="text-xl font-bold" style={{color: '#0B8EF5'}}>
                                         {offer.price}
                                     </span>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${offer.statusColor}`}>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+                                        offer.availableSeats === 0 
+                                            ? 'bg-red-100 text-red-600'
+                                            : offer.statusColor
+                                    }`}>
                                         <Users className="w-3.5 h-3.5"/>
-                                        {offer.availableSeats} {offer.availableSeats === 1 ? 'cupo' : 'cupos'}
+                                        {offer.availableSeats === 0 
+                                            ? 'Sin cupos' 
+                                            : `${offer.availableSeats} ${offer.availableSeats === 1 ? 'cupo' : 'cupos'}`
+                                        }
                                     </span>
                                 </div>
+                                {!hasAvailableSeats && (
+                                    <div className="mt-3 text-center">
+                                        <span className="text-xs font-medium text-red-600 bg-red-50 px-3 py-1.5 rounded-full">
+                                            ❌ Viaje completo - No disponible
+                                        </span>
+                                    </div>
+                                )}
                             </div>
-                        ))}
-                    </div>
+                            );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Últimas notificaciones */}
@@ -290,13 +520,14 @@ export const HomePassenger: React.FC = () => {
                             </p>
                         </div>
                         <Button
+                            onClick={() => navigate('/app/myTrips')}
                             className="text-white font-semibold shadow-lg hover:opacity-90 px-6 py-3"
                             style={{
                                 backgroundColor: '#0B8EF5',
                                 borderRadius: '8px'
                             }}
                         >
-                            Ver mis Notificaciones
+                            Ver mis Viajes
                         </Button>
                     </div>
 

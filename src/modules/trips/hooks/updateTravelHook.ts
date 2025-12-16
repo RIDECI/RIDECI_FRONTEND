@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import type { Location, Status, TravelType } from '../types';
+import { useGlobalNotifications } from '@/context/GlobalNotificationContext';
+
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
 
 export interface UpdateTravelRequest {
     id: string,
@@ -38,6 +42,7 @@ export interface UpdateTravelResponse {
 export function useUpdateTravel() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { addNotification } = useGlobalNotifications();
 
     const updateTravel = async (id: string, travelRequest: UpdateTravelRequest): Promise<UpdateTravelResponse> => {
         setLoading(true);
@@ -58,6 +63,11 @@ export function useUpdateTravel() {
             }
 
             const result: UpdateTravelBackendResponse = await response.json();
+
+            addNotification({
+                title: 'Viaje actualizado exitosamente',
+                type: 'success',
+            });
 
             return {
                 success: true,

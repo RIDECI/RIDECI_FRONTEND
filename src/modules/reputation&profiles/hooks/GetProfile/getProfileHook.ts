@@ -29,50 +29,65 @@ export function useGetProfile() {
         setError(null);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 300));
 
-            const currentProfile = localStorage.getItem('currentProfile');
-            console.log('Buscando perfil en localStorage:', currentProfile);
-            
-            if (currentProfile) {
-                const parsedProfile = JSON.parse(currentProfile);
-                console.log('Perfil encontrado:', parsedProfile);
-                
-                setProfile({
-                    ...parsedProfile,
-                    birthDate: new Date(parsedProfile.birthDate)
-                });
-            } else {
-                console.log('No hay perfil en localStorage, usando datos de ejemplo');
-                
-                const mockProfile: Profile = {
-                    id: parseInt(id) || 1,
-                    name: "Usuario Demo",
-                    email: "demo@rideci.com",
-                    vehicles: [],
-                    phoneNumber: "3001234567",
-                    ratings: [],
-                    badges: ["Usuario Nuevo"],
-                    profileType: "PASSENGER" as ProfileType,
-                    reputation: {
-                        wightedScores: new Map<number, number>(),
-                        average: 0,
-                        totalRatings: 0
-                    },
-                    identificationType: "CC" as IdentificationType,
-                    identificationNumber: "1234567890",
-                    address: "Calle 123",
-                    profilePictureUrl: "https://via.placeholder.com/150",
-                    birthDate: new Date('2000-01-01')
-                };
-                setProfile(mockProfile);
+            const TROYA_BASE_URL = 'https://troyareputationbackend-production.up.railway.app';
+
+            console.log(`Obteniendo perfil con userId: ${id}`);
+
+            const response = await fetch(`${TROYA_BASE_URL}/profiles/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching profile: ${response.status}`);
             }
 
-            console.log('Perfil obtenido (simulado)');
+            const profileData = await response.json();
+            console.log('Perfil obtenido del backend:', profileData);
+
+            setProfile({
+                ...profileData,
+                birthDate: profileData.birthDate ? new Date(profileData.birthDate) : new Date('2000-01-01')
+            });
+
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error getting profile';
             setError(errorMessage);
             console.error('Error obteniendo perfil:', errorMessage);
+
+            const userId = localStorage.getItem('userId');
+            const userName = localStorage.getItem('userName');
+            const userEmail = localStorage.getItem('userEmail');
+            const userPhone = localStorage.getItem('phoneNumber');
+            const userAddress = localStorage.getItem('address');
+            const identificationNumberLS = localStorage.getItem('identificationNumber') || localStorage.getItem('institutionalId');
+            const selectedProfile = localStorage.getItem('selectedProfile');
+            const userProfileType = localStorage.getItem('userProfileType');
+
+            const fallbackProfile: Profile = {
+                id: parseInt(userId || id) || 1,
+                name: userName || "Usuario",
+                email: userEmail || "usuario@rideci.com",
+                vehicles: [],
+                phoneNumber: userPhone || "3001234567",
+                ratings: [],
+                badges: [],
+                profileType: (selectedProfile || userProfileType || "NOT_DEFINED") as ProfileType,
+                reputation: {
+                    wightedScores: new Map<number, number>(),
+                    average: 0,
+                    totalRatings: 0
+                },
+                identificationType: (localStorage.getItem('identificationType') as IdentificationType) || "CC" as IdentificationType,
+                identificationNumber: identificationNumberLS || "1234567890",
+                address: userAddress || "Dirección no especificada",
+                profilePictureUrl: localStorage.getItem('profilePictureUrl') || "https://via.placeholder.com/150",
+                birthDate: new Date('2000-01-01')
+            };
+            setProfile(fallbackProfile);
         } finally {
             setLoading(false);
         }

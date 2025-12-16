@@ -1,28 +1,31 @@
 // src/modules/administration/pages/AdminHome.tsx
+/**
+ * Panel principal del administrador
+ */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CheckCircle } from "lucide-react";
-import type { Report, UserCard, PendingAction } from '../types';
-import { avatar1, mockReports } from '../utils/mockData';
-import { getSeverityColor, getStatusColor, findUserByName } from '../utils/helpers';
+import type { UserCard, PendingAction } from '../types';
+import { avatar1 } from '../utils/mockData';
 import { ErrorModal } from '../components/ErrorModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { ReportDetailsModal } from '../components/ReportDetailsModal';
 import { ActOnReportModal } from '../components/ActOnReportModal';
 import { UserDetailsModal } from '../components/UserDetailsModal';
+import { ReportsList } from '../components/ReportsList';
+import { EmergencyButton } from '../components/EmergencyButton';
 import { useAdminMetrics } from '../hooks/useAdminMetrics';
 import { useAdminUsers } from '../hooks/useAdminUsers';
+import { useReports } from '../hooks/useReports';
+import type { EnrichedReport } from '../services/reportEnrichmentService';
 
 export default function AdminHome() {
   const { metrics } = useAdminMetrics();
+  const { users, successMessage, performUserAction, getPendingDrivers, activeUsersCount } = useAdminUsers();
+  const { reports, statistics, markAsOpened } = useReports();
   
-  // Hook centralizado - ahora comparte estado con AdminUsers
-  const { users, successMessage, performUserAction, getPendingDrivers } = useAdminUsers();
-  
-  const [reports, setReports] = useState<Report[]>(mockReports);
   const [itemsPerPage, setItemsPerPage] = useState(3);
   
-  // Calcular items por página según ancho de pantalla
   useEffect(() => {
     const calc = () => {
       const w = window.innerWidth;
@@ -33,20 +36,8 @@ export default function AdminHome() {
     return () => window.removeEventListener("resize", calc);
   }, []);
 
-  // Carousel logic for reports
-  const chunks: Report[][] = [];
-  for (let i = 0; i < reports.length; i += itemsPerPage) {
-    chunks.push(reports.slice(i, i + itemsPerPage));
-  }
-  const [reportPage, setReportPage] = useState(0);
-  useEffect(() => setReportPage(0), [reports.length, itemsPerPage]);
-  const reportPrev = useCallback(() => setReportPage(p => Math.max(0, p - 1)), []);
-  const reportNext = useCallback(() => setReportPage(p => Math.min(chunks.length - 1, p + 1)), [chunks.length]);
-
-  // Conductores pendientes
   const pendingDrivers = useMemo(() => getPendingDrivers(), [getPendingDrivers]);
 
-  // Users pagination
   const [userPage, setUserPage] = useState(0);
   useEffect(() => setUserPage(0), [pendingDrivers.length, itemsPerPage]);
   
@@ -62,11 +53,10 @@ export default function AdminHome() {
   const canUserGoPrev = userPage > 0;
   const canUserGoNext = userPage < totalUserPages - 1;
 
-  // Modales
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [selectedReport, setSelectedReport] = useState<EnrichedReport | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [actModalOpen, setActModalOpen] = useState(false);
-  const [reportToAct, setReportToAct] = useState<Report | null>(null);
+  const [reportToAct, setReportToAct] = useState<EnrichedReport | null>(null);
   
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null);
   const [selectedProfileRole, setSelectedProfileRole] = useState<string>("Conductor");
@@ -77,13 +67,23 @@ export default function AdminHome() {
   const [actionLoading, setActionLoading] = useState(false);
   const [errorState, setErrorState] = useState({ open: false, title: "", message: "" });
 
-  const reporterUser = useMemo(() => findUserByName(users, reportToAct?.reporter), [reportToAct, users]);
-  const offenderUser = useMemo(() => findUserByName(users, reportToAct?.conductor), [reportToAct, users]);
+  // ✅ SIMPLIFICADO: Usar los datos ya enriquecidos del reporte
+  const reporterUser = useMemo(() => {
+    if (!reportToAct) return null;
+    // Los reportes ahora vienen con reporterUserData enriquecido
+    return reportToAct.reporterUserData || null;
+  }, [reportToAct]);
 
-  // Funciones auxiliares
-  const openReportDetails = (r: Report) => {
+  const offenderUser = useMemo(() => {
+    if (!reportToAct) return null;
+    // Los reportes ahora vienen con offenderUserData enriquecido
+    return reportToAct.offenderUserData || null;
+  }, [reportToAct]);
+
+  const openReportDetails = (r: EnrichedReport) => {
     setSelectedReport(r);
     setIsReportModalOpen(true);
+    markAsOpened(r.id);
   };
 
   const closeReportModal = () => {
@@ -91,9 +91,10 @@ export default function AdminHome() {
     setSelectedReport(null);
   };
 
-  const openActModal = (r: Report) => {
+  const openActModal = (r: EnrichedReport) => {
     setReportToAct(r);
     setActModalOpen(true);
+    markAsOpened(r.id);
   };
 
   const openUserDetails = (u: UserCard) => {
@@ -118,7 +119,7 @@ export default function AdminHome() {
     }
     setSelectedUser(user);
     setPendingAction(action);
-    if (action === "suspend_profile") setSelectedRolesToSuspend([]);
+    if (action === "suspend_profile" || action === "activate_profile") setSelectedRolesToSuspend([]);
     setConfirmOpen(true);
   };
 
@@ -134,19 +135,13 @@ export default function AdminHome() {
     setConfirmOpen(true);
   };
 
-  // Ejecutar acción confirmada
   const performAction = async () => {
     if (!pendingAction) return;
     
     setActionLoading(true);
 
-    // Manejar archivar reporte
     if (pendingAction === "archive") {
       await new Promise(r => setTimeout(r, 700));
-      const reportId = reportToAct?.id || selectedReport?.id;
-      if (reportId) {
-        setReports(prev => prev.filter(r => r.id !== reportId));
-      }
       setActionLoading(false);
       setConfirmOpen(false);
       setPendingAction(null);
@@ -155,7 +150,6 @@ export default function AdminHome() {
       return;
     }
 
-    // Para acciones de usuarios, usar el hook centralizado
     if (!selectedUser) {
       setErrorState({ open: true, title: "Error", message: "No hay usuario seleccionado." });
       setActionLoading(false);
@@ -186,7 +180,6 @@ export default function AdminHome() {
     }
   };
 
-  // Keyboard handlers
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -205,12 +198,12 @@ export default function AdminHome() {
       <header className="flex items-center justify-between p-6 bg-white border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">Panel de administrador</h1>
-          <div className="text-sm text-slate-500">Supervisa usuarios, reportes y métricas</div>
+          <div className="text-sm text-slate-500">Supervisa usuarios, reportes y métricas del sistema</div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-2xl font-bold text-blue-600">13</div>
+            <div className="text-2xl font-bold text-blue-600">{activeUsersCount}</div>
           </div>
           <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
             A
@@ -219,7 +212,6 @@ export default function AdminHome() {
       </header>
 
       <main className="p-6 w-full">
-        {/* Tarjetas de métricas principales */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <article className="rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all bg-white">
             <div className="flex items-center justify-between mb-3">
@@ -231,20 +223,22 @@ export default function AdminHome() {
               </div>
             </div>
             <div className="text-3xl font-bold text-slate-800 mb-2">{metrics.displayCompletedTrips}</div>
-            <div className="text-xs text-slate-500">Última actualización automática</div>
+            <div className="text-xs text-slate-500">Actualización automática del sistema</div>
           </article>
 
           <article className="rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all bg-white">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-semibold text-slate-700">Reportes abiertos</div>
+              <div className="text-sm font-semibold text-slate-700">Reportes activos</div>
               <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center shadow-sm">
                 <svg className="w-6 h-6 text-yellow-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                 </svg>
               </div>
             </div>
-            <div className="text-3xl font-bold text-slate-800 mb-2">{reports.filter(r => r.status === "ABIERTO" || r.status === "CRÍTICO").length}</div>
-            <div className="text-xs text-slate-500">Prioriza los incidentes críticos</div>
+            <div className="text-3xl font-bold text-slate-800 mb-2">{statistics.total}</div>
+            <div className="text-xs text-slate-500">
+              {statistics.active} pendientes • {statistics.critical} críticos
+            </div>
           </article>
 
           <article className="rounded-2xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all bg-white">
@@ -257,91 +251,26 @@ export default function AdminHome() {
               </div>
             </div>
             <div className="text-3xl font-bold text-slate-800 mb-2">{metrics.co2Saved} kg</div>
-            <div className="text-xs text-slate-500">Ahorro estimado por viajes compartidos</div>
+            <div className="text-xs text-slate-500">Impacto ambiental por viajes compartidos</div>
           </article>
         </section>
 
-        {/* Reportes Carousel */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-semibold text-gray-800">Reportes de Seguridad</h2>
-            <div className="px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
-              <span className="text-sm font-semibold text-blue-700">{reports.length} reportes</span>
-            </div>
+            <EmergencyButton 
+              onEmergencyCall={() => console.log('Emergency call initiated')}
+            />
           </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={reportPrev}
-              disabled={reportPage === 0}
-              className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all ${reportPage === 0 ? "opacity-40 cursor-not-allowed" : ""}`}
-            >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-
-            <div className="flex-1 overflow-hidden">
-              <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${reportPage * 100}%)` }}>
-                {chunks.length > 0 ? (
-                  chunks.map((chunk, i) => (
-                    <div key={i} className="min-w-full flex gap-4 px-1">
-                      {chunk.map(r => (
-                        <div key={r.id} className="flex-1 rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col" style={{ backgroundColor: "#D6E9FF", minHeight: 220 }}>
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="text-sm font-bold text-blue-800">#{r.id}</div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSeverityColor(r.severity)}`}>{r.severity}</span>
-                          </div>
-
-                          <h3 className="font-bold text-slate-900 mb-3">{r.title}</h3>
-
-                          <div className="space-y-1 text-xs mb-3 flex-1">
-                            <div className="text-slate-700">Reportado por: <span className="text-slate-900 font-medium">{r.reporter}</span></div>
-                            <div className="text-slate-700">Conductor: <span className="text-slate-900 font-medium">{r.conductor}</span></div>
-                            <div className="text-slate-700">Fecha: <span className="text-slate-900 font-medium">{r.date} - {r.time}</span></div>
-                            <div className="text-slate-700">Ruta: <span className="text-slate-900 font-medium">{r.route}</span></div>
-                            {r.amount && <div className="text-slate-700">Monto: <span className="text-slate-900 font-medium">{r.amount}</span></div>}
-                          </div>
-
-                          <div className="mb-3">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusColor(r.status)}`}>{r.status}</span>
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button onClick={() => openReportDetails(r)} className="flex-1 py-2 px-3 bg-white border border-blue-700 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm">
-                              Ver
-                            </button>
-                            <button onClick={() => openActModal(r)} className="flex-1 py-2 px-3 bg-blue-800 text-white rounded-lg hover:bg-blue-900 transition-colors font-medium text-sm">
-                              Actuar
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-
-                      {chunk.length < itemsPerPage && Array.from({ length: itemsPerPage - chunk.length }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="flex-1 opacity-0 pointer-events-none" style={{ minHeight: 220 }} />
-                      ))}
-                    </div>
-                  ))
-                ) : (
-                  <div className="min-w-full text-center py-10 text-slate-500">No hay reportes.</div>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={reportNext}
-              disabled={reportPage >= chunks.length - 1}
-              className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all ${reportPage >= chunks.length - 1 ? "opacity-40 cursor-not-allowed" : ""}`}
-            >
-              <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
-                <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
+          <ReportsList
+            onViewReport={openReportDetails}
+            onActOnReport={openActModal}
+            itemsPerPage={itemsPerPage}
+            onReportOpened={markAsOpened}
+          />
         </section>
 
-        {/* Separador */}
         <div className="my-8 flex items-center gap-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-full border border-blue-200">
@@ -353,7 +282,6 @@ export default function AdminHome() {
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
         </div>
 
-        {/* Conductores por validar */}
         <section>
           {pendingDrivers.length === 0 ? (
             <div className="text-center py-10 text-slate-500 bg-gray-50 rounded-xl border border-gray-200">
@@ -368,7 +296,7 @@ export default function AdminHome() {
               <button 
                 onClick={userPrev} 
                 disabled={!canUserGoPrev} 
-                className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all ${!canUserGoPrev ? "opacity-40 cursor-not-allowed" : ""}`}
+                className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer ${!canUserGoPrev ? "opacity-40 cursor-not-allowed" : ""}`}
               >
                 <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
                   <path d="M12 16L6 10L12 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -380,7 +308,7 @@ export default function AdminHome() {
                   <div key={u.id} className="relative rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all h-[170px] flex flex-col" style={{ backgroundColor: '#CAE8FF' }}>
                     <button
                       onClick={() => openUserDetails(u)}
-                      className="absolute top-3 right-3 px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm z-10"
+                      className="absolute top-3 right-3 px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm z-10 cursor-pointer"
                     >
                       Ver
                     </button>
@@ -398,13 +326,13 @@ export default function AdminHome() {
                     <div className="flex gap-2 mt-3">
                       <button 
                         onClick={() => { setSelectedUser(u); startConfirmFor(u, "approve"); }} 
-                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border-2 border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors shadow-sm"
+                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border-2 border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors shadow-sm cursor-pointer"
                       >
                         Aprobar
                       </button>
                       <button 
                         onClick={() => { setSelectedUser(u); startConfirmFor(u, "reject"); }} 
-                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border-2 border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors shadow-sm"
+                        className="flex-1 py-1.5 text-xs font-semibold rounded-lg border-2 border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors shadow-sm cursor-pointer"
                       >
                         Rechazar
                       </button>
@@ -416,7 +344,7 @@ export default function AdminHome() {
               <button 
                 onClick={userNext} 
                 disabled={!canUserGoNext} 
-                className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all ${!canUserGoNext ? "opacity-40 cursor-not-allowed" : ""}`}
+                className={`flex-shrink-0 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer ${!canUserGoNext ? "opacity-40 cursor-not-allowed" : ""}`}
               >
                 <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
                   <path d="M8 4L14 10L8 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -427,9 +355,8 @@ export default function AdminHome() {
         </section>
       </main>
 
-      {/* Mensaje de éxito */}
       {successMessage && (
-        <div className="fixed top-6 right-6 z-80">
+        <div className="fixed top-6 right-6 z-[80]">
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl px-6 py-4 shadow-xl flex items-center gap-3">
             <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-white" />
@@ -439,7 +366,6 @@ export default function AdminHome() {
         </div>
       )}
 
-      {/* Modales */}
       <ReportDetailsModal
         open={isReportModalOpen}
         report={selectedReport}
@@ -471,6 +397,7 @@ export default function AdminHome() {
         onSuspendAccount={() => startConfirmFor(selectedUser, "suspend_account")}
         onSuspendProfile={() => startConfirmFor(selectedUser, "suspend_profile")}
         onActivateAccount={() => startConfirmFor(selectedUser, "activate_account")}
+        onActivateProfile={() => startConfirmFor(selectedUser, "activate_profile")}
       />
 
       <ConfirmModal
@@ -479,6 +406,7 @@ export default function AdminHome() {
           pendingAction === "suspend_account" ? "Confirmar suspensión de cuenta"
             : pendingAction === "suspend_profile" ? "Suspender perfil(es)"
             : pendingAction === "activate_account" ? "Activar cuenta"
+            : pendingAction === "activate_profile" ? "Activar perfil(es)"
             : pendingAction === "approve" ? "Aprobar conductor"
             : pendingAction === "reject" ? "Rechazar conductor"
             : pendingAction === "archive" ? "Archivar reporte"
@@ -488,7 +416,8 @@ export default function AdminHome() {
           pendingAction === "approve" ? `¿Estás seguro de que deseas aprobar a ${selectedUser?.name} como conductor? Esta acción cambiará su estado a Verificado y podrá comenzar a ofrecer viajes.` :
           pendingAction === "reject" ? `¿Estás seguro de que deseas rechazar a ${selectedUser?.name}? ${selectedUser?.profiles.length === 1 ? 'Su cuenta será eliminada completamente.' : 'Se removerá su perfil de conductor pero mantendrá sus otros perfiles.'}` :
           pendingAction === "suspend_profile" ? `Selecciona los perfiles que deseas suspender para ${selectedUser?.name}.` :
-          pendingAction === "archive" ? `Vas a archivar el reporte ${reportToAct?.id || selectedReport?.id}.` :
+          pendingAction === "activate_profile" ? `Selecciona los perfiles que deseas activar para ${selectedUser?.name}.` :
+          pendingAction === "archive" ? `Vas a archivar el reporte.` :
           `Confirma esta acción.`
         }
         pendingAction={pendingAction}

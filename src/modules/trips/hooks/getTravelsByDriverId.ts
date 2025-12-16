@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import type { TravelBackendResponse } from './createTravelHook';
 
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 export function useGetTravelsByDriver(driverId: string) {
     const [travels, setTravels] = useState<TravelBackendResponse[]>([]);
     const [loading, setLoading] = useState(true);

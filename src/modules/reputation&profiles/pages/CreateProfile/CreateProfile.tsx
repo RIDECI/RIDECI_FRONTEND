@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCreateProfile } from "@/modules/reputation&profiles/hooks/CreateProfile/createProfileHook"; 
+import { useGetProfile } from "@/modules/reputation&profiles/hooks/GetProfile/getProfileHook";
 import ProfileInfo from "@/modules/reputation&profiles/components/FormProfile/ProfileInfo";
 import SaveChangesButton from "@/modules/reputation&profiles/components/FormProfile/SaveChangesButton";
 
@@ -29,12 +30,57 @@ export default function CreateProfile() {
     program: "",
   });
 
+  const { getProfile, loading: loadingProfile, profile } = useGetProfile();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      getProfile(userId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData((prev) => ({
+        ...prev,
+        name: profile.name || prev.name,
+        identificationNumber:
+          profile.identificationNumber ||
+          localStorage.getItem('identificationNumber') ||
+          localStorage.getItem('institutionalId') ||
+          prev.identificationNumber,
+        identificationType: (profile.identificationType as string) || prev.identificationType,
+        phoneNumber: profile.phoneNumber || localStorage.getItem('phoneNumber') || prev.phoneNumber,
+        birthDate: profile.birthDate ? new Date(profile.birthDate).toISOString().slice(0, 10) : prev.birthDate,
+        email: profile.email || localStorage.getItem('userEmail') || prev.email,
+        address: profile.address || localStorage.getItem('address') || prev.address,
+      }));
+
+      // Cargar la imagen del perfil desde el perfil o localStorage
+      if (profile.profilePictureUrl) {
+        setPhoto(profile.profilePictureUrl);
+      } else {
+        const savedPhoto = localStorage.getItem('profilePictureUrl');
+        if (savedPhoto) {
+          setPhoto(savedPhoto);
+        }
+      }
+    }
+  }, [profile]);
+
   const { createProfile, loading } = useCreateProfile();
 
   const handlePhotoChange = (file: File | null) => {
     if (file) {
-      const url = URL.createObjectURL(file);
-      setPhoto(url);
+      // Convertir la imagen a base64 para poder guardarla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPhoto(base64String);
+        // También guardar en localStorage para persistencia
+        localStorage.setItem('profilePictureUrl', base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -56,6 +102,7 @@ export default function CreateProfile() {
       phoneNumber: formData.phoneNumber,
       ratings: [],
       badges: [],
+      profileType: profileType, // Asegurarse de usar el valor mapeado
       reputation: { wightedScores: new Map<number, number>(), average: 0, totalRatings: 0 },
       identificationType: formData.identificationType,
       identificationNumber: formData.identificationNumber,
@@ -66,32 +113,42 @@ export default function CreateProfile() {
 
     const response = await createProfile(profileType, profileData as any);
 
-    if (response.success) navigate("/app/profile");
+    if (response.success) {
+      try {
+        if (typeof roleReceived === 'string' && roleReceived.length > 0) {
+          localStorage.setItem('userProfileType', roleReceived);
+        }
+        // Guardar también el perfil actual seleccionado
+        localStorage.setItem('selectedProfile', profileType);
+        // Asegurar que la imagen del perfil se guarde
+        if (photo) {
+          localStorage.setItem('profilePictureUrl', photo);
+        }
+      } catch {}
+      navigate('/roleRegisterPick');
+    }
   };
 
   
   return (
-  <div className="p-12 max-w-6xl mx-auto pb-24 bg-[#e8f1fd] rounded-2xl shadow-md border border-slate-200">
-    <h1 className="text-4xl font-bold mb-10 text-slate-800">Completa tu Perfil</h1>
+    <div className="min-h-screen flex items-start justify-center bg-transparent">
+      <div className="p-12 max-w-5xl w-full mt-24 pb-24 bg-[#e8f1fd] rounded-2xl shadow-md border border-slate-200">
+        <h1 className="text-4xl font-bold mb-10 text-slate-800">Completa tu Perfil</h1>
 
-    <div className="space-y-12 w-full">
-      <ProfileInfo 
-        role={roleReceived} 
-        photo={photo}
-        onPhotoChange={handlePhotoChange}
-        formData={formData}
-        onInputChange={handleInputChange}
-      />
+        <div className="space-y-12 w-full">
+          <ProfileInfo
+            role={roleReceived}
+            photo={photo}
+            onPhotoChange={handlePhotoChange}
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
 
-      <div className="pt-10 flex justify-end border-t border-slate-300 mt-10">
-        <SaveChangesButton
-          onConfirm={handleConfirm} 
-          loading={loading} 
-        />
+          <div className="pt-10 flex justify-end border-t border-slate-300 mt-10">
+            <SaveChangesButton onConfirm={handleConfirm} loading={loading} />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
-
-
+  );
 }

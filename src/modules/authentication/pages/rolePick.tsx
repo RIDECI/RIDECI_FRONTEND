@@ -8,13 +8,12 @@ import { Header } from '../components/header.tsx';
 
 export const ProfileRegisterSelectionPage: React.FC = () => {
     const navigate = useNavigate();
+    const userProfileType = localStorage.getItem('userProfileType');
 
     const handleProfileSelect = (profileId: ProfileType) => {
         console.log('Perfil seleccionado:', profileId);
         localStorage.setItem('selectedProfile', profileId);
-
-        // Navegar según el perfil seleccionado
-        navigate('/app');
+        navigate('/createProfile');
     };
 
     return (
@@ -32,7 +31,7 @@ export const ProfileRegisterSelectionPage: React.FC = () => {
 
             <div className="flex flex-col items-center">
                 <h2 className="text-white text-5xl font-semibold text-center mt-22 mb-22">
-                      ¿Qué rol deseas para tu registro?
+                      {userProfileType ? `Bienvenido como ${userProfileType}` : '¿Qué rol deseas para tu registro?'}
                 </h2>    
             </div>
 

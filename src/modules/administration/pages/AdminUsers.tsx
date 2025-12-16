@@ -1,4 +1,7 @@
 // src/modules/administration/pages/AdminUsers.tsx
+/**
+ * Página de gestión de usuarios MEJORADA
+ */
 
 import React, { useCallback, useEffect, useState } from "react";
 import { CheckCircle } from "lucide-react";
@@ -11,12 +14,13 @@ import { UserDetailsModal } from '../components/UserDetailsModal';
 import { useAdminUsers } from '../hooks/useAdminUsers';
 
 const AdminUsers: React.FC = () => {
-  const { users, successMessage, performUserAction, getFilteredUsers } = useAdminUsers();
+  const { users, successMessage, performUserAction, getFilteredUsers, activeUsersCount } = useAdminUsers();
   
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("Todos");
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
 
+  // Carrusel superior
   const [itemsPerPage, setItemsPerPage] = useState<number>(3);
   
   useEffect(() => {
@@ -34,6 +38,9 @@ const AdminUsers: React.FC = () => {
   // Usar la función de filtrado del hook
   const filteredUsers = getFilteredUsers(search, roleFilter, statusFilter);
 
+  // ========================================
+  // CARRUSEL SUPERIOR (paginación)
+  // ========================================
   const [userPage, setUserPage] = useState(0);
   
   useEffect(() => setUserPage(0), [filteredUsers.length, itemsPerPage]);
@@ -56,6 +63,35 @@ const AdminUsers: React.FC = () => {
   const canGoPrev = userPage > 0;
   const canGoNext = userPage < totalUserPages - 1;
 
+  // ========================================
+  // LISTADO COMPLETO (paginación)
+  // ========================================
+  const [fullListPage, setFullListPage] = useState(0);
+  const fullListItemsPerPage = 12; // Mostrar 12 usuarios por página en el listado completo
+
+  useEffect(() => setFullListPage(0), [filteredUsers.length]);
+
+  const totalFullListPages = Math.ceil(filteredUsers.length / fullListItemsPerPage);
+
+  const fullListPrev = useCallback(() => {
+    setFullListPage(prev => Math.max(0, prev - 1));
+  }, []);
+
+  const fullListNext = useCallback(() => {
+    setFullListPage(prev => Math.min(totalFullListPages - 1, prev + 1));
+  }, [totalFullListPages]);
+
+  const visibleFullListUsers = filteredUsers.slice(
+    fullListPage * fullListItemsPerPage,
+    (fullListPage + 1) * fullListItemsPerPage
+  );
+
+  const canFullListGoPrev = fullListPage > 0;
+  const canFullListGoNext = fullListPage < totalFullListPages - 1;
+
+  // ========================================
+  // MODALES Y ACCIONES
+  // ========================================
   const [selectedUser, setSelectedUser] = useState<UserCard | null>(null);
   const [selectedProfileRole, setSelectedProfileRole] = useState<string>("Conductor");
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -81,7 +117,7 @@ const AdminUsers: React.FC = () => {
 
   const startConfirm = (action: PendingAction) => {
     setPendingAction(action);
-    if (action === "suspend_profile" && selectedUser) {
+    if ((action === "suspend_profile" || action === "activate_profile") && selectedUser) {
       setSelectedRolesToSuspend([]);
     }
     setConfirmOpen(true);
@@ -144,8 +180,6 @@ const AdminUsers: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white relative">
-      <div className="absolute inset-0 opacity-6 pointer-events-none" />
-
       <header className="relative z-10 flex items-center justify-between p-6 bg-white border-b border-gray-200">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">Gestión de usuarios</h1>
@@ -154,7 +188,7 @@ const AdminUsers: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-2xl font-bold text-blue-600">{users.length}</div>
+            <div className="text-2xl font-bold text-blue-600">{activeUsersCount}</div>
           </div>
           <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold text-lg">
             A
@@ -163,6 +197,7 @@ const AdminUsers: React.FC = () => {
       </header>
 
       <main className="relative z-10 p-6 max-w-7xl mx-auto">
+        {/* Filtros */}
         <section className="mb-6">
           <div className="flex gap-3 items-center flex-wrap bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <input
@@ -198,13 +233,14 @@ const AdminUsers: React.FC = () => {
           </div>
         </section>
 
-        <section className="relative">
+        {/* Carrusel Superior */}
+        <section className="relative mb-8">
           <div className="flex items-center gap-4">
             <button
               onClick={userPrev}
               disabled={!canGoPrev}
-              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                !canGoPrev ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all cursor-pointer ${
+                !canGoPrev ? "opacity-40 cursor-not-allowed" : ""
               }`}
             >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
@@ -222,7 +258,7 @@ const AdminUsers: React.FC = () => {
                   >
                     <button 
                       onClick={() => openUser(u)} 
-                      className="absolute top-4 right-4 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm z-10"
+                      className="absolute top-4 right-4 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm z-10 cursor-pointer"
                     >
                       Ver
                     </button>
@@ -244,7 +280,6 @@ const AdminUsers: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Mostrar estado SIEMPRE */}
                     <div className="mb-3">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getUserStatusColor(u.status)}`}>
                         {u.status}
@@ -259,7 +294,7 @@ const AdminUsers: React.FC = () => {
                             setSelectedUser(u);
                             startConfirm("approve");
                           }}
-                          className="flex-1 py-2 text-sm rounded-lg border-2 border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-semibold shadow-sm"
+                          className="flex-1 py-2 text-sm rounded-lg border-2 border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-semibold shadow-sm cursor-pointer"
                         >
                           Aprobar
                         </button>
@@ -268,7 +303,7 @@ const AdminUsers: React.FC = () => {
                             setSelectedUser(u);
                             startConfirm("reject");
                           }}
-                          className="flex-1 py-2 text-sm rounded-lg border-2 border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-semibold shadow-sm"
+                          className="flex-1 py-2 text-sm rounded-lg border-2 border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-semibold shadow-sm cursor-pointer"
                         >
                           Rechazar
                         </button>
@@ -281,7 +316,7 @@ const AdminUsers: React.FC = () => {
                           setSelectedUser(u);
                           startConfirm("activate_account");
                         }}
-                        className="w-full py-2.5 border-2 border-green-400 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm font-semibold shadow-sm"
+                        className="w-full py-2.5 border-2 border-green-400 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm font-semibold shadow-sm cursor-pointer"
                       >
                         Activar cuenta
                       </button>
@@ -296,8 +331,8 @@ const AdminUsers: React.FC = () => {
             <button
               onClick={userNext}
               disabled={!canGoNext}
-              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all ${
-                !canGoNext ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+              className={`flex-shrink-0 z-20 h-12 w-12 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all cursor-pointer ${
+                !canGoNext ? "opacity-40 cursor-not-allowed" : ""
               }`}
             >
               <svg className="w-6 h-6 text-slate-700" viewBox="0 0 20 20" fill="none">
@@ -314,15 +349,17 @@ const AdminUsers: React.FC = () => {
             <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <span className="text-sm font-semibold text-blue-700">Listado completo de usuarios</span>
+            <span className="text-sm font-semibold text-blue-700">
+              Listado completo • Página {fullListPage + 1} de {totalFullListPages || 1}
+            </span>
           </div>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
         </div>
 
-        {/* Listado Completo */}
-        <div>
+        {/* Listado Completo con Paginación */}
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredUsers.slice(0, 12).map((u) => (
+            {visibleFullListUsers.map((u) => (
               <div 
                 key={u.id} 
                 className="rounded-xl p-5 border border-blue-100 shadow-sm hover:shadow-lg transition-all duration-300 h-[220px] flex flex-col" 
@@ -349,7 +386,7 @@ const AdminUsers: React.FC = () => {
                   </div>
                   <button 
                     onClick={() => openUser(u)} 
-                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-shrink-0 shadow-sm"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex-shrink-0 shadow-sm cursor-pointer"
                   >
                     Ver
                   </button>
@@ -363,7 +400,7 @@ const AdminUsers: React.FC = () => {
                         setSelectedUser(u);
                         startConfirm("approve");
                       }}
-                      className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-medium"
+                      className="flex-1 py-2 text-sm rounded-lg border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 transition-colors font-medium cursor-pointer"
                     >
                       Aprobar
                     </button>
@@ -372,7 +409,7 @@ const AdminUsers: React.FC = () => {
                         setSelectedUser(u);
                         startConfirm("reject");
                       }}
-                      className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium"
+                      className="flex-1 py-2 text-sm rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium cursor-pointer"
                     >
                       Rechazar
                     </button>
@@ -385,7 +422,7 @@ const AdminUsers: React.FC = () => {
                       setSelectedUser(u);
                       startConfirm("activate_account");
                     }}
-                    className="mt-4 w-full py-2 border-2 border-green-300 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm font-semibold"
+                    className="mt-4 w-full py-2 border-2 border-green-300 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm font-semibold cursor-pointer"
                   >
                     Activar cuenta
                   </button>
@@ -393,6 +430,33 @@ const AdminUsers: React.FC = () => {
               </div>
             ))}
           </div>
+
+          {/* Paginación del Listado Completo */}
+          {totalFullListPages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <button
+                onClick={fullListPrev}
+                disabled={!canFullListGoPrev}
+                className={`px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors font-medium cursor-pointer ${
+                  !canFullListGoPrev ? "opacity-40 cursor-not-allowed" : ""
+                }`}
+              >
+                Anterior
+              </button>
+              <span className="px-4 py-2 text-sm text-slate-600">
+                Página {fullListPage + 1} de {totalFullListPages}
+              </span>
+              <button
+                onClick={fullListNext}
+                disabled={!canFullListGoNext}
+                className={`px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors font-medium cursor-pointer ${
+                  !canFullListGoNext ? "opacity-40 cursor-not-allowed" : ""
+                }`}
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -416,6 +480,7 @@ const AdminUsers: React.FC = () => {
         onSuspendAccount={() => startConfirm("suspend_account")}
         onSuspendProfile={() => startConfirm("suspend_profile")}
         onActivateAccount={() => startConfirm("activate_account")}
+        onActivateProfile={() => startConfirm("activate_profile")}
       />
 
       <ConfirmModal
@@ -427,6 +492,8 @@ const AdminUsers: React.FC = () => {
             ? "Suspender perfil(es)"
             : pendingAction === "activate_account"
             ? "Activar cuenta"
+            : pendingAction === "activate_profile"
+            ? "Activar perfil(es)"
             : pendingAction === "approve"
             ? "Aprobar conductor"
             : pendingAction === "reject"
@@ -442,6 +509,8 @@ const AdminUsers: React.FC = () => {
             ? `Selecciona los perfiles que deseas suspender para ${selectedUser?.name}.`
             : pendingAction === "activate_account"
             ? `¿Estás seguro de que deseas activar la cuenta de ${selectedUser?.name}? Esta acción cambiará su estado a Verificado.`
+            : pendingAction === "activate_profile"
+            ? `Selecciona los perfiles que deseas activar para ${selectedUser?.name}.`
             : `Confirma esta acción para ${selectedUser?.name}.`
         }
         pendingAction={pendingAction}
