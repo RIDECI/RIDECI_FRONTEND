@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, Zap, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import type { AvailableTrip } from '../types/Trip';
 import { AvailableTripCard } from '../components/pasajero/AvailableTripCard';
-import { searchTrips } from '../services/tripsApi';
+import { useGetAllTravels } from '../../trips/hooks/getAllTravelsHook';
+import type { TravelBackendResponse } from '../../trips/hooks/createTravelHook';
 
 export function SearchTrips() {
   const navigate = useNavigate();
@@ -15,52 +16,51 @@ export function SearchTrips() {
   const [departureTime, setDepartureTime] = useState(searchState?.date || '');
   const [nearbySearch, setNearbySearch] = useState(true);
   const [showResults, setShowResults] = useState(true);
-  const [availableTrips, setAvailableTrips] = useState<AvailableTrip[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Cargar todos los viajes disponibles al montar el componente
-  useEffect(() => {
-    loadAllTrips();
-  }, []);
+  // Obtener todos los viajes desde el backend
+  const { travels, loading: isLoading, error: backendError } = useGetAllTravels();
 
-  const loadAllTrips = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const trips = await searchTrips(); // Sin parámetros obtiene todos los viajes
-      setAvailableTrips(trips);
-      setShowResults(true);
-    } catch (err) {
-      setError('Error al buscar viajes. Por favor, intenta nuevamente.');
-      console.error('Error buscando viajes:', err);
-    } finally {
-      setIsLoading(false);
+  // Convertir los viajes del backend al formato AvailableTrip
+  const availableTrips: AvailableTrip[] = useMemo(() => {
+    return travels
+      .filter(travel => travel.availableSlots > 0) // Solo viajes con cupos disponibles
+      .map((travel: TravelBackendResponse) => ({
+        id: travel.id,
+        driverName: `Conductor ${travel.driverId || 'Desconocido'}`, // TODO: Obtener nombre real del conductor
+        vehicleType: 'Vehículo', // TODO: Obtener tipo de vehículo real
+        rating: 4.5, // TODO: Obtener rating real del conductor
+        route: `${travel.origin.placeName} → ${travel.destiny.placeName}`,
+        departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        price: travel.estimatedCost,
+        availableSeats: travel.availableSlots,
+      }));
+  }, [travels]);
+
+  // Filtrar viajes según criterios de búsqueda
+  const filteredTrips = useMemo(() => {
+    if (!destination && !departureTime) {
+      return availableTrips;
     }
-  };
 
-  const handleSearch = async () => {
-    setIsLoading(true);
-    setError(null);
-    setShowResults(false);
-    
-    try {
-      const trips = await searchTrips({
-        destination,
-        departureTime,
-        nearbySearch,
-      });
+    return availableTrips.filter(trip => {
+      const matchesDestination = !destination || 
+        trip.route.toLowerCase().includes(destination.toLowerCase());
       
-      setAvailableTrips(trips);
-      setShowResults(true);
-    } catch (err) {
-      setError('Error al buscar viajes. Por favor, intenta nuevamente.');
-      console.error('Error buscando viajes:', err);
-    } finally {
-      setIsLoading(false);
-    }
+      const matchesTime = !departureTime || 
+        trip.departureTime.includes(departureTime);
+
+      return matchesDestination && matchesTime;
+    });
+  }, [availableTrips, destination, departureTime]);
+
+  const handleSearch = () => {
+    setShowResults(true);
   };
+
+  const error = backendError;
 
   const handleViewDetails = (trip: AvailableTrip) => {
     navigate(`/app/tripDetails/${trip.id}`, { state: { trip } });
@@ -162,7 +162,7 @@ export function SearchTrips() {
       {showResults && !isLoading && (
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">
-            {availableTrips.length} viajes encontrados
+            {filteredTrips.length} viajes encontrados
           </h2>
         </div>
       )}
@@ -173,12 +173,12 @@ export function SearchTrips() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <Loader2 className="w-12 h-12 text-blue-600 mx-auto mb-4 animate-spin" />
-              <p className="text-gray-600 text-lg">Buscando viajes disponibles...</p>
+              <p className="text-gray-600 text-lg">Cargando viajes disponibles...</p>
             </div>
           </div>
-        ) : showResults && availableTrips.length > 0 ? (
+        ) : showResults && filteredTrips.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {availableTrips.map((trip) => (
+            {filteredTrips.map((trip) => (
               <AvailableTripCard 
                 key={trip.id} 
                 trip={trip}
