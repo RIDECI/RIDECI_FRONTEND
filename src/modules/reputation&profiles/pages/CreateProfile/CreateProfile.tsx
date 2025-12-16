@@ -56,7 +56,15 @@ export default function CreateProfile() {
         address: profile.address || localStorage.getItem('address') || prev.address,
       }));
 
-      if (profile.profilePictureUrl) setPhoto(profile.profilePictureUrl);
+      // Cargar la imagen del perfil desde el perfil o localStorage
+      if (profile.profilePictureUrl) {
+        setPhoto(profile.profilePictureUrl);
+      } else {
+        const savedPhoto = localStorage.getItem('profilePictureUrl');
+        if (savedPhoto) {
+          setPhoto(savedPhoto);
+        }
+      }
     }
   }, [profile]);
 
@@ -64,8 +72,15 @@ export default function CreateProfile() {
 
   const handlePhotoChange = (file: File | null) => {
     if (file) {
-      const url = URL.createObjectURL(file);
-      setPhoto(url);
+      // Convertir la imagen a base64 para poder guardarla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPhoto(base64String);
+        // También guardar en localStorage para persistencia
+        localStorage.setItem('profilePictureUrl', base64String);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -87,6 +102,7 @@ export default function CreateProfile() {
       phoneNumber: formData.phoneNumber,
       ratings: [],
       badges: [],
+      profileType: profileType, // Asegurarse de usar el valor mapeado
       reputation: { wightedScores: new Map<number, number>(), average: 0, totalRatings: 0 },
       identificationType: formData.identificationType,
       identificationNumber: formData.identificationNumber,
@@ -98,14 +114,17 @@ export default function CreateProfile() {
     const response = await createProfile(profileType, profileData as any);
 
     if (response.success) {
-      // Guardar el tipo de perfil creado para que solo ese rol aparezca en pickRole
       try {
         if (typeof roleReceived === 'string' && roleReceived.length > 0) {
           localStorage.setItem('userProfileType', roleReceived);
         }
-        localStorage.removeItem("selectedProfile");
+        // Guardar también el perfil actual seleccionado
+        localStorage.setItem('selectedProfile', profileType);
+        // Asegurar que la imagen del perfil se guarde
+        if (photo) {
+          localStorage.setItem('profilePictureUrl', photo);
+        }
       } catch {}
-      // Navegar a la pantalla de selección de rol (mostrará solo el rol creado)
       navigate('/roleRegisterPick');
     }
   };
