@@ -21,13 +21,16 @@ export const useLogin = () => {
 
   const handleLogin = async (data: LoginRequest) => {
     setError(null);
+    console.log("🔵 useLogin: handleLogin called with:", { email: data.email, password: data.password ? "********" : "empty" });
+
     if (!data.email || !data.password) {
       setError("Debes ingresar un email y una contraseña.");
-      console.log("Email o contraseña vacíos");
+      console.warn("⚠️ useLogin: Validation failed - Empty email or password");
       return;
     }
 
     try {
+      console.log("📡 useLogin: Sending request to https://kratosauthenticationbackend-production.up.railway.app/auth/login");
       const response = await fetch("https://kratosauthenticationbackend-production.up.railway.app/auth/login",
         {
           method: "POST",
@@ -36,52 +39,57 @@ export const useLogin = () => {
         }
       );
 
-      console.log("Request body:", JSON.stringify(data));
-      console.log("Status:", response.status);
+      console.log("📥 useLogin: Response received. Status:", response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+        const textBody = await response.text();
+        console.error("❌ useLogin: Login failed. Status:", response.status, "Body:", textBody);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(textBody);
+        } catch {
+          errorData = { message: textBody };
+        }
+
         setError(errorData?.message || "Credenciales incorrectas.");
-        console.log("Error al iniciar sesión:", errorData || "Unknown error");
-        console.log("Error al iniciar sesión:");
         return;
       }
 
       const result: AuthResponse = await response.json();
       setAuthData(result);
 
-      console.log("Login exitoso:", result);
-      console.log(result);
+      console.log("✅ useLogin: Login successful. Token received.");
 
       // Decodificar JWT para extraer el nombre del usuario
       try {
         const payload = JSON.parse(atob(result.accessToken.split('.')[1]));
-        console.log("JWT payload:", payload);
+        console.log("🔑 useLogin: JWT payload decoded:", payload);
 
         if (payload.name) {
           localStorage.setItem("userName", payload.name);
         }
       } catch (e) {
-        console.error("Error decodificando JWT:", e);
+        console.error("⚠️ useLogin: Error decoding JWT (non-critical):", e);
       }
 
       localStorage.setItem("accessToken", result.accessToken);
       localStorage.setItem("refreshToken", result.refreshToken);
       localStorage.setItem("userId", result.institutionalId.toString());
-      localStorage.setItem("userEmail", data.email); // Guardar email para referencia
+      localStorage.setItem("userEmail", data.email);
 
       const maybeRole = (result as any)?.role;
       if (maybeRole === "ADMINISTRATOR" || maybeRole === "ADMIN") {
         localStorage.setItem("role", "ADMINISTRATOR");
         navigate("/app/admin", { replace: true });
-        return; 
+        return;
       }
 
       navigate("/pickRole");
 
     } catch (err: any) {
+      console.error("🔥 useLogin: Network or code error:", err);
       setError("Error de conexión con el servidor.");
-      console.log("Error en la solicitud:", err.message);
     }
   };
 
