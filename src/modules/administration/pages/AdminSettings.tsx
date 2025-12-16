@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Save, X } from "lucide-react";
 import { usePolicies } from "../hooks/usePolicies";
+import { useAdminUsers } from "../hooks/useAdminUsers";
 import type { PublicationPolicy } from "../hooks/usePolicies";
 
 /**
@@ -22,6 +23,7 @@ function to24h(time24: string, period: string) {
 
 export default function AdminSettings() {
   const { policies, createPolicy, updatePolicy } = usePolicies();
+  const { activeUsersCount } = useAdminUsers();
 
   // Mantengo tu UI state exactamente igual
   const [startTime, setStartTime] = useState<string>("06:00");
@@ -104,7 +106,7 @@ export default function AdminSettings() {
         <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-sm text-slate-600">Usuarios activos</div>
-            <div className="text-2xl font-bold text-blue-600">13</div>
+            <div className="text-2xl font-bold text-blue-600">{activeUsersCount}</div>
           </div>
           <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
             A
@@ -129,12 +131,12 @@ export default function AdminSettings() {
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 />
                 <select
                   value={startPeriod}
                   onChange={(e) => setStartPeriod(e.target.value)}
-                  className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 >
                   <option value="AM">AM</option>
                   <option value="PM">PM</option>
@@ -152,12 +154,12 @@ export default function AdminSettings() {
                   type="time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 />
                 <select
                   value={endPeriod}
                   onChange={(e) => setEndPeriod(e.target.value)}
-                  className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                 >
                   <option value="AM">AM</option>
                   <option value="PM">PM</option>
@@ -177,7 +179,7 @@ export default function AdminSettings() {
               <div className="flex-shrink-0 mt-1">
                 <button
                   onClick={() => setAlertasSeguridad(!alertasSeguridad)}
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
                     alertasSeguridad
                       ? "border-blue-600 bg-white"
                       : "border-gray-300 bg-white"
@@ -201,7 +203,7 @@ export default function AdminSettings() {
               <div className="flex-shrink-0 mt-1">
                 <button
                   onClick={() => setNuevosUsuarios(!nuevosUsuarios)}
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
                     nuevosUsuarios
                       ? "border-blue-600 bg-white"
                       : "border-gray-300 bg-white"
@@ -225,7 +227,7 @@ export default function AdminSettings() {
               <div className="flex-shrink-0 mt-1">
                 <button
                   onClick={() => setReportesSeguridad(!reportesSeguridad)}
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
                     reportesSeguridad
                       ? "border-blue-600 bg-white"
                       : "border-gray-300 bg-white"
@@ -250,14 +252,14 @@ export default function AdminSettings() {
         <div className="flex items-center gap-4 mt-6">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm cursor-pointer"
           >
             <Save size={18} />
             Guardar Cambios
           </button>
           <button
             onClick={handleCancel}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-gray-50 text-slate-700 font-medium rounded-lg border border-gray-300 transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-gray-50 text-slate-700 font-medium rounded-lg border border-gray-300 transition-colors cursor-pointer"
           >
             <X size={18} />
             Cancelar

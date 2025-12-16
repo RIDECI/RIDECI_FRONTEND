@@ -57,6 +57,13 @@ export const useLogin = () => {
       localStorage.setItem("refreshToken", result.refreshToken);
       localStorage.setItem("userId", result.institutionalId.toString());
 
+      const maybeRole = (result as any)?.role;
+      if (maybeRole === "ADMINISTRATOR" || maybeRole === "ADMIN") {
+        localStorage.setItem("role", "ADMINISTRATOR");
+        navigate("/app/admin", { replace: true });
+        return; 
+      }
+
       navigate("/pickRole");
       
     } catch (err: any) {
