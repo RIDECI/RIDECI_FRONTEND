@@ -17,10 +17,10 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import type { TravelBackendResponse } from "../hooks/createTravelHook";
 import { deleteTravelHook } from "../hooks/deleteTravelHook";
 import { useGetTravelById } from "../hooks/getTravelByIdHook";
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 import { ConfirmActionModal } from "@/components/common/ConfirmActionModal";
 import { useState } from "react";
 
-// Helper functions for status styling
 const getStatusCardClasses = (status?: string): string => {
   if (status === "ACTIVE")
     return "from-green-50 to-green-100 border-green-200/50";
@@ -74,20 +74,14 @@ const mockTripDetails = {
     {
       id: 1,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "5,000 COP",
     },
     {
       id: 2,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "7,000 COP",
     },
     {
       id: 3,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "8,000 COP",
     },
   ],
   vehicle: {
@@ -101,23 +95,21 @@ function DetailsOfTravelComponent() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { addNotification } = useGlobalNotifications();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Obtener travelId desde query params o desde location.state
   const travelIdFromParams = searchParams.get("travelId");
   const travelFromState = location.state?.travel as
     | TravelBackendResponse
     | undefined;
 
-  // Si viene de state, usar ese, si no, hacer fetch con el ID
   const {
     travel: travelFromApi,
     loading,
     error,
   } = useGetTravelById(travelFromState ? null : travelIdFromParams);
 
-  // Usar el travel que esté disponible
   const travel = travelFromState || travelFromApi;
 
   console.log("Travel data in details:", travel);
@@ -128,14 +120,21 @@ function DetailsOfTravelComponent() {
     setIsDeleting(true);
     try {
       await deleteTravelHook(travel.id);
+      addNotification({
+        title: 'Viaje cancelado exitosamente',
+        type: 'success',
+      });
       setIsDeleting(false);
       setShowCancelModal(false);
       navigate("/app/sectionTravel");
     } catch (error) {
       console.error("Error al eliminar viaje:", error);
+      addNotification({
+        title: 'Error al cancelar el viaje. Por favor intenta de nuevo.',
+        type: 'info',
+      });
       setIsDeleting(false);
       setShowCancelModal(false);
-      alert("Error al cancelar el viaje. Por favor intenta de nuevo.");
     }
   };
 

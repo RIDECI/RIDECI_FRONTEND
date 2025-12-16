@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { CreateBookingRequest, BookingResponse } from "../types/booking";
 import { useNavigate } from "react-router-dom";
 import { getBookingsApiUrl } from '../utils/apiConfig';
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 
 export const useCreateBooking = () => {
   const [bookingData, setBookingData] = useState<BookingResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { addNotification } = useGlobalNotifications();
 
   const handleCreateBooking = async (data: CreateBookingRequest) => {
     setError(null);
@@ -63,6 +65,12 @@ export const useCreateBooking = () => {
         setIsLoading(false);
         console.error("❌ Error al crear reserva:", errorData);
         console.error("❌ Status:", response.status, response.statusText);
+
+        addNotification({
+          title: errorMessage,
+          type: 'info',
+        });
+
         throw new Error(errorMessage);
       }
 
@@ -70,10 +78,14 @@ export const useCreateBooking = () => {
       setBookingData(bookingResponse);
       setIsLoading(false);
       console.log("✅ Reserva creada exitosamente:", bookingResponse);
-      
+
+      addNotification({
+        title: '¡Reserva creada exitosamente!',
+        type: 'success',
+      });
       // No navegar automáticamente, dejar que el componente lo maneje
       // navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
-      
+
       return bookingResponse;
     } catch (err: any) {
       const errorMessage = err.message || "Error de conexión con el servidor.";
