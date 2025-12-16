@@ -462,7 +462,7 @@ export const HomePassenger: React.FC = () => {
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-3 mb-3 text-xs text-gray-600">
+                                <div className="mb-3 text-xs text-gray-600 space-y-1">
                                     <div className="flex items-center gap-1">
                                         <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0"/>
                                         <span className="truncate">{offer.startPoint}</span>

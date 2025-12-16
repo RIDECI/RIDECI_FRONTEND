@@ -78,6 +78,7 @@ export function TripDetails() {
         // Continuar de todas formas, ya que la reserva se creó
       } else {
         console.log('✅ Cupos actualizados exitosamente');
+        showToast(`Cupos actualizados: ${tripDetails.trip.availableSeats} → ${newAvailableSlots}`, 'success');
       }
       
       console.log('✅ Reserva completada exitosamente');

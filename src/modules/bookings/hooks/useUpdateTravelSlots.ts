@@ -6,51 +6,57 @@ interface UpdateSlotsResult {
   error?: string;
 }
 
-interface UpdateAvailableSlotsRequest {
-  availableSlots: number;
-}
-
 /**
  * Hook para actualizar solo los cupos disponibles de un viaje en el backend Nemesis
- * Usa el nuevo endpoint PATCH /{id}/available-slots
+ * Usa el nuevo endpoint PATCH /{id}/slots que recibe directamente el número de cupos
  */
 export function useUpdateTravelSlots() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const updateSlots = async (
     travelId: string,
-    newAvailableSlots: number
+    quantity: number
   ): Promise<UpdateSlotsResult> => {
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
       const baseUrl = getTravelsApiUrl();
-      const url = `${baseUrl}/${travelId}/available-slots`;
-      console.log(`🔄 Actualizando cupos del viaje ${travelId} a: ${newAvailableSlots}`);
-      console.log(`🌐 URL: ${url}`);
+      const url = `${baseUrl}/${travelId}/slots`;
+      const bodyToSend = JSON.stringify(quantity);
+      
+      console.log('╔══════════════════════════════════════════════════════════════╗');
+      console.log('║           PATCH REQUEST - Actualización de Cupos             ║');
+      console.log('╠══════════════════════════════════════════════════════════════╣');
+      console.log(`║ Travel ID: ${travelId}`);
+      console.log(`║ Nuevo valor de cupos: ${quantity}`);
+      console.log(`║ URL completa: ${url}`);
+      console.log(`║ Body: ${bodyToSend}`);
+      console.log('╚══════════════════════════════════════════════════════════════╝');
 
-      const requestBody: UpdateAvailableSlotsRequest = {
-        availableSlots: newAvailableSlots,
-      };
-
-      console.log(`📤 Request body:`, requestBody);
-
-      // Usar el nuevo endpoint PATCH específico para actualizar cupos
+      // El endpoint espera solo el número en el body
       const updateResponse = await fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: bodyToSend,
       });
 
-      console.log(`📥 Response status: ${updateResponse.status} ${updateResponse.statusText}`);
+      console.log('╔══════════════════════════════════════════════════════════════╗');
+      console.log('║                    RESPUESTA DEL BACKEND                     ║');
+      console.log('╠══════════════════════════════════════════════════════════════╣');
+      console.log(`║ Status: ${updateResponse.status} ${updateResponse.statusText}`);
+      console.log(`║ OK: ${updateResponse.ok}`);
 
       if (!updateResponse.ok) {
         const responseText = await updateResponse.text();
-        console.error(`❌ Error response body:`, responseText);
+        console.log(`║ Response Body: ${responseText}`);
+        console.log('╚══════════════════════════════════════════════════════════════╝');
+        console.error('❌ ERROR: La actualización de cupos falló en el backend');
         
         let errorData: any = {};
         try {
@@ -59,11 +65,18 @@ export function useUpdateTravelSlots() {
           errorData = { message: responseText };
         }
         
-        throw new Error(errorData.message || `Error al actualizar cupos: ${updateResponse.status} - ${responseText}`);
+        const errorMessage = errorData.message || `Error al actualizar cupos: ${updateResponse.status}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const result = await updateResponse.json();
-      console.log('✅ Cupos actualizados exitosamente:', result);
+      console.log(`║ Response Body:`, result);
+      console.log('╚══════════════════════════════════════════════════════════════╝');
+      console.log('✅ ¡ÉXITO! Cupos actualizados correctamente en el backend');
+      console.log('📊 Verifica en la base de datos que el valor de availableSlots sea:', quantity);
+      
+      setSuccess(true);
 
       return {
         success: true,
@@ -86,5 +99,6 @@ export function useUpdateTravelSlots() {
     updateSlots,
     loading,
     error,
+    success,
   };
 }

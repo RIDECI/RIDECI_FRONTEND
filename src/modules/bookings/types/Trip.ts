@@ -22,6 +22,8 @@ export interface AvailableTrip {
   vehicleType: string;
   rating: number;
   route: string;
+  origin: string;
+  destination: string;
   departureTime: string;
   price: number;
   availableSeats: number;

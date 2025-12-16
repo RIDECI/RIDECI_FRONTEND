@@ -20,29 +20,42 @@ export function SearchTrips() {
   // Obtener todos los viajes desde el backend
   const { travels, loading: isLoading, error: backendError, refetch: refetchTravels } = useGetAllTravels();
 
-  // Refrescar viajes cuando el componente se monta
+  // Refrescar viajes cuando el componente se monta o cuando regresa desde otra pantalla
   useEffect(() => {
+    console.log('🔄 SearchTrips montado - Refrescando lista de viajes...');
     refetchTravels();
-    console.log('🔄 Refrescando lista de viajes en SearchTrips...');
-  }, []);
+  }, [location.pathname]); // Se ejecuta cuando cambia la ruta
 
   // Convertir los viajes del backend al formato AvailableTrip
   const availableTrips: AvailableTrip[] = useMemo(() => {
+    if (travels.length > 0) {
+      console.log('🔍 Primer viaje del backend:', travels[0]);
+      console.log('📍 Origin:', travels[0]?.origin);
+      console.log('📍 Destiny:', travels[0]?.destiny);
+    }
+    
     return travels
       // Mostrar TODOS los viajes, incluso sin cupos (para que se vean bloqueados)
-      .map((travel: TravelBackendResponse) => ({
-        id: travel.id,
-        driverName: `Conductor ${travel.driverId || 'Desconocido'}`, // TODO: Obtener nombre real del conductor
-        vehicleType: 'Vehículo', // TODO: Obtener tipo de vehículo real
-        rating: 4.5, // TODO: Obtener rating real del conductor
-        route: `${(travel.origin as any).placeName || travel.origin} → ${(travel.destiny as any).placeName || travel.destiny}`,
-        departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        price: travel.estimatedCost,
-        availableSeats: travel.availableSlots,
-      }));
+      .map((travel: TravelBackendResponse) => {
+        const origin = travel.origin?.direction || travel.origin?.placeName || 'Origen no disponible';
+        const destination = travel.destiny?.direction || travel.destiny?.placeName || 'Destino no disponible';
+        
+        return {
+          id: travel.id,
+          driverName: `Conductor ${travel.driverId || 'Desconocido'}`,
+          vehicleType: 'Vehículo particular',
+          rating: 4.5,
+          route: `${origin} → ${destination}`,
+          origin,
+          destination,
+          departureTime: new Date(travel.departureDateAndTime).toLocaleTimeString('es-CO', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          price: travel.estimatedCost,
+          availableSeats: travel.availableSlots,
+        };
+      });
   }, [travels]);
 
   // Filtrar viajes según criterios de búsqueda
@@ -78,7 +91,7 @@ export function SearchTrips() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate('/bookings')}
+        onClick={() => navigate(-1)}
         className="w-fit text-blue-600 hover:bg-transparent hover:text-blue-700 font-medium"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
