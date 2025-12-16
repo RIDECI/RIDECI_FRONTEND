@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { TravelBackendResponse } from './createTravelHook';
 
-const API_URL = '/api/travels'; // Usar proxy de Vite para evitar CORS
+// Usar URL directa del backend para evitar problemas con el proxy
+const API_URL = 'https://nemesistravelmanagementbackendmain-production.up.railway.app/travels';
 
 export function useGetAllTravels() {
     const [travels, setTravels] = useState<TravelBackendResponse[]>([]);
@@ -13,6 +14,8 @@ export function useGetAllTravels() {
         setError(null);
 
         try {
+            console.log('Fetching travels from:', `${API_URL}/all`);
+
             const response = await fetch(`${API_URL}/all`, {
                 method: 'GET',
                 headers: {
@@ -25,6 +28,7 @@ export function useGetAllTravels() {
             }
 
             const result: TravelBackendResponse[] = await response.json();
+            console.log('Travels fetched successfully:', result.length, 'travels');
             setTravels(result);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error fetching all travels';
