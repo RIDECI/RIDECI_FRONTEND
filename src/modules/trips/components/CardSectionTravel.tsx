@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { useGlobalNotifications } from "../../../context/GlobalNotificationContext";
 const mockTrips = [
     {
         id: 1,
@@ -59,8 +60,9 @@ const mockTrips = [
         price: "6,000 COP"
     }
 ];
-function CardSectionTravel(){
+function CardSectionTravel() {
     const navigate = useNavigate();
+    const { addNotification } = useGlobalNotifications();
 
     return (
         <div className="p-6">
@@ -69,8 +71,15 @@ function CardSectionTravel(){
                     <Car className="w-8 h-8" />
                     <h1 className="text-3xl font-bold">Ver mis viajes</h1>
                 </div>
-                <Button 
-                    onClick={() => navigate('/travels')}
+                <Button
+                    onClick={() => {
+                        // Simulating adding a trip
+                        addNotification({
+                            type: "success",
+                            title: "Nuevo viaje creado exitosamente"
+                        });
+                        navigate('/travels');
+                    }}
                     className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-6"
                 >
                     Añadir viaje
@@ -78,7 +87,7 @@ function CardSectionTravel(){
             </div>
             <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input 
+                <Input
                     placeholder="Buscar por destino, id o fecha"
                     className="pl-10 h-12 rounded-lg bg-[#CAE8FF]/35"
                 />
@@ -89,11 +98,10 @@ function CardSectionTravel(){
                         <CardHeader>
                             <CardTitle className="flex items-start justify-between">
                                 <span>{trip.title}</span>
-                                <span className={`text-xs px-2 py-1 rounded-full ${
-                                    trip.status === 'en curso' 
-                                        ? 'bg-green-100 text-green-700' 
-                                        : 'bg-yellow-100 text-yellow-700'
-                                }`}>
+                                <span className={`text-xs px-2 py-1 rounded-full ${trip.status === 'en curso'
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-yellow-100 text-yellow-700'
+                                    }`}>
                                     {trip.status}
                                 </span>
                             </CardTitle>

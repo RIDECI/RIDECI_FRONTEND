@@ -1,6 +1,7 @@
 import { ArrowLeft, MapPin, LocateFixed, Clock, Car, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useGlobalNotifications } from "../../../context/GlobalNotificationContext";
 
 const mockTripDetails = {
     origin: "Portal Norte",
@@ -17,14 +18,15 @@ const mockTripDetails = {
         color: "Negro"
     }
 };
-function DetailsOfTravelComponent(){
+function DetailsOfTravelComponent() {
     const navigate = useNavigate();
+    const { addNotification } = useGlobalNotifications();
 
     return (
         <div className="p-6">
             <div className="flex items-center gap-4 mb-6">
-                <Button 
-                    variant="ghost" 
+                <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => navigate('/sectionTravel')}
                     className="hover:bg-gray-100"
@@ -38,8 +40,8 @@ function DetailsOfTravelComponent(){
                         className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-6">
                         Editar Viaje
                     </Button>
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         className="border-red-300 text-red-500 hover:bg-red-50 rounded-lg px-6"
                     >
                         Cancelar viaje
@@ -51,8 +53,8 @@ function DetailsOfTravelComponent(){
                     <MapPin className="w-5 h-5 mt-1" />
                     <div>
                         <p className="text-sm font-semibold">Origen</p>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={mockTripDetails.origin}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-56"
@@ -64,8 +66,8 @@ function DetailsOfTravelComponent(){
                     <LocateFixed className="w-5 h-5 mt-1" />
                     <div>
                         <p className="text-sm font-semibold">Destino</p>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={mockTripDetails.destination}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-56"
@@ -77,8 +79,8 @@ function DetailsOfTravelComponent(){
                     <Clock className="w-5 h-5 mt-1" />
                     <div>
                         <p className="text-sm font-semibold">Fecha y Hora de Salida</p>
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value={mockTripDetails.departureDate}
                             readOnly
                             className="bg-white border border-gray-300 rounded-lg px-4 py-2 mt-1 w-64"
@@ -132,7 +134,10 @@ function DetailsOfTravelComponent(){
             </div>
 
             <div className="flex justify-between mt-64">
-                <Button className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8">
+                <Button
+                    onClick={() => addNotification({ type: "message", title: "Chat de grupo iniciado" })}
+                    className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
+                >
                     Chat Con Pasajeros
                 </Button>
                 <Button className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8">

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useToast } from "../../../components/ToastContext";
+import { useGlobalNotifications } from "../../../context/GlobalNotificationContext";
 import { Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import NotificationCard from "../components/NotificationCard";
 import DatePicker from "../components/DatePicker";
-import { mockNotifications } from "../utils/mockNotifications";
 
 const filters = ["Todas", "Importante", "Viajes", "Alerta"];
 
@@ -13,8 +13,9 @@ export default function NotificationsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const { showToast } = useToast();
-  
-  const filteredNotifications = mockNotifications
+  const { notifications } = useGlobalNotifications();
+
+  const filteredNotifications = notifications
     .filter((n) => {
       if (activeFilter === "Todas") return true;
       if (activeFilter === "Importante") return n.type === "info";
@@ -46,6 +47,7 @@ export default function NotificationsPage() {
     setSelectedDate(null);
     showToast("Filtro de fecha eliminado", "info");
   };
+
   return (
     <div className="p-10 w-full h-full">
 
@@ -53,63 +55,62 @@ export default function NotificationsPage() {
       <h1 className="text-3xl font-bold mb-6">Notificaciones</h1>
 
       {/* Contenedor de Tabs */}
-    <div className="relative flex items-center p-2 rounded-2xl mb-6 w-full shadow-sm 
+      <div className="relative flex items-center p-2 rounded-2xl mb-6 w-full shadow-sm 
                 bg-white border border-gray-200">
-      {filters.map((f) => {
-      const isActive = activeFilter === f;
+        {filters.map((f) => {
+          const isActive = activeFilter === f;
 
-      return (
-        <button
-          key={f}
-          onClick={() => handleFilterChange(f)}
-          className="relative z-10 px-5 py-2 text-lg font-medium text-blue-600"
-        >
-          {isActive && (
-            <motion.div
-              layoutId="activeTab"
-              className="absolute inset-0 bg-blue-600 rounded-xl shadow"
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          return (
+            <button
+              key={f}
+              onClick={() => handleFilterChange(f)}
+              className="relative z-10 px-5 py-2 text-lg font-medium text-blue-600"
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-blue-600 rounded-xl shadow"
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                />
+              )}
+
+              <span className={`relative z-20 ${isActive ? "text-white" : "text-blue-600"}`}>
+                {f}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Botón filtro */}
+        <div className="ml-auto relative">
+          <button
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${selectedDate
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+          >
+            <Calendar className="w-5 h-5" />
+            {selectedDate ? selectedDate.toLocaleDateString("es-ES") : "Seleccionar fecha"}
+          </button>
+
+          {showDatePicker && (
+            <DatePicker
+              onDateSelect={handleDateSelect}
+              onClose={() => setShowDatePicker(false)}
             />
           )}
 
-        <span className={`relative z-20 ${isActive ? "text-white" : "text-blue-600"}`}>
-          {f}
-        </span>
-      </button>
-    );
-    })}
-
-    {/* Botón filtro */}
-    <div className="ml-auto relative">
-      <button 
-        onClick={() => setShowDatePicker(!showDatePicker)}
-        className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition ${
-          selectedDate
-            ? "bg-blue-600 text-white" 
-            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-        }`}
-      >
-        <Calendar className="w-5 h-5" />
-        {selectedDate ? selectedDate.toLocaleDateString("es-ES") : "Seleccionar fecha"}
-      </button>
-      
-      {showDatePicker && (
-        <DatePicker
-          onDateSelect={handleDateSelect}
-          onClose={() => setShowDatePicker(false)}
-        />
-      )}
-
-      {selectedDate && (
-        <button
-          onClick={clearDateFilter}
-          className="ml-2 px-3 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition text-sm font-medium"
-        >
-          Limpiar
-        </button>
-      )}
-    </div>
-    </div>
+          {selectedDate && (
+            <button
+              onClick={clearDateFilter}
+              className="ml-2 px-3 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition text-sm font-medium"
+            >
+              Limpiar
+            </button>
+          )}
+        </div>
+      </div>
 
 
       {/* Panel blanco */}
