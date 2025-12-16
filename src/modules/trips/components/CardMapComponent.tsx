@@ -57,14 +57,7 @@ const CardMapComponent = ({
       value: departureDate,
       onChange: onDateChange
     },
-    {
-      id: 'time',
-      placeholder: 'Hora de Salida',
-      type: 'time',
-      icon: Clock,
-      value: departureTime,
-      onChange: onTimeChange
-    },
+
     {
       id: 'cost',
       placeholder: 'Costo Estimado (COP)',
