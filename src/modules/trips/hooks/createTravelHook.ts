@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import type { Travel, Location, Status, TravelType } from '../types';
 
+// URL del backend desplegado
+const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app';
+
 export interface TravelRequest {
     id?: string;
     organizerId?: number;
