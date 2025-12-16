@@ -55,8 +55,9 @@ import AdminMonitor from "./modules/administration/pages/AdminMonitor";
 import AdminSettings from "./modules/administration/pages/AdminSettings";
 import EndTripRating from "./modules/reputation&profiles/pages/EndCalificateTravel/EndTripRating";
 
-import Alerts from "./modules/security/pages/Alerts";
-import AlertForm from "./modules/security/pages/AlertForm";
+/* ------------------ Security and Comunication ------------------ */
+import Reports from "./modules/security/pages/Reports";
+import ReportForm from "./modules/security/pages/ReportForm";
 import { Conversations } from "./modules/security/pages/Conversations";
 
 function App() {
@@ -118,8 +119,8 @@ function App() {
           <Route path="payment/history" element={<PaymentHistory />} />
 
           {/* Rutas de Alerts */}
-          <Route path="alerts" element={<Alerts />} />
-          <Route path="alerts/new" element={<AlertForm />} />
+          <Route path="security/reports" element={<Reports />} />
+          <Route path="security/reports/new" element={<ReportForm />} />
         </Route>
         {/* fallback 404 */}
         <Route

@@ -10,7 +10,7 @@ interface LocationState {
   passengerName?: string;
 }
 
-function AlertForm() {
+function ReportForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
@@ -287,4 +287,4 @@ function AlertForm() {
   );
 }
 
-export default AlertForm;
+export default ReportForm;

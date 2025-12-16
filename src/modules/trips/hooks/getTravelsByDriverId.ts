@@ -14,7 +14,7 @@ export function useGetTravelsByDriver(driverId: string) {
         setError(null);
 
         try {
-            const response = await fetch(`${API_URL}/travels/driver/${driverId}`, {
+            const response = await fetch(`https://nemesistravelmanagementbackendmain-production.up.railway.app/travels/driver/${driverId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

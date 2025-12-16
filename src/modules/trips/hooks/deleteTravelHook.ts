@@ -4,7 +4,7 @@ const API_URL = 'https://poseidonsearchandbooking-production-98fe.up.railway.app
 export async function deleteTravelHook(travelId: string): Promise<void> {
     try {
         const response = await fetch(
-            `${API_URL}/travels/${travelId}`,
+            `https://nemesistravelmanagementbackendmain-production.up.railway.app/travels/${travelId}`,
             {
                 method: 'DELETE',
                 headers: {

@@ -59,7 +59,7 @@ export function AppSidebar() {
     },
     {
       title: "Alertas",
-      url: "/app/alerts",
+      url: "/app/security/reports",
       icon: CircleAlert,
     },
     {
