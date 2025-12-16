@@ -1,7 +1,6 @@
 // src/modules/administration/contexts/AdminUsersContext.tsx
 /**
  * Contexto global para gestionar usuarios del administrador
- * Comparte estado entre AdminHome, AdminUsers y otras páginas
  */
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
@@ -11,6 +10,7 @@ import { mockUsers } from '../utils/mockData';
 interface AdminUsersContextValue {
   users: UserCard[];
   successMessage: string;
+  activeUsersCount: number;
   performUserAction: (
     userId: string,
     action: PendingAction,
@@ -28,7 +28,20 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
   const [successMessage, setSuccessMessage] = useState<string>("");
 
   /**
-   * Ejecutar acción sobre un usuario
+   * CORREGIDO: Calcula usuarios activos según nueva lógica
+   * Un usuario está activo si:
+   * - Status es "Verificado" Y
+   * - Tiene al menos UN perfil con status "Activo"
+   */
+  const activeUsersCount = useMemo(() => {
+    return users.filter(u => 
+      u.status === "Verificado" && 
+      u.profiles.some(p => p.status === "Activo")
+    ).length;
+  }, [users]);
+
+  /**
+   * MEJORADO: Ejecutar acción sobre un usuario
    */
   const performUserAction = useCallback(async (
     userId: string,
@@ -39,7 +52,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
       return { success: false, message: "Acción no válida" };
     }
 
-    // Simular delay de operación
+    // Simular delay
     await new Promise(resolve => setTimeout(resolve, 700));
 
     const user = users.find(u => u.id === userId);
@@ -50,75 +63,143 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
     const userName = user.name;
     let message = "Acción realizada";
 
-    // Determinar acción y actualizar usuarios
     switch (action) {
-      case "approve":
-        setUsers(prev => prev.map(u => 
-          u.id === userId ? { ...u, status: "Verificado" } : u
-        ));
-        message = `Has aprobado a ${userName} como conductor`;
-        break;
+      case "approve": {
+        // APROBAR CONDUCTOR
+        // Solo cuenta como +1 activo si el usuario NO tenía otros perfiles activos antes
+        const hadOtherActiveProfiles = user.profiles.some(p => 
+          p.role !== "Conductor" && p.status === "Activo"
+        );
 
-      case "reject": {
-        // Si el usuario solo tiene el perfil de conductor, eliminarlo completamente
-        if (user.profiles.length === 1 && user.profiles[0].role === "Conductor") {
-          setUsers(prev => prev.filter(u => u.id !== userId));
-          message = `Has rechazado a ${userName} y su cuenta ha sido eliminada`;
+        setUsers(prev => prev.map(u => 
+          u.id === userId ? { 
+            ...u, 
+            status: "Verificado",
+            profiles: u.profiles.map(p => ({ ...p, status: "Activo" as const }))
+          } : u
+        ));
+
+        if (hadOtherActiveProfiles) {
+          message = `Has aprobado a ${userName} como conductor. Ya tenía otros perfiles activos.`;
         } else {
-          // Si tiene otros perfiles, solo remover el perfil de conductor
-          setUsers(prev => prev.map(u => {
-            if (u.id !== userId) return u;
-            const newProfiles = u.profiles.filter(p => p.role !== "Conductor");
-            return {
-              ...u,
-              status: "Verificado",
-              profiles: newProfiles,
-              activeProfile: newProfiles[0]
-            };
-          }));
-          message = `Has rechazado a ${userName} como conductor. Se mantienen sus otros perfiles`;
+          message = `Has aprobado a ${userName} como conductor. Usuario ahora está activo.`;
         }
         break;
       }
 
-      case "activate_account":
+      case "reject": {
+        // RECHAZAR CONDUCTOR
+        // El usuario desaparece si solo tiene perfil de conductor
+        if (user.profiles.length === 1 && user.profiles[0].role === "Conductor") {
+          setUsers(prev => prev.filter(u => u.id !== userId));
+          message = `Has rechazado a ${userName}. Su cuenta ha sido eliminada.`;
+        } else {
+          // Si tiene otros perfiles, remover solo el de conductor
+          setUsers(prev => prev.map(u => {
+            if (u.id !== userId) return u;
+            const newProfiles = u.profiles.filter(p => p.role !== "Conductor");
+            const firstActive = newProfiles.find(p => p.status === "Activo") || newProfiles[0];
+            return {
+              ...u,
+              status: "Verificado",
+              profiles: newProfiles,
+              activeProfile: firstActive
+            };
+          }));
+          message = `Has rechazado a ${userName} como conductor. Mantiene sus otros perfiles.`;
+        }
+        break;
+      }
+
+      case "activate_account": {
+        // ACTIVAR CUENTA: Activa TODOS los perfiles
         setUsers(prev => prev.map(u => 
-          u.id === userId ? { ...u, status: "Verificado" } : u
+          u.id === userId ? { 
+            ...u, 
+            status: "Verificado",
+            profiles: u.profiles.map(p => ({ ...p, status: "Activo" as const }))
+          } : u
         ));
         message = `Has activado la cuenta de ${userName}`;
         break;
+      }
 
-      case "suspend_account":
-        setUsers(prev => prev.map(u => 
-          u.id === userId ? { ...u, status: "Suspendido" } : u
-        ));
-        message = `Has suspendido la cuenta de ${userName}`;
+      case "activate_profile": {
+        // ACTIVAR PERFIL(ES) ESPECÍFICO(S)
+        if (!selectedRoles || selectedRoles.length === 0) {
+          return { success: false, message: "Debes seleccionar al menos un perfil para activar" };
+        }
+        
+        setUsers(prev => prev.map(u => {
+          if (u.id !== userId) return u;
+          
+          const updatedProfiles = u.profiles.map(p => 
+            selectedRoles.includes(p.role) ? { ...p, status: "Activo" as const } : p
+          );
+          
+          // Si hay al menos un perfil activo, el usuario está verificado
+          const hasActiveProfiles = updatedProfiles.some(p => p.status === "Activo");
+          const firstActive = updatedProfiles.find(p => p.status === "Activo");
+          
+          return {
+            ...u,
+            status: hasActiveProfiles ? "Verificado" : u.status,
+            profiles: updatedProfiles,
+            activeProfile: firstActive || u.activeProfile
+          };
+        }));
+        
+        const profilesText = selectedRoles.length > 1 ? 'los perfiles' : 'el perfil';
+        message = `Has activado ${profilesText} de ${userName}`;
         break;
+      }
+
+      case "suspend_account": {
+        // SUSPENDER CUENTA: Suspende TODOS los perfiles
+        setUsers(prev => prev.map(u => 
+          u.id === userId ? { 
+            ...u, 
+            status: "Suspendido",
+            profiles: u.profiles.map(p => ({ ...p, status: "Suspendido" as const }))
+          } : u
+        ));
+        message = `Has suspendido la cuenta de ${userName}. Usuario ya no está activo.`;
+        break;
+      }
 
       case "suspend_profile": {
+        // SUSPENDER PERFIL(ES) ESPECÍFICO(S)
         if (!selectedRoles || selectedRoles.length === 0) {
           return { success: false, message: "Debes seleccionar al menos un perfil" };
         }
         
-        // Si se suspenden todos los perfiles, suspender la cuenta completa
-        if (selectedRoles.length === user.profiles.length) {
-          setUsers(prev => prev.map(u => 
-            u.id === userId ? { ...u, status: "Suspendido" } : u
-          ));
-          message = `Has suspendido todos los perfiles de ${userName}. La cuenta ha sido suspendida`;
+        setUsers(prev => prev.map(u => {
+          if (u.id !== userId) return u;
+          
+          const updatedProfiles = u.profiles.map(p => 
+            selectedRoles.includes(p.role) ? { ...p, status: "Suspendido" as const } : p
+          );
+          
+          // Si todos los perfiles están suspendidos, suspender la cuenta
+          const allSuspended = updatedProfiles.every(p => p.status === "Suspendido");
+          const hasActiveProfiles = updatedProfiles.some(p => p.status === "Activo");
+          const firstActive = updatedProfiles.find(p => p.status === "Activo");
+          
+          return {
+            ...u,
+            status: allSuspended ? "Suspendido" : (hasActiveProfiles ? "Verificado" : "Suspendido"),
+            profiles: updatedProfiles,
+            activeProfile: firstActive || updatedProfiles[0]
+          };
+        }));
+        
+        const profilesText = selectedRoles.length > 1 ? 'los perfiles' : 'el perfil';
+        const allProfilesSuspended = selectedRoles.length === user.profiles.length;
+        
+        if (allProfilesSuspended) {
+          message = `Has suspendido todos los perfiles de ${userName}. Usuario ya no está activo.`;
         } else {
-          // Remover los perfiles seleccionados
-          setUsers(prev => prev.map(u => {
-            if (u.id !== userId) return u;
-            const newProfiles = u.profiles.filter(p => !selectedRoles.includes(p.role));
-            return {
-              ...u,
-              profiles: newProfiles,
-              activeProfile: newProfiles[0]
-            };
-          }));
-          const profilesText = selectedRoles.length > 1 ? 'los perfiles' : 'el perfil';
-          message = `Has suspendido ${profilesText} de ${userName}`;
+          message = `Has suspendido ${profilesText} de ${userName}. Mantiene otros perfiles activos.`;
         }
         break;
       }
@@ -127,17 +208,15 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
         return { success: false, message: "Acción no reconocida" };
     }
 
-    // Establecer mensaje de éxito
+    // Mensaje de éxito
     setSuccessMessage(message);
-    
-    // Auto-limpiar mensaje después de 3 segundos
     setTimeout(() => setSuccessMessage(""), 3000);
 
     return { success: true, message };
   }, [users]);
 
   /**
-   * Obtener conductores pendientes de aprobación
+   * Obtener conductores pendientes
    */
   const getPendingDrivers = useCallback(() => {
     return users.filter(u => 
@@ -184,7 +263,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
   }, [users]);
 
   /**
-   * Limpiar mensaje de éxito manualmente
+   * Limpiar mensaje de éxito
    */
   const clearSuccessMessage = useCallback(() => {
     setSuccessMessage("");
@@ -193,11 +272,12 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
   const value = useMemo(() => ({
     users,
     successMessage,
+    activeUsersCount,
     performUserAction,
     getPendingDrivers,
     getFilteredUsers,
     clearSuccessMessage,
-  }), [users, successMessage, performUserAction, getPendingDrivers, getFilteredUsers, clearSuccessMessage]);
+  }), [users, successMessage, activeUsersCount, performUserAction, getPendingDrivers, getFilteredUsers, clearSuccessMessage]);
 
   return (
     <AdminUsersContext.Provider value={value}>
@@ -207,7 +287,7 @@ export function AdminUsersProvider({ children }: { children: React.ReactNode }) 
 }
 
 /**
- * Hook para usar el contexto de usuarios
+ * Hook para usar el contexto
  */
 export function useAdminUsers() {
   const context = useContext(AdminUsersContext);

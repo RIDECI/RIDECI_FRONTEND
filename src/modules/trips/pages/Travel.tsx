@@ -97,9 +97,13 @@ export function Travel() {
                 alert(`Error al actualizar el viaje: ${result.error}`);
             }
         } else {
+            // Obtener el userId del localStorage para usarlo como driverId
+            const userId = localStorage.getItem('userId');
+            const driverId = userId ? parseInt(userId, 10) : 1;
+
             const travelData: TravelRequest = {
-                driverId: 1,
-                availableSlots: 4,
+                driverId: driverId, 
+                availableSlots: 4, 
                 status: 'ACTIVE',
                 travelType: 'TRIP',
                 estimatedCost: Number.parseFloat(costWithoutDots),

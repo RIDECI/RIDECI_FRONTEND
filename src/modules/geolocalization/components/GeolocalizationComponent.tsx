@@ -2,7 +2,6 @@ import { GoogleMap, useJsApiLoader, Polyline, Marker } from '@react-google-maps/
 import { useState, useEffect, useRef } from 'react';
 import { Navigation, Clock, Users, MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import carIcon from '../../../../public/car-icon.png';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
 import type { LocationDocument } from '../types/location';
@@ -312,8 +311,8 @@ function GeolocalizationComponent({ role = "PASSENGER" }: GeolocalizationCompone
               position={driverPosition}
               title='Mi Ubicacion'
               icon={{
-                url: carIcon,
-                scaledSize: new window.google.maps.Size(30, 30)
+                url: '/car-icon.png',
+                scaledSize: new window.google.maps.Size(30,30)
               }}
               zIndex={1000}
             />

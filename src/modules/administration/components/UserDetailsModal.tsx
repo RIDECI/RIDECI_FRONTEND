@@ -1,9 +1,15 @@
 // src/modules/administration/components/UserDetailsModal.tsx
+/**
+ * Modal mejorado de detalles de usuario
+ * MEJORAS:
+ * - Botones de suspender más visibles y profesionales
+ * - Más información del usuario visible
+ * - Mejor UX y organización
+ */
 
 import React from 'react';
 import type { UserCard } from '../types';
-import { avatar1 } from '../utils/mockData';
-import { StarRating } from './StarRating';
+import { X, Shield, AlertTriangle, CheckCircle, Ban } from 'lucide-react';
 import { getUserStatusColor } from '../utils/helpers';
 
 interface UserDetailsModalProps {
@@ -15,9 +21,10 @@ interface UserDetailsModalProps {
   onSuspendAccount: () => void;
   onSuspendProfile: () => void;
   onActivateAccount: () => void;
+  onActivateProfile: () => void;
 }
 
-export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
+export function UserDetailsModal({
   open,
   user,
   selectedProfileRole,
@@ -25,168 +32,210 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   onClose,
   onSuspendAccount,
   onSuspendProfile,
-  onActivateAccount
-}) => {
+  onActivateAccount,
+  onActivateProfile,
+}: UserDetailsModalProps) {
   if (!open || !user) return null;
 
-  const currentProfile = user.profiles.find(p => p.role === selectedProfileRole);
-  const rating = currentProfile?.rating ?? 0;
+  const activeProfile = user.profiles.find(p => p.role === selectedProfileRole) || user.profiles[0];
+  const isSuspendedOrBlocked = user.status === "Suspendido" || user.status === "Bloqueado";
+  const hasMultipleProfiles = user.profiles.length > 1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto border border-gray-100">
-        <div className="flex items-start gap-6">
-          {/* Avatar y Rating */}
-          <div className="flex flex-col items-center flex-shrink-0">
-            <div className="relative">
-              <img 
-                src={user.profilePictureUrl || avatar1} 
-                alt={user.name}
-                className="w-28 h-28 rounded-full object-cover border-4 border-blue-100 shadow-lg"
-              />
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center gap-2 mt-4">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 py-2 rounded-lg border border-blue-200">
-                <StarRating rating={rating} size={18} />
-              </div>
-              {rating < 2 && (
-                <div className="mt-1 px-3 py-1.5 bg-red-50 border border-red-300 rounded-lg shadow-sm">
-                  <p className="text-xs text-red-700 font-semibold">⚠️ Reputación baja</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Información del usuario */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-                <div className="text-sm text-slate-500 mt-1.5 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                  {user.email}
-                </div>
-                <div className="text-sm text-slate-500 mt-1 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                  </svg>
-                  {user.phone}
-                </div>
-              </div>
-              <button 
-                onClick={onClose} 
-                className="text-slate-400 hover:text-slate-600 transition-colors ml-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Detalles en tabla */}
-            <div className="space-y-3 text-sm bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <div className="grid grid-cols-[140px_1fr] gap-3 items-center py-2 border-b border-gray-200">
-                <span className="font-semibold text-slate-700">Perfil activo:</span>
-                <select
-                  value={selectedProfileRole}
-                  onChange={(e) => onProfileChange(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-slate-700 hover:border-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
-                >
-                  {user.profiles.map(profile => (
-                    <option key={profile.role} value={profile.role}>
-                      {profile.role} (★ {profile.rating.toFixed(1)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-[140px_1fr] gap-3 items-center py-2 border-b border-gray-200">
-                <span className="font-semibold text-slate-700">Estado:</span>
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium w-fit ${getUserStatusColor(user.status)}`}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img
+              src={user.profilePictureUrl || ''}
+              alt={user.name}
+              className="w-16 h-16 rounded-full border-4 border-white/20 object-cover"
+            />
+            <div>
+              <h2 className="text-2xl font-bold">{user.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getUserStatusColor(user.status)}`}>
                   {user.status}
                 </span>
-              </div>
-
-              {user.identificationType && (
-                <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
-                  <span className="font-semibold text-slate-700">Tipo ID:</span>
-                  <span className="text-slate-600">{user.identificationType}</span>
-                </div>
-              )}
-
-              {user.identificationNumber && (
-                <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
-                  <span className="font-semibold text-slate-700">Número ID:</span>
-                  <span className="text-slate-600 font-mono">{user.identificationNumber}</span>
-                </div>
-              )}
-
-              {user.birthDate && (
-                <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
-                  <span className="font-semibold text-slate-700">Fecha de nac.:</span>
-                  <span className="text-slate-600">
-                    {new Date(user.birthDate).toLocaleDateString('es-CO', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-              )}
-
-              <div className="grid grid-cols-[140px_1fr] gap-3 py-2 border-b border-gray-200">
-                <span className="font-semibold text-slate-700">Placa:</span>
-                <span className={`font-mono ${currentProfile?.plate ? "text-slate-600" : "text-slate-400"}`}>
-                  {currentProfile?.plate || "—"}
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-[140px_1fr] gap-3 py-2">
-                <span className="font-semibold text-slate-700">Vehículo:</span>
-                <span className={currentProfile?.vehicle ? "text-slate-600" : "text-slate-400"}>
-                  {currentProfile?.vehicle || "—"}
-                </span>
+                <span className="text-sm text-blue-100">ID: {user.id}</span>
               </div>
             </div>
           </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
-        {/* Botones de acción */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {(user.status === "Suspendido" || user.status === "Bloqueado") ? (
-            <button
-              onClick={onActivateAccount}
-              className="w-full py-3 rounded-lg border-2 border-green-400 bg-green-50 text-green-700 font-semibold hover:bg-green-100 transition-all shadow-sm hover:shadow-md"
-            >
-              Activar cuenta
-            </button>
-          ) : (
-            <button
-              onClick={onSuspendAccount}
-              className="w-full py-3 rounded-lg border-2 border-red-400 bg-red-50 text-red-700 font-semibold hover:bg-red-100 transition-all shadow-sm hover:shadow-md"
-            >
-              Suspender cuenta
-            </button>
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Información personal */}
+          <section className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-600" />
+              Información Personal
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-500 font-medium">Email</p>
+                <p className="text-gray-900 font-semibold">{user.email}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium">Teléfono</p>
+                <p className="text-gray-900 font-semibold">{user.phone || 'No especificado'}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium">Tipo de ID</p>
+                <p className="text-gray-900 font-semibold">{user.identificationType || 'No especificado'}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 font-medium">Número de ID</p>
+                <p className="text-gray-900 font-semibold">{user.identificationNumber || 'No especificado'}</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-gray-500 font-medium">Fecha de nacimiento</p>
+                <p className="text-gray-900 font-semibold">
+                  {user.birthDate ? new Date(user.birthDate).toLocaleDateString('es-CO') : 'No especificado'}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Selector de perfiles */}
+          {user.profiles.length > 1 && (
+            <section>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Seleccionar Perfil</h3>
+              <div className="flex gap-2 flex-wrap">
+                {user.profiles.map((profile) => (
+                  <button
+                    key={profile.role}
+                    onClick={() => onProfileChange(profile.role)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                      selectedProfileRole === profile.role
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {profile.role}
+                    {profile.status === "Suspendido" && (
+                      <Ban className="inline w-4 h-4 ml-1 text-red-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </section>
           )}
 
+          {/* Detalles del perfil seleccionado */}
+          <section className="bg-blue-50 rounded-xl p-5 border border-blue-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Perfil: {activeProfile.role}
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-600 font-medium">Rating</p>
+                <p className="text-gray-900 font-bold text-lg">
+                  ⭐ {activeProfile.rating?.toFixed(1) || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-600 font-medium">Estado del perfil</p>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                  activeProfile.status === "Activo" 
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  {activeProfile.status}
+                </span>
+              </div>
+              {(activeProfile.role === "Conductor" || activeProfile.role === "Acompañante") && (
+                <>
+                  <div>
+                    <p className="text-gray-600 font-medium">Placa</p>
+                    <p className="text-gray-900 font-semibold">{activeProfile.plate || 'No especificada'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 font-medium">Vehículo</p>
+                    <p className="text-gray-900 font-semibold">{activeProfile.vehicle || 'No especificado'}</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Acciones */}
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Acciones</h3>
+            
+            {isSuspendedOrBlocked ? (
+              // Usuario suspendido/bloqueado - Mostrar opciones de activación
+              <div className="space-y-3">
+                <button
+                  onClick={onActivateAccount}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Activar Cuenta Completa
+                </button>
+                
+                {hasMultipleProfiles && (
+                  <button
+                    onClick={onActivateProfile}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <Shield className="w-5 h-5" />
+                    Activar Perfiles Específicos
+                  </button>
+                )}
+              </div>
+            ) : (
+              // Usuario activo - Mostrar opciones de suspensión
+              <div className="space-y-3">
+                <button
+                  onClick={onSuspendAccount}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Ban className="w-5 h-5" />
+                  Suspender Cuenta Completa
+                </button>
+                
+                {hasMultipleProfiles && (
+                  <button
+                    onClick={onSuspendProfile}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    Suspender Perfiles Específicos
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Advertencia si es el único perfil */}
+            {!hasMultipleProfiles && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-800">
+                  Este usuario solo tiene un perfil. Suspender el perfil equivale a suspender la cuenta.
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 rounded-b-2xl">
           <button
-            onClick={onSuspendProfile}
-            className="w-full py-3 rounded-lg border-2 border-orange-400 bg-orange-50 text-orange-700 font-semibold hover:bg-orange-100 transition-all shadow-sm hover:shadow-md"
+            onClick={onClose}
+            className="w-full py-3 px-4 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-semibold"
           >
-            Suspender perfil(es)
+            Cerrar
           </button>
         </div>
       </div>
     </div>
   );
-};
+}

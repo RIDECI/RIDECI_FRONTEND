@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Car, UserCircle, Users } from 'lucide-react';
 import type { Profile, ProfileType } from '../types/user.d.ts';
 
 import ImgConductor from "../../../assets/Conductor.jpeg";
 import { useNavigate } from 'react-router-dom';
+import { useGetUserProfiles } from '@/modules/reputation&profiles/hooks/useGetUserProfiles';
 
 interface ProfileSelectorProps {
     onProfileSelect?: (profileId: ProfileType) => void;
@@ -12,8 +13,9 @@ interface ProfileSelectorProps {
 export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelect }) => {
     const [selectedProfile, setSelectedProfile] = useState<ProfileType | null>(null);
     const navigate = useNavigate();
-
-    const profiles: Profile[] = [
+    const { profiles: userProfiles, loading } = useGetUserProfiles();
+    
+    const allProfiles: Profile[] = [
         {
             id: 'conductor',
             title: 'Conductor',
@@ -33,6 +35,23 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
             image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=300&fit=crop'
         }
     ];
+
+    // Mapear los tipos de perfil del backend a los títulos locales
+    const mapProfileTypeToTitle = (profileType: string): string => {
+        const type = String(profileType).toLowerCase();
+        if (type === 'driver' || type === 'conductor') return 'Conductor';
+        if (type === 'passenger' || type === 'pasajero') return 'Pasajero';
+        if (type === 'companiant' || type === 'acompanante' || type === 'companion') return 'Acompañante';
+        return profileType;
+    };
+
+    // Obtener los títulos de los perfiles del usuario
+    const userProfileTitles = userProfiles.map(p => mapProfileTypeToTitle(p.profileType));
+
+    // Filtrar para mostrar solo los perfiles creados por el usuario
+    const profiles = userProfileTitles.length > 0
+        ? allProfiles.filter(p => userProfileTitles.includes(p.title))
+        : allProfiles;
 
     const handleProfileSelect = (profileId: ProfileType) => {
         setSelectedProfile(profileId);
@@ -56,7 +75,13 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({ onProfileSelec
                 break;
         }
     };
-
+    if (loading) {
+        return (
+            <div className="w-full flex justify-center items-center py-12">
+                <div className="text-white text-xl">Cargando perfiles...</div>
+            </div>
+        );
+    }
     return (
         <div className="w-full">
             <div className="flex justify-center items-center gap-8 px-4">
