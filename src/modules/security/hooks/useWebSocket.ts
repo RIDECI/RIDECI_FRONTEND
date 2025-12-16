@@ -38,7 +38,6 @@ export function useWebSocket({
       setIsConnected(true);
       onConnected?.();
     });
-
     socket.on("message", (msg: MessageResponse) => {
       onMessageReceived(msg);
     });
