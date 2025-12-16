@@ -142,7 +142,7 @@ return (
             >
               <option value="STUDENT">Estudiante</option>
               <option value="PROFESSOR">Profesor</option>
-              <option value="ADMIN">Admin</option>
+              <option value="ADMINISTRATOR">Admin</option>
             </select>
           </div>
 
