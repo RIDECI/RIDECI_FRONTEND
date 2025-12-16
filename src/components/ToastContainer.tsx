@@ -1,94 +1,64 @@
 import React from "react";
-import { useToast } from "./ToastContext";
-import { CheckCircle, XCircle, Info, X } from "lucide-react";
+import { useToast, type Toast as ToastType } from "./ToastContext";
+import { X, CheckCircle, AlertCircle, Info, Car, MessageCircle } from "lucide-react";
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
 
-  const getIcon = (type?: "info" | "success" | "error") => {
+  const getIcon = (type: ToastType['type']) => {
     switch (type) {
-      case "success":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "error":
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      default:
-        return <Info className="w-5 h-5 text-blue-600" />;
+      case 'success': return <CheckCircle className="w-6 h-6 text-green-500" />;
+      case 'error': return <AlertCircle className="w-6 h-6 text-red-500" />;
+      case 'trip': return <Car className="w-6 h-6 text-blue-500" />;
+      case 'message': return <MessageCircle className="w-6 h-6 text-purple-500" />;
+      default: return <Info className="w-6 h-6 text-gray-500" />;
     }
   };
 
-  const getBgColor = (type?: "info" | "success" | "error") => {
+  const getBorderColor = (type: ToastType['type']) => {
     switch (type) {
-      case "success":
-        return "#f0fdf4";
-      case "error":
-        return "#fef2f2";
-      default:
-        return "#eff6ff";
-    }
-  };
-
-  const getBorderColor = (type?: "info" | "success" | "error") => {
-    switch (type) {
-      case "success":
-        return "#22c55e";
-      case "error":
-        return "#ef4444";
-      default:
-        return "#3b82f6";
+      case 'success': return 'border-l-green-500';
+      case 'error': return 'border-l-red-500';
+      case 'trip': return 'border-l-blue-500';
+      case 'message': return 'border-l-purple-500';
+      default: return 'border-l-gray-400';
     }
   };
 
   return (
-    <div style={{
-      position: "fixed",
-      top: 20,
-      right: 20,
-      zIndex: 9999,
-      display: "flex",
-      flexDirection: "column",
-      gap: "12px",
-      maxWidth: "400px"
-    }}>
+    <div className="fixed top-5 right-5 z-50 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          style={{
-            minWidth: 280,
-            padding: "16px",
-            borderRadius: 12,
-            background: getBgColor(toast.type),
-            color: "#1f2937",
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)",
-            fontWeight: 500,
-            fontSize: 14,
-            opacity: 0.98,
-            transition: "all 0.3s ease",
-            border: `2px solid ${getBorderColor(toast.type)}`,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            animation: "slideIn 0.3s ease"
-          }}
+          className={`
+            pointer-events-auto
+            flex items-start gap-3 
+            bg-white p-4 rounded-lg shadow-lg 
+            border border-gray-100 border-l-4 ${getBorderColor(toast.type)}
+            transform transition-all duration-300 ease-in-out
+            animate-in slide-in-from-right
+          `}
         >
-          {getIcon(toast.type)}
-          <span style={{ flex: 1 }}>{toast.message}</span>
+          <div className="flex-shrink-0 mt-1">
+            {getIcon(toast.type)}
+          </div>
+
+          <div className="flex-1 mr-2">
+            {toast.title && (
+              <h4 className="font-bold text-gray-900 text-sm mb-1 leading-tight">
+                {toast.title}
+              </h4>
+            )}
+            <p className="text-gray-600 text-sm leading-relaxed">
+              {toast.message}
+            </p>
+          </div>
+
           <button
             onClick={() => removeToast(toast.id)}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: 0.6,
-              transition: "opacity 0.2s"
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
+            className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <X className="w-4 h-4 text-gray-600" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       ))}

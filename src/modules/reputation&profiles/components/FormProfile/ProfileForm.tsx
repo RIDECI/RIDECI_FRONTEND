@@ -122,8 +122,8 @@ export default function ProfileForm() {
       localStorage.setItem('userProfileType', selectedRole);
       localStorage.setItem('userProfileRole', profileType);
       
-      // Ir a la selección de perfil para confirmar el rol
-      navigate("/roleRegisterPick");
+      // Ir al perfil actualizado
+      navigate("/app/profile");
     }
   };
 

@@ -64,6 +64,8 @@ export function useGetProfile() {
             const userPhone = localStorage.getItem('phoneNumber');
             const userAddress = localStorage.getItem('address');
             const identificationNumberLS = localStorage.getItem('identificationNumber') || localStorage.getItem('institutionalId');
+            const selectedProfile = localStorage.getItem('selectedProfile');
+            const userProfileType = localStorage.getItem('userProfileType');
 
             const fallbackProfile: Profile = {
                 id: parseInt(userId || id) || 1,
@@ -73,7 +75,7 @@ export function useGetProfile() {
                 phoneNumber: userPhone || "3001234567",
                 ratings: [],
                 badges: [],
-                profileType: "NOT_DEFINED" as ProfileType,
+                profileType: (selectedProfile || userProfileType || "NOT_DEFINED") as ProfileType,
                 reputation: {
                     wightedScores: new Map<number, number>(),
                     average: 0,

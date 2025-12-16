@@ -1,6 +1,6 @@
 import { GoogleMap, useJsApiLoader, Polyline, Marker } from '@react-google-maps/api';
 import { useState, useEffect, useRef } from 'react';
-import { Navigation, Clock, Users, MapPin, ShoppingBag } from 'lucide-react';
+import { Navigation, Clock, Users, MapPin, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRouteInformation } from '../hooks/getRouteInformationHook';
@@ -17,12 +17,12 @@ const containerStyle = {
 };
 
 interface GeolocalizationComponentProps {
-  role?: 'DRIVER' | 'PASSENGER'; 
+  role?: 'DRIVER' | 'PASSENGER';
 }
 
 const libraries: ("geometry")[] = ["geometry"];
 
-function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponentProps) {
+function GeolocalizationComponent({ role = "PASSENGER" }: GeolocalizationComponentProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const travelId = searchParams.get("travelId");
@@ -37,8 +37,8 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
     lng: -74.0426038,
   });
 
-  const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null> (null);
-  
+  const [driverPosition, setDriverPosition] = useState<google.maps.LatLngLiteral | null>(null);
+
   const stompClientRef = useRef<CompatClient | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -70,7 +70,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
   }, [route, isLoaded]);
 
   useEffect(() => {
-    if( role !== "DRIVER" || !travelId) return;
+    if (role !== "DRIVER" || !travelId) return;
 
     const options = {
       enableHighAccuracy: true,
@@ -78,11 +78,11 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       maximumAge: 0
     };
 
-  const watchId = navigator.geolocation.watchPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        const { latitude, longitude, speed, accuracy} = pos.coords;
+        const { latitude, longitude, speed, accuracy } = pos.coords;
 
-        setDriverPosition({lat: latitude, lng: longitude});
+        setDriverPosition({ lat: latitude, lng: longitude });
 
         const locationData: LocationDocument = {
           latitude: latitude,
@@ -95,15 +95,15 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
         };
 
         axios.put(`http://nemesisroutesandtrackingbackendmain-production.up.railway.app/geolocations/${travelId}/traveltracking/location`, locationData)
-              .then(() => console.log("Location Sent"))
-              .catch(e => console.error("Error sending location", e))
+          .then(() => console.log("Location Sent"))
+          .catch(e => console.error("Error sending location", e))
       },
       (err) => console.error("Error with GPS", err),
       options
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  },[travelId]); 
+  }, [travelId]);
 
   useEffect(() => {
     if (role !== 'PASSENGER' || !travelId) return;
@@ -115,16 +115,16 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
       console.log("Connected to websocket: " + frame);
 
       stompClient.subscribe(`/topic/route/${travelId}/location`, (message) => {
-        if(message.body){
+        if (message.body) {
           try {
             const LocationDocument = JSON.parse(message.body);
             console.log("Nueva ubicación recibida:", LocationDocument);
-        
+
             setDriverPosition({
               lat: LocationDocument.latitude,
               lng: LocationDocument.longitude
-            }); 
-          } catch (e){
+            });
+          } catch (e) {
             console.error("Error parsing JSON", e);
           }
         }
@@ -137,7 +137,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
 
     return () => {
       if (stompClientRef.current && stompClientRef.current.connected) {
-         stompClientRef.current.disconnect();
+        stompClientRef.current.disconnect();
       }
     };
   }, [travelId, role]);
@@ -245,14 +245,6 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             {role === 'DRIVER' ? 'Modo Conductor' : 'Sigue tu Viaje'}
           </h1>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setShowEmergencyModal(true)}
-          className="rounded-full w-12 h-12 border-red-500 text-red-500 hover:bg-red-50"
-        >
-          <ShoppingBag className="w-6 h-6" />
-        </Button>
       </div>
       <div className="relative w-full h-[600px]">
         <GoogleMap
@@ -325,7 +317,7 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
               zIndex={1000}
             />
           )}
-          
+
           {/* Polyline de la ruta */}
           {decodedPath.length > 0 && (
             <Polyline
@@ -338,26 +330,43 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
             />
           )}
         </GoogleMap>
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-xl px-8 py-4 flex items-center gap-8 border z-10">
+
+        {/* Floating Security Button */}
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            onClick={() => setShowEmergencyModal(true)}
+            className="group bg-white/90 backdrop-blur-md hover:bg-white text-gray-700 hover:text-blue-600 rounded-full h-12 px-4 shadow-lg border border-white/50 transition-all duration-300 flex items-center gap-2"
+          >
+            <div className="bg-blue-50 group-hover:bg-blue-100 p-1.5 rounded-full transition-colors">
+              <ShieldCheck className="w-5 h-5 text-[#0B8EF5]" />
+            </div>
+            <span className="font-bold text-sm pr-1">Seguridad</span>
+          </Button>
+        </div>
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md rounded-full shadow-2xl px-6 py-3 flex items-center gap-6 border border-white/50 z-10 w-auto min-w-max">
           <div className="flex items-center gap-3">
-            <Navigation className="w-5 h-5 text-gray-700" />
+            <div className="bg-blue-50 p-2 rounded-full">
+              <Navigation className="w-5 h-5 text-[#0B8EF5]" />
+            </div>
             <div>
-              <p className="text-xs text-gray-600">Distancia Total</p>
-              <p className="font-bold">{formatDistance(route.totalDistance)}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Distancia</p>
+              <p className="font-bold text-lg text-gray-800 leading-none">{formatDistance(route.totalDistance)}</p>
             </div>
           </div>
 
-          <div className="h-8 w-px bg-gray-300"></div>
+          <div className="h-8 w-px bg-gray-200/60"></div>
 
           <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-gray-700" />
+            <div className="bg-blue-50 p-2 rounded-full">
+              <Clock className="w-5 h-5 text-[#0B8EF5]" />
+            </div>
             <div>
-              <p className="text-xs text-gray-600">Tiempo Estimado</p>
-              <p className="font-bold">{formatTime(route.estimatedTime)}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tiempo</p>
+              <p className="font-bold text-lg text-gray-800 leading-none">{formatTime(route.estimatedTime)}</p>
             </div>
           </div>
 
-          <div className="h-8 w-px bg-gray-300"></div>
+          <div className="h-8 w-px bg-gray-200/60"></div>
           <button
             className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={() => {
@@ -369,24 +378,25 @@ function GeolocalizationComponent({ role = "PASSENGER"}: GeolocalizationComponen
           </button>
         </div>
       </div>
-      <div className="flex justify-between mt-6">
+      <div className="flex gap-4 mt-6">
         <Button
+          variant="outline"
           onClick={() => navigate(`/app/detailsOfTravel?travelId=${travelId}`)}
-          className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
+          className="flex-1 border-2 border-[#0B8EF5] text-[#0B8EF5] hover:bg-blue-50 rounded-xl py-6 font-bold text-lg hover:-translate-y-1 transition-all duration-300"
         >
           Detalles de Viaje
         </Button>
         <Button
           onClick={() => navigate("/app/conversations")}
-          className="bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-lg px-8"
+          className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-xl py-6 shadow-lg hover:shadow-xl transition-all duration-300 font-bold text-lg hover:-translate-y-1"
         >
-          Ir al chat con el conductor
+          Chat con Conductor
         </Button>
       </div>
-    <EmergencyModal
-      isVisible={showEmergencyModal}
-      onClose={() => setShowEmergencyModal(false)}
-    />
+      <EmergencyModal
+        isVisible={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+      />
 
 
     </div>
