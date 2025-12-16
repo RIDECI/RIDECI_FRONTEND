@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import socketIOClient, { io, type Socket } from "socket.io-client";
+import socketIOClient, { type Socket } from "socket.io-client";
 import type { MessageResponse } from "../types/MessageResponse";
 
 interface UseWebSocketProps {
@@ -28,7 +28,7 @@ export function useWebSocket({
   useEffect(() => {
     if (!userId) return;
 
-    const socket = socketIOClient("https://web-production-d849d5.up.railway.app/socket.io", {
+    const socket = socketIOClient("https://dalton-pseudozealous-paloma.ngrok-free.dev", {
       query: { userId },
       transports: ["websocket"],
     });
