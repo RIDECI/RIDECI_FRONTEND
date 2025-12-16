@@ -1,7 +1,6 @@
 import {
   ArrowLeft,
-  MapPin,
-  LocateFixed,
+
   Clock,
   Car,
   User,
@@ -19,36 +18,38 @@ import type { TravelBackendResponse } from "../hooks/createTravelHook";
 import { deleteTravelHook } from "../hooks/deleteTravelHook";
 import { useGetTravelById } from "../hooks/getTravelByIdHook";
 import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
+import { ConfirmActionModal } from "@/components/common/ConfirmActionModal";
+import { useState } from "react";
 
 const getStatusCardClasses = (status?: string): string => {
   if (status === "ACTIVE")
-    return "from-yellow-50 to-yellow-100 border-yellow-200/50";
-  if (status === "IN_COURSE")
     return "from-green-50 to-green-100 border-green-200/50";
+  if (status === "IN_COURSE")
+    return "from-emerald-50 to-emerald-100 border-emerald-200/50";
   if (status === "COMPLETED")
-    return "from-blue-50 to-blue-100 border-blue-200/50";
-  return "from-red-50 to-red-100 border-red-200/50";
+    return "from-blue-50 to-sky-100 border-blue-200/50";
+  return "from-slate-50 to-slate-100 border-slate-200/50";
 };
 
 const getStatusIconClasses = (status?: string): string => {
-  if (status === "ACTIVE") return "bg-yellow-500";
-  if (status === "IN_COURSE") return "bg-green-500";
+  if (status === "ACTIVE") return "bg-green-500";
+  if (status === "IN_COURSE") return "bg-emerald-500";
   if (status === "COMPLETED") return "bg-[#0B8EF5]";
-  return "bg-red-500";
+  return "bg-slate-500";
 };
 
 const getStatusLabelClasses = (status?: string): string => {
-  if (status === "ACTIVE") return "text-yellow-700";
-  if (status === "IN_COURSE") return "text-green-700";
+  if (status === "ACTIVE") return "text-green-700";
+  if (status === "IN_COURSE") return "text-emerald-700";
   if (status === "COMPLETED") return "text-[#0B8EF5]";
-  return "text-red-700";
+  return "text-slate-700";
 };
 
 const getStatusTextClasses = (status?: string): string => {
-  if (status === "ACTIVE") return "text-yellow-900";
-  if (status === "IN_COURSE") return "text-green-900";
+  if (status === "ACTIVE") return "text-green-900";
+  if (status === "IN_COURSE") return "text-emerald-900";
   if (status === "COMPLETED") return "text-blue-900";
-  return "text-red-900";
+  return "text-slate-900";
 };
 
 const getStatusText = (status?: string): string => {
@@ -59,10 +60,10 @@ const getStatusText = (status?: string): string => {
 };
 
 const getStatusSubtextClasses = (status?: string): string => {
-  if (status === "ACTIVE") return "text-yellow-600";
-  if (status === "IN_COURSE") return "text-green-600";
+  if (status === "ACTIVE") return "text-green-600";
+  if (status === "IN_COURSE") return "text-emerald-600";
   if (status === "COMPLETED") return "text-blue-600";
-  return "text-red-600";
+  return "text-slate-600";
 };
 
 const mockTripDetails = {
@@ -73,20 +74,14 @@ const mockTripDetails = {
     {
       id: 1,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "5,000 COP",
     },
     {
       id: 2,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "7,000 COP",
     },
     {
       id: 3,
       name: "Jorge rodriguez",
-      avatar: "/placeholder-avatar.jpg",
-      price: "8,000 COP",
     },
   ],
   vehicle: {
@@ -101,6 +96,8 @@ function DetailsOfTravelComponent() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { addNotification } = useGlobalNotifications();
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const travelIdFromParams = searchParams.get("travelId");
   const travelFromState = location.state?.travel as
@@ -117,17 +114,18 @@ function DetailsOfTravelComponent() {
 
   console.log("Travel data in details:", travel);
 
-  const handleConfirmDelete = async (id: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas cancelar este viaje?")) {
-      return;
-    }
+  const handleExecuteCancellation = async () => {
+    if (!travel?.id) return;
 
+    setIsDeleting(true);
     try {
-      await deleteTravelHook(id);
+      await deleteTravelHook(travel.id);
       addNotification({
         title: 'Viaje cancelado exitosamente',
         type: 'success',
       });
+      setIsDeleting(false);
+      setShowCancelModal(false);
       navigate("/app/sectionTravel");
     } catch (error) {
       console.error("Error al eliminar viaje:", error);
@@ -135,15 +133,16 @@ function DetailsOfTravelComponent() {
         title: 'Error al cancelar el viaje. Por favor intenta de nuevo.',
         type: 'info',
       });
+      setIsDeleting(false);
+      setShowCancelModal(false);
     }
   };
 
   let availableSlotsText = "Viaje completo";
   if (travel?.availableSlots && travel.availableSlots > 0) {
     const plural = travel.availableSlots > 1;
-    availableSlotsText = `${travel.availableSlots} cupo${
-      plural ? "s" : ""
-    } disponible${plural ? "s" : ""}`;
+    availableSlotsText = `${travel.availableSlots} cupo${plural ? "s" : ""
+      } disponible${plural ? "s" : ""}`;
   }
 
   if (loading) {
@@ -231,20 +230,13 @@ function DetailsOfTravelComponent() {
           <Button
             variant="outline"
             className="border-2 border-red-300 text-red-500 hover:bg-red-50 rounded-xl px-6 shadow-lg hover:shadow-xl transition-all duration-300"
-            onClick={() => {
-              if (travel?.id) {
-                handleConfirmDelete(travel.id);
-              } else {
-                console.error("No travel id to delete", travel);
-                alert("No se encontró el id del viaje para eliminar");
-              }
-            }}
+            onClick={() => setShowCancelModal(true)}
           >
             Cancelar viaje
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl p-4 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-center gap-3 mb-2">
             <div className="bg-[#0B8EF5] rounded-full p-2">
@@ -275,20 +267,7 @@ function DetailsOfTravelComponent() {
           <p className="text-xs text-gray-500 mt-1">Disponibles</p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl p-4 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-[#0B8EF5] rounded-full p-2">
-              <Route className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xs font-semibold text-gray-600 uppercase">
-              Tipo
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-gray-800">
-            {travel?.travelType || "TRIP"}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Viaje</p>
-        </div>
+
 
         <div
           className={`bg-gradient-to-br rounded-2xl p-4 border shadow-md hover:shadow-lg transition-all duration-300 ${getStatusCardClasses(
@@ -327,69 +306,69 @@ function DetailsOfTravelComponent() {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl p-6 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-[#0B8EF5] rounded-full p-3 shadow-md">
-              <MapPin className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+      <div className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl p-8 border border-blue-200/50 shadow-md hover:shadow-lg mb-8 transition-all duration-300">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-blue-50 p-2 rounded-lg">
+            <Route className="w-6 h-6 text-[#0B8EF5]" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Itinerario del Viaje</h2>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 relative">
+          {/* Origin */}
+          <div className="flex-1 w-full md:w-auto z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 bg-[#0B8EF5] rounded-full ring-4 ring-blue-50"></div>
+              <p className="text-xs font-bold text-[#0B8EF5] uppercase tracking-wider">
                 Origen
               </p>
-              <div className="h-1 w-12 bg-[#0B8EF5] rounded-full mt-1"></div>
+            </div>
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-blue-100/50 shadow-sm">
+              <p className="text-gray-900 font-bold text-lg">
+                {travel?.origin.direction || "No especificado"}
+              </p>
             </div>
           </div>
-          <p className="text-gray-800 font-medium leading-relaxed">
-            {travel?.origin.direction || "No especificado"}
-          </p>
-        </div>
 
-        <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl p-6 border border-sky-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-[#0B8EF5] rounded-full p-3 shadow-md">
-              <LocateFixed className="w-6 h-6 text-white" />
+          {/* Connector Line (Desktop) */}
+          <div className="hidden md:flex flex-1 flex-col items-center justify-center px-4 -mt-4">
+            <div className="flex items-center gap-2 mb-2 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+              <Clock className="w-4 h-4 text-[#00000]" />
+              <p className="text-base font-medium text-gray-900">
+                {travel?.departureDateAndTime
+                  ? new Date(travel.departureDateAndTime).toLocaleString("es-CO", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                  : mockTripDetails.departureDate}
+              </p>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <div className="w-full h-0.5 bg-gray-900 relative flex items-center justify-center">
+              <div className="absolute right-0 -mr-1 w-2 h-2 border-t-2 border-r-2 border-gray-900 rotate-45"></div>
+            </div>
+          </div>
+
+          {/* Destiny */}
+          <div className="flex-1 w-full md:w-auto z-10">
+            <div className="flex items-center gap-3 mb-2 md:justify-end">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Destino
               </p>
-              <div className="h-1 w-12 bg-[#0B8EF5] rounded-full mt-1"></div>
+              <div className="w-3 h-3 bg-gray-400 rounded-full ring-4 ring-gray-100"></div>
             </div>
-          </div>
-          <p className="text-gray-800 font-medium leading-relaxed">
-            {travel?.destiny.direction || "No especificado"}
-          </p>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-sky-100 rounded-2xl p-6 border border-blue-200/50 shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="bg-[#0B8EF5] rounded-full p-3 shadow-md">
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Salida
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-blue-100/50 md:text-right shadow-sm">
+              <p className="text-gray-900 font-bold text-lg">
+                {travel?.destiny.direction || "No especificado"}
               </p>
-              <div className="h-1 w-12 bg-[#0B8EF5] rounded-full mt-1"></div>
             </div>
           </div>
-          <p className="text-gray-800 font-medium leading-relaxed">
-            {travel?.departureDateAndTime
-              ? new Date(travel.departureDateAndTime).toLocaleString("es-CO", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })
-              : mockTripDetails.departureDate}
-          </p>
         </div>
       </div>
       <div
-        className={`grid ${
-          travel?.passengersId && travel.passengersId.length > 0
-            ? "grid-cols-2"
-            : "grid-cols-1"
-        } gap-6`}
+        className={`grid ${travel?.passengersId && travel.passengersId.length > 0
+          ? "grid-cols-2"
+          : "grid-cols-1"
+          } gap-6`}
       >
         {travel?.passengersId && travel.passengersId.length > 0 && (
           <div>
@@ -401,7 +380,7 @@ function DetailsOfTravelComponent() {
               {travel.passengersId.map((passengerId, index) => (
                 <div
                   key={passengerId}
-                  className="bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl border border-blue-200/50 shadow-md hover:shadow-lg px-6 py-4 flex items-center gap-4 transition-all duration-300"
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-4 flex items-center gap-4 transition-all duration-300"
                 >
                   <div className="relative">
                     <div className="w-14 h-14 rounded-full bg-[#0B8EF5] flex items-center justify-center overflow-hidden shadow-md">
@@ -437,7 +416,7 @@ function DetailsOfTravelComponent() {
             <Car className="w-7 h-7 text-[#0B8EF5]" />
             <span className="text-gray-800">Información del vehículo</span>
           </h2>
-          <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-3xl border border-gray-200/50 shadow-md p-8 transition-all duration-300">
+          <div className="bg-gradient-to-br from-slate-50 to-gray-100 rounded-3xl border border-gray-200/50 shadow-md p-8 transition-all duration-300">
             <div className="flex items-center justify-between pb-8">
               <div className="flex items-center gap-4">
                 <div className="bg-[#0B8EF5] rounded-2xl p-4 shadow-md">
@@ -453,17 +432,17 @@ function DetailsOfTravelComponent() {
                 </div>
               </div>
               <div className="relative">
-                <div className="bg-gradient-to-b from-yellow-300 via-yellow-400 to-yellow-500 border-4 border-gray-900 rounded-lg px-6 py-3 shadow-xl transform hover:scale-110 transition-transform duration-200">
-                  <div className="absolute top-1 left-1 right-1 h-1 bg-white/30 rounded"></div>
+                <div className="bg-gradient-to-b from-sky-100 via-blue-100 to-blue-200 border-4 border-gray-900 rounded-lg px-6 py-3 shadow-xl transition-all duration-300">
+
                   <p
                     className="font-black text-2xl text-gray-900 tracking-widest text-center"
                     style={{ fontFamily: "monospace" }}
                   >
                     {mockTripDetails.vehicle.plate}
                   </p>
-                  <div className="absolute bottom-1 left-1 right-1 h-1 bg-black/20 rounded"></div>
+
                 </div>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-full border-2 border-gray-900"></div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-blue-200 to-blue-300 rounded-full border-2 border-gray-900"></div>
               </div>
             </div>
             <div className="border-t-2 border-gray-300 my-6"></div>
@@ -490,7 +469,7 @@ function DetailsOfTravelComponent() {
             onClick={() => {
               navigate("/app/conversations");
             }}
-            className="flex-1 bg-[#0B8EF5] hover:bg-[#0B8EF5]/90 text-white rounded-2xl px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-[#0B8EF5]/50 flex items-center justify-center gap-3"
+            className="flex-1 bg-white hover:bg-gray-50 text-[#0B8EF5] rounded-2xl px-8 py-6 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 border-2 border-[#0B8EF5] flex items-center justify-center gap-3"
           >
             <MessageSquare className="w-6 h-6" />
             Chat Con Pasajeros
@@ -510,6 +489,17 @@ function DetailsOfTravelComponent() {
           </Button>
         </div>
       </div>
+      <ConfirmActionModal
+        open={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleExecuteCancellation}
+        title="¿Cancelar este viaje?"
+        description="Esta acción eliminará el viaje permanentemente y notificará a los pasajeros. ¿Estás seguro?"
+        confirmLabel="Sí, cancelar viaje"
+        cancelLabel="Volver"
+        variant="danger"
+        loading={isDeleting}
+      />
     </div>
   );
 }

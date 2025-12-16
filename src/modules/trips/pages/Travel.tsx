@@ -1,53 +1,64 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import  MapComponent  from "../components/MapComponent"
+import MapComponent from "../components/MapComponent"
 import ButtonCancel from "../components/ButtonCancel"
 import ButtonCreate from "../components/ButtonCreate"
 import { MapIcon } from "lucide-react"
 import { useCreateTravel, type TravelRequest, type TravelBackendResponse } from "../hooks/createTravelHook"
 import { useUpdateTravel, type UpdateTravelRequest } from "../hooks/updateTravelHook"
 import { useGeocoding } from "../hooks/useGeocoding"
+import { ConfirmActionModal } from "@/components/common/ConfirmActionModal"
 
-export function Travel(){
+export function Travel() {
     const navigate = useNavigate();
     const location = useLocation();
     const travelToEdit = location.state?.travel as TravelBackendResponse | undefined;
-    
+
     const { createTravel, loading: createLoading, error: createError } = useCreateTravel();
     const { updateTravel, loading: updateLoading, error: updateError } = useUpdateTravel();
     const { geocodeAddress, loading: geocodingLoading } = useGeocoding();
-    
+
     const isProcessing = createLoading || updateLoading || geocodingLoading;
     const error = createError || updateError;
-    
+
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
     const [departureDateAndTime, setDepartureDateAndTime] = useState('');
     const [estimatedCost, setEstimatedCost] = useState('');
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     useEffect(() => {
         if (travelToEdit) {
             console.log('Travel to edit:', travelToEdit);
             setOrigin(travelToEdit.origin.direction);
             setDestination(travelToEdit.destiny.direction);
-            
+
             // Convertir fecha ISO a formato datetime-local (YYYY-MM-DDTHH:mm)
             const dateStr = travelToEdit.departureDateAndTime;
             const formattedDate = dateStr.slice(0, 16); // Toma solo YYYY-MM-DDTHH:mm
             console.log('Formatted date:', formattedDate);
             setDepartureDateAndTime(formattedDate);
-            
+
             const costFormatted = travelToEdit.estimatedCost.toString().replaceAll(/\B(?=(\d{3})+(?!\d))/g, '.');
             console.log('Formatted cost:', costFormatted);
             setEstimatedCost(costFormatted);
         }
     }, [travelToEdit]);
 
-    const handleSubmit = async () => {
+    const handlePreSubmit = () => {
         if (!origin || !destination || !departureDateAndTime || !estimatedCost) {
             alert('Por favor completa todos los campos');
             return;
         }
+
+        setShowConfirmModal(true);
+    };
+
+    const executeSubmit = async () => {
+        setShowConfirmModal(false); // Close if open
+
+        // Re-validate just in case
+        if (!origin || !destination || !departureDateAndTime || !estimatedCost) return;
 
         const originResult = await geocodeAddress(origin);
         if (!originResult.success || !originResult.location) {
@@ -77,10 +88,10 @@ export function Travel(){
             };
 
             const result = await updateTravel(travelToEdit.id, updateData);
-            
+
             if (result.success && result.data) {
-                navigate('/app/detailsOfTravel', { 
-                    state: { travel: result.data } 
+                navigate('/app/detailsOfTravel', {
+                    state: { travel: result.data }
                 });
             } else {
                 alert(`Error al actualizar el viaje: ${result.error}`);
@@ -103,10 +114,10 @@ export function Travel(){
             };
 
             const result = await createTravel(travelData);
-            
+
             if (result.success && result.data) {
-                navigate('/app/detailsOfTravel', { 
-                    state: { travel: result.data } 
+                navigate('/app/detailsOfTravel', {
+                    state: { travel: result.data }
                 });
             } else {
                 alert(`Error al crear el viaje: ${result.error}`);
@@ -132,7 +143,7 @@ export function Travel(){
                     {error}
                 </div>
             )}
-            <MapComponent 
+            <MapComponent
                 origin={origin}
                 destination={destination}
                 departureDateAndTime={departureDateAndTime}
@@ -144,12 +155,27 @@ export function Travel(){
             />
             <div className="px-6 pt-20 pb-8 flex justify-between gap-4">
                 <ButtonCancel title="Cancelar" />
-                <ButtonCreate 
-                    title={buttonTitle} 
-                    onClick={handleSubmit}
+                <ButtonCreate
+                    title={buttonTitle}
+                    onClick={handlePreSubmit}
                     disabled={isProcessing}
                 />
             </div>
+
+            <ConfirmActionModal
+                open={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={executeSubmit}
+                title={travelToEdit ? "¿Actualizar viaje?" : "¿Crear nuevo viaje?"}
+                description={travelToEdit
+                    ? "Se actualizará la información del viaje con los nuevos datos. ¿Estás seguro?"
+                    : "Se creará un nuevo viaje con la información proporcionada. ¿Estás seguro?"
+                }
+                confirmLabel={travelToEdit ? "Actualizar" : "Crear"}
+                cancelLabel="Volver"
+                variant="primary"
+                loading={isProcessing}
+            />
         </div>
     )
 

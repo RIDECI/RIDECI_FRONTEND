@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CreateBookingRequest, BookingResponse } from "../types/booking";
 import { useNavigate } from "react-router-dom";
+import { useGlobalNotifications } from "@/context/GlobalNotificationContext";
 
 // URL del backend desplegado
 const API_URL = "https://poseidonsearchandbooking-production-98fe.up.railway.app";
@@ -10,6 +11,7 @@ export const useCreateBooking = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const { addNotification } = useGlobalNotifications();
 
   const handleCreateBooking = async (data: CreateBookingRequest) => {
     setError(null);
@@ -54,9 +56,15 @@ export const useCreateBooking = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        setError(errorData?.message || "Error al crear la reserva.");
+        const errorMsg = errorData?.message || "Error al crear la reserva.";
+        setError(errorMsg);
         setIsLoading(false);
         console.log("Error al crear reserva:", errorData);
+
+        addNotification({
+          title: errorMsg,
+          type: 'info',
+        });
         return;
       }
 
@@ -64,10 +72,15 @@ export const useCreateBooking = () => {
       setBookingData(bookingResponse);
       setIsLoading(false);
       console.log("Reserva creada exitosamente:", bookingResponse);
-      
+
+      addNotification({
+        title: '¡Reserva creada exitosamente!',
+        type: 'success',
+      });
+
       // No navegar automáticamente, dejar que el componente lo maneje
       // navigate(`/app/bookingConfirmed`, { state: { bookingId: bookingResponse.id } });
-      
+
       return bookingResponse;
     } catch (err: any) {
       setError("Error de conexión con el servidor.");
